@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { Customer, PaginationParams, ApiResponse } from '../types';
-import { fetchCustomers, searchCustomers } from '../services/api';
+import { fetchCustomers, searchCustomers } from '../services/api/customers';
 
 const CONTEXT_NAME = "CustomerContext"; // For logging
 

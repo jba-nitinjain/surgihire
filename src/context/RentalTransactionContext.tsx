@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { RentalTransaction, PaginationParams, ApiResponse, Customer } from '../types';
-import { fetchRentals, searchRecords, fetchCustomers } from '../services/api'; // Assuming searchRecords can be used for rentals
+import { fetchRentals } from '../services/api/rentals';
+import { fetchCustomers } from '../services/api/customers';
+import { searchRecords } from '../services/api/core';
 
 const CONTEXT_NAME = "RentalTransactionContext";
 

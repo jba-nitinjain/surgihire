@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { Equipment, PaginationParams, ApiResponse, EquipmentCategory } from '../types'; 
-import { fetchEquipment, searchEquipment } from '../services/api'; 
+import { fetchEquipment, searchEquipment } from '../services/api/equipment';
 
 const CONTEXT_NAME = "EquipmentContext"; // For logging
 

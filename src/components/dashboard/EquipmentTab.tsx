@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useEquipment } from '../../context/EquipmentContext';
 import { useEquipmentCategories } from '../../context/EquipmentCategoryContext';
-import { getEquipmentItem } from '../../services/api'; // Import for fetching single equipment
+import { getEquipmentItem } from '../../services/api/equipment'; // Import for fetching single equipment
 import EquipmentList from '../EquipmentList';
 import EquipmentForm from '../EquipmentForm';
 import EquipmentDetail from '../EquipmentDetail';
