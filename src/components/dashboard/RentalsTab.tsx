@@ -6,6 +6,7 @@ import RentalTransactionForm from '../rentals/RentalTransactionForm';
 import SearchBox from '../ui/SearchBox';
 import { PlusCircle } from 'lucide-react'; // Unused icons like Filter, CalendarIcon removed
 import { RentalTransaction } from '../../types'; // Unused Customer type import removed
+import { getRental, fetchRentalDetailsByRentalId } from '../../services/api';
 
 // Define rental statuses for filter dropdown
 const RENTAL_STATUSES = ["Draft", "Pending Confirmation", "Confirmed/Booked", "Active/Rented Out", "Returned/Completed", "Overdue", "Cancelled"];
@@ -40,8 +41,28 @@ const RentalsTab: React.FC = () => {
     setIsRentalFormOpen(true);
   };
 
-  const handleOpenRentalFormForEdit = (rental: RentalTransaction) => {
-    setEditingRental(rental);
+  const handleOpenRentalFormForEdit = async (rental: RentalTransaction) => {
+    try {
+      // Fetch the full rental record including its rental_items
+      const [rentalRes, detailsRes] = await Promise.all([
+        getRental(rental.rental_id),
+        fetchRentalDetailsByRentalId(rental.rental_id, { records: 100, skip: 0 })
+      ]);
+
+      if (rentalRes.success) {
+        const fullRental = rentalRes.data as RentalTransaction;
+        if (detailsRes.success && Array.isArray(detailsRes.data)) {
+          fullRental.rental_items = detailsRes.data;
+        }
+        setEditingRental(fullRental);
+      } else {
+        // Fallback to the passed rental data if the request fails
+        setEditingRental(rental);
+      }
+    } catch (err) {
+      console.error('Failed to fetch rental details', err);
+      setEditingRental(rental);
+    }
     // setSelectedRental(null); // If using detail view
     setIsRentalFormOpen(true);
   };

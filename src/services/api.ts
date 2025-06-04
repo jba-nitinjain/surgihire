@@ -236,15 +236,14 @@ export const fetchRentals = async (params: PaginationParams): Promise<ApiRespons
 // Assuming backend handles creation of rental_details if `rental_items` is passed
 // If your backend expects JSON for complex objects like rental_items:
 export const createRental = async (data: Record<string, any>): Promise<ApiResponse> => {
-    // You might need to send this as JSON if your backend is set up for it,
-    // especially due to the nested rental_items array.
-    // The `true` flag tells createRecordGeneric to stringify the data.
-    return createRecordGeneric(RENTAL_TRANSACTIONS_TABLE, data, true);
+    // Send as FormData so the PHP backend can parse nested rental_items JSON
+    // strings correctly. The generic helper will stringify arrays for us.
+    return createRecordGeneric(RENTAL_TRANSACTIONS_TABLE, data, false);
 };
 
 export const updateRental = async (id: number, data: Record<string, any>): Promise<ApiResponse> => {
-    // Similar to create, update might need to send JSON.
-    return updateRecordGeneric(RENTAL_TRANSACTIONS_TABLE, id, data, true);
+    // Use FormData for updates as well so rental_details are processed properly.
+    return updateRecordGeneric(RENTAL_TRANSACTIONS_TABLE, id, data, false);
 };
 export const deleteRental = async (id: number): Promise<ApiResponse> => deleteRecord(RENTAL_TRANSACTIONS_TABLE, id);
 export const getRental = async (id: number): Promise<ApiResponse> => getRecord(RENTAL_TRANSACTIONS_TABLE, id);
