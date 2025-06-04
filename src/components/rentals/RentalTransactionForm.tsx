@@ -450,7 +450,7 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
   const iconClass = "h-5 w-5 text-gray-400";
 
   return (
-    <div className="bg-white rounded-lg shadow w-full mx-auto">
+    <div className="bg-white w-full">
       <div className="flex justify-between items-center p-4 border-b border-light-gray-200">
         <h2 className="text-xl font-semibold text-brand-blue flex items-center">
           <CalendarCheck2 className="h-6 w-6 mr-2 text-brand-blue" />
