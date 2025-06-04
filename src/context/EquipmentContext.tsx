@@ -98,9 +98,9 @@ export const EquipmentProvider: React.FC<EquipmentProviderProps> = ({
       };
 
       if (query.trim()) {
-        response = await searchEquipment(query.trim(), {records: recordsPerPage, skip}); // Search might ignore currentFilters depending on API
+        response = await searchEquipment(query.trim(), {records: recordsPerPage, skip, filters: Object.keys(activeFiltersForApi).length > 0 ? activeFiltersForApi : undefined});
       } else {
-        response = await fetchEquipment(paginationParams); 
+        response = await fetchEquipment(paginationParams);
       }
       processApiResponse(response, page, skip);
 
@@ -136,13 +136,22 @@ export const EquipmentProvider: React.FC<EquipmentProviderProps> = ({
 
   // Effect for initial load OR when search query/filters are cleared to a "default" state
   useEffect(() => {
-    const noActiveFilters = (!filters.status || filters.status === 'all') && 
+    const noActiveFilters = (!filters.status || filters.status === 'all') &&
                             (!filters.category_id || filters.category_id === 'all' || String(filters.category_id).trim() === '');
     if (!searchQuery.trim() && noActiveFilters && !initialLoadDone && !loading) {
     //   console.log(`${CONTEXT_NAME}: Initial/Default load triggered. initialLoadDone: ${initialLoadDone}, loading: ${loading}, filters:`, filters);
       fetchEquipmentData(1, '', filters);
     }
   }, [searchQuery, filters, initialLoadDone, loading, fetchEquipmentData]);
+
+  // Fetch when filters change and there is no active search query
+  useEffect(() => {
+    const hasActiveFilters = (filters.status && filters.status !== 'all') ||
+                             (filters.category_id && filters.category_id !== 'all' && String(filters.category_id).trim() !== '');
+    if (!searchQuery.trim() && hasActiveFilters) {
+      fetchEquipmentData(1, '', filters);
+    }
+  }, [filters, searchQuery, fetchEquipmentData]);
 
   // Debounced search effect
   useEffect(() => {
