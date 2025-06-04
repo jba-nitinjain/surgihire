@@ -20,7 +20,6 @@ import {
   IndianRupee,
   ListChecks,
   Info,
-  DollarSign,
 } from 'lucide-react';
 import Modal from '../ui/Modal';
 import RentalItemsSection from './RentalItemsSection';
@@ -556,7 +555,7 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
             <div className="md:col-span-2">
                 <label className={labelClass}>Calculated Total Rental Amount</label>
                 <p className="mt-1 px-3 py-2 bg-light-gray-100 border border-light-gray-300 rounded-md text-dark-text/80 sm:text-sm flex items-center font-semibold text-green-700">
-                   <DollarSign size={18} className="mr-2"/> {formatCurrency(calculatedTotalAmount)}
+                   <IndianRupee size={18} className="mr-2"/> {formatCurrency(calculatedTotalAmount)}
                 </p>
             </div>
 
