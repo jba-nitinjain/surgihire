@@ -156,24 +156,37 @@ const Dashboard: React.FC<DashboardProps> = ({ sidebarOpen, setSidebarOpen }) =>
         </header>
 
         <div className="flex-grow">
-          {activeTab === 'customers' && isCustomersBase && (
-            <CustomerTab onViewRentalsForCustomer={handleViewRentalsForCustomer} />
-          )}
-          {activeTab === 'equipment' && isEquipmentBase && (
-            <EquipmentTab onViewMaintenanceForEquipment={handleViewMaintenanceForEquipment} />
-          )}
-          {activeTab === 'rentals' && isRentalsBase && (
-            <RentalsTab />
-          )}
-          {activeTab === 'masters' && (isMastersEqCatBase || isMastersPayPlanBase) && <MastersTab />}
-          {activeTab === 'maintenance' && isMaintenanceBase && (
-            <MaintenanceTab navigateToEquipmentDetail={handleNavigateToEquipmentDetail} />
-          )}
-          {activeTab === 'payments' && isPaymentsBase && (
-            <div className="text-center p-10 text-gray-500 bg-white rounded-lg shadow">Payments module coming soon.</div>
-          )}
 
-          <Outlet />
+          {(() => {
+            if (activeTab === 'customers' && isCustomersBase) {
+              return (
+                <CustomerTab onViewRentalsForCustomer={handleViewRentalsForCustomer} />
+              );
+            }
+            if (activeTab === 'equipment' && isEquipmentBase) {
+              return (
+                <EquipmentTab onViewMaintenanceForEquipment={handleViewMaintenanceForEquipment} />
+              );
+            }
+            if (activeTab === 'rentals' && isRentalsBase) {
+              return <RentalsTab />;
+            }
+            if (activeTab === 'masters' && (isMastersEqCatBase || isMastersPayPlanBase)) {
+              return <MastersTab />;
+            }
+            if (activeTab === 'maintenance' && isMaintenanceBase) {
+              return (
+                <MaintenanceTab navigateToEquipmentDetail={handleNavigateToEquipmentDetail} />
+              );
+            }
+            if (activeTab === 'payments' && isPaymentsBase) {
+              return (
+                <div className="text-center p-10 text-gray-500 bg-white rounded-lg shadow">Payments module coming soon.</div>
+              );
+            }
+            return <Outlet />;
+          })()}
+
         </div>
         <Footer />
       </div>
