@@ -18,7 +18,7 @@ import MastersTab from './dashboard/MastersTab';
 import MaintenanceTab from './dashboard/MaintenanceTab';
 import RentalsTab from './dashboard/RentalsTab'; // Import new tab component
 import Footer from './Footer';
-import { Outlet, useNavigate, useLocation } from 'react-router-dom';
+import { Outlet, useNavigate, useLocation, useMatch } from 'react-router-dom';
 
 interface DashboardProps {
   sidebarOpen: boolean;
@@ -70,6 +70,15 @@ const Dashboard: React.FC<DashboardProps> = ({ sidebarOpen, setSidebarOpen }) =>
     if (activeTab === 'maintenance') return maintenanceLoading;
     return false;
   };
+
+  // Determine if we are on a base path (list view) for each tab
+  const isCustomersBase = useMatch({ path: '/customers', end: true });
+  const isEquipmentBase = useMatch({ path: '/equipment', end: true });
+  const isRentalsBase = useMatch({ path: '/rentals', end: true });
+  const isMaintenanceBase = useMatch({ path: '/maintenance', end: true });
+  const isMastersEqCatBase = useMatch({ path: '/masters/equipment-categories', end: true });
+  const isMastersPayPlanBase = useMatch({ path: '/masters/payment-plans', end: true });
+  const isPaymentsBase = useMatch({ path: '/payments', end: true });
 
   const handleNavigateToEquipmentDetail = (equipmentId: number) => {
     navigate(`/equipment/${equipmentId}`);
@@ -147,22 +156,36 @@ const Dashboard: React.FC<DashboardProps> = ({ sidebarOpen, setSidebarOpen }) =>
         </header>
 
         <div className="flex-grow">
-          {activeTab === 'customers' && (
-            <CustomerTab onViewRentalsForCustomer={handleViewRentalsForCustomer} />
-          )}
-          {activeTab === 'equipment' && (
-            <EquipmentTab onViewMaintenanceForEquipment={handleViewMaintenanceForEquipment} />
-          )}
-          {activeTab === 'rentals' && (
-            <RentalsTab />
-          )} {/* Render new RentalsTab */}
-          {activeTab === 'masters' && <MastersTab />}
-          {activeTab === 'maintenance' && (
-            <MaintenanceTab navigateToEquipmentDetail={handleNavigateToEquipmentDetail} />
-          )}
-          {activeTab === 'payments' && <div className="text-center p-10 text-gray-500 bg-white rounded-lg shadow">Payments module coming soon.</div>}
+          {(() => {
+            if (activeTab === 'customers' && isCustomersBase) {
+              return (
+                <CustomerTab onViewRentalsForCustomer={handleViewRentalsForCustomer} />
+              );
+            }
+            if (activeTab === 'equipment' && isEquipmentBase) {
+              return (
+                <EquipmentTab onViewMaintenanceForEquipment={handleViewMaintenanceForEquipment} />
+              );
+            }
+            if (activeTab === 'rentals' && isRentalsBase) {
+              return <RentalsTab />;
+            }
+            if (activeTab === 'masters' && (isMastersEqCatBase || isMastersPayPlanBase)) {
+              return <MastersTab />;
+            }
+            if (activeTab === 'maintenance' && isMaintenanceBase) {
+              return (
+                <MaintenanceTab navigateToEquipmentDetail={handleNavigateToEquipmentDetail} />
+              );
+            }
+            if (activeTab === 'payments' && isPaymentsBase) {
+              return (
+                <div className="text-center p-10 text-gray-500 bg-white rounded-lg shadow">Payments module coming soon.</div>
+              );
+            }
+            return <Outlet />;
+          })()}
         </div>
-        <Outlet />
         <Footer />
       </div>
     </div>

@@ -173,7 +173,7 @@ const CustomerForm: React.FC<CustomerFormProps> = ({ customer, onSave, onCancel 
   const labelClass = "block text-sm font-medium text-dark-text";
 
   return (
-    <div className="bg-white rounded-lg shadow w-full mx-auto">
+    <div className="w-full">
       <div className="flex justify-between items-center p-4 border-b border-light-gray-200">
         <h2 className="text-xl font-semibold text-brand-blue">
           {customer ? 'Edit Customer' : 'Add New Customer'}
