@@ -18,6 +18,7 @@ import MastersTab from './dashboard/MastersTab';
 import MaintenanceTab from './dashboard/MaintenanceTab';
 import RentalsTab from './dashboard/RentalsTab'; // Import new tab component
 import Footer from './Footer';
+import { Outlet } from 'react-router-dom';
 
 interface DashboardProps {
   sidebarOpen: boolean;
@@ -180,6 +181,7 @@ const Dashboard: React.FC<DashboardProps> = ({ sidebarOpen, setSidebarOpen }) =>
           )}
           {activeTab === 'payments' && <div className="text-center p-10 text-gray-500 bg-white rounded-lg shadow">Payments module coming soon.</div>}
         </div>
+        <Outlet />
         <Footer />
       </div>
     </div>
