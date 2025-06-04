@@ -14,4 +14,3 @@ export const TextAreaField = React.forwardRef<HTMLTextAreaElement, React.Textare
   return <textarea ref={ref} className={`${baseClasses} ${className}`.trim()} {...props} />;
 });
 
-export default { TextField, SelectField, TextAreaField };
