@@ -19,13 +19,20 @@ const initialFormData: PaymentFormData = {
   notes: '',
 };
 
+const KNOWN_MODES = ['Cash', 'NEFT/RTGS', 'IMPS', 'Credit Card', 'Debit Card'];
+
 const PaymentForm: React.FC<PaymentFormProps> = ({ payment, onSave, onCancel }) => {
   const [formData, setFormData] = useState<PaymentFormData>(initialFormData);
+  const [modeSelect, setModeSelect] = useState<string>('');
+  const [otherMode, setOtherMode] = useState<string>('');
   const [formErrors, setFormErrors] = useState<Partial<Record<keyof PaymentFormData, string>>>({});
   const { createItem, updateItem, loading: crudLoading } = useCrud();
 
   useEffect(() => {
     if (payment) {
+      const isKnown = payment.payment_mode ? KNOWN_MODES.includes(payment.payment_mode) : false;
+      setModeSelect(isKnown ? payment.payment_mode! : payment.payment_mode ? 'Others' : '');
+      setOtherMode(isKnown ? '' : payment.payment_mode || '');
       setFormData({
         rental_id: payment.rental_id,
         nature: payment.nature ?? 'rental',
@@ -35,6 +42,10 @@ const PaymentForm: React.FC<PaymentFormProps> = ({ payment, onSave, onCancel }) 
         payment_reference: payment.payment_reference ?? '',
         notes: payment.notes ?? '',
       });
+    } else {
+      setModeSelect('');
+      setOtherMode('');
+      setFormData(initialFormData);
     }
   }, [payment]);
 
@@ -43,6 +54,22 @@ const PaymentForm: React.FC<PaymentFormProps> = ({ payment, onSave, onCancel }) 
   ) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleModeSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value;
+    setModeSelect(value);
+    if (value !== 'Others') {
+      setFormData(prev => ({ ...prev, payment_mode: value }));
+    } else {
+      setFormData(prev => ({ ...prev, payment_mode: otherMode }));
+    }
+  };
+
+  const handleOtherModeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setOtherMode(value);
+    setFormData(prev => ({ ...prev, payment_mode: value }));
   };
 
   const validate = (): boolean => {
@@ -139,18 +166,38 @@ const PaymentForm: React.FC<PaymentFormProps> = ({ payment, onSave, onCancel }) 
           </div>
         </div>
         <div>
-          <label htmlFor="payment_mode" className="block text-sm font-medium text-dark-text mb-1">
+          <label htmlFor="payment_mode_select" className="block text-sm font-medium text-dark-text mb-1">
             Mode
           </label>
-          <input
-            type="text"
-            id="payment_mode"
-            name="payment_mode"
-            value={formData.payment_mode || ''}
-            onChange={handleChange}
+          <select
+            id="payment_mode_select"
+            value={modeSelect}
+            onChange={handleModeSelectChange}
             className={inputClass}
-          />
+          >
+            <option value="">Select</option>
+            {KNOWN_MODES.map(m => (
+              <option key={m} value={m}>
+                {m}
+              </option>
+            ))}
+            <option value="Others">Others</option>
+          </select>
         </div>
+        {modeSelect === 'Others' && (
+          <div>
+            <label htmlFor="payment_mode_other" className="block text-sm font-medium text-dark-text mb-1">
+              Specify Mode
+            </label>
+            <input
+              type="text"
+              id="payment_mode_other"
+              value={otherMode}
+              onChange={handleOtherModeChange}
+              className={inputClass}
+            />
+          </div>
+        )}
         <div>
           <label htmlFor="payment_reference" className="block text-sm font-medium text-dark-text mb-1">
             Reference
