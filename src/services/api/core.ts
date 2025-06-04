@@ -60,7 +60,9 @@ export const fetchFromApi = async (
       let errorData;
       try {
         errorData = await response.json();
-      } catch {}
+      } catch {
+        // Some error responses may not contain JSON
+      }
       const detail = errorData?.message || response.statusText || `HTTP error ${response.status}`;
       throw new Error(`Server error: ${response.status} - ${detail}. Please try again later or contact support.`);
     }
