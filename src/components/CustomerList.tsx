@@ -10,11 +10,13 @@ import { Customer } from '../types';
 interface CustomerListProps {
   onSelectCustomer: (customer: Customer) => void;
   onEditCustomer: (customer: Customer) => void; // Add this prop
+  onViewRentals: (customerId: string) => void;
 }
 
-const CustomerList: React.FC<CustomerListProps> = ({ 
-  onSelectCustomer, 
-  onEditCustomer 
+const CustomerList: React.FC<CustomerListProps> = ({
+  onSelectCustomer,
+  onEditCustomer,
+  onViewRentals
 }) => {
   const { 
     customers, 
@@ -53,11 +55,12 @@ const CustomerList: React.FC<CustomerListProps> = ({
     <div className="space-y-6">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {customers.map(customer => (
-          <CustomerCard 
-            key={customer.customer_id} 
-            customer={customer} 
+          <CustomerCard
+            key={customer.customer_id}
+            customer={customer}
             onClick={onSelectCustomer}
             onEdit={onEditCustomer} // Pass down the onEditCustomer handler
+            onViewRentals={onViewRentals}
           />
         ))}
       </div>

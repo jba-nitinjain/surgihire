@@ -6,8 +6,12 @@ import SearchBox from '../ui/SearchBox';
 import { PlusCircle } from 'lucide-react';
 import { Customer } from '../../types';
 
+interface CustomerTabProps {
+  onViewRentalsForCustomer: (customerId: string) => void;
+}
+
 // No props needed from Dashboard for its internal UI state management
-const CustomerTab: React.FC = () => {
+const CustomerTab: React.FC<CustomerTabProps> = ({ onViewRentalsForCustomer }) => {
   const { searchQuery, setSearchQuery } = useCustomers();
 
   // State managed within CustomerTab
@@ -42,6 +46,7 @@ const CustomerTab: React.FC = () => {
       <CustomerList
         onSelectCustomer={handleSelectCustomerForDetail}
         onEditCustomer={handleOpenCustomerFormForEdit}
+        onViewRentals={onViewRentalsForCustomer}
       />
     </>
   );

@@ -12,7 +12,11 @@ import { getRental, fetchRentalDetailsByRentalId } from '../../services/api/rent
 const RENTAL_STATUSES = ["Draft", "Pending Confirmation", "Confirmed/Booked", "Active/Rented Out", "Returned/Completed", "Overdue", "Cancelled"];
 
 
-const RentalsTab: React.FC = () => {
+interface RentalsTabProps {
+  initialCustomerIdFilter?: string | null;
+}
+
+const RentalsTab: React.FC<RentalsTabProps> = ({ initialCustomerIdFilter }) => {
   const {
     searchQuery,
     setSearchQuery,
@@ -33,6 +37,13 @@ const RentalsTab: React.FC = () => {
       fetchCustomersForSelection();
     }
   }, [customersForFilter.length, loadingCustomers, fetchCustomersForSelection]);
+
+  useEffect(() => {
+    if (initialCustomerIdFilter) {
+      setFilters({ customer_id: initialCustomerIdFilter, status: null });
+      setSearchQuery('');
+    }
+  }, [initialCustomerIdFilter, setFilters, setSearchQuery]);
 
 
   const handleOpenRentalFormForCreate = () => {
