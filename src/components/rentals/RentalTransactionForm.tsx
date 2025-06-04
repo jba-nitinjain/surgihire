@@ -28,6 +28,8 @@ import RentalShippingBilling from './RentalShippingBilling';
 import { formatCurrency } from '../../utils/formatting'; // Import formatCurrency
 import usePincodeLookup from '../../utils/usePincodeLookup';
 
+const EQUIPMENT_RENTAL_STATUSES = ['Confirmed/Booked', 'Active/Rented Out'];
+
 const RENTAL_STATUSES_FORM = ["Draft", "Pending Confirmation", "Confirmed/Booked", "Active/Rented Out", "Returned/Completed", "Overdue", "Cancelled"];
 
 interface RentalTransactionFormProps {
@@ -414,6 +416,16 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
           );
         }
       }
+
+      if (EQUIPMENT_RENTAL_STATUSES.includes(apiData.status)) {
+        await Promise.all(
+          apiData.rental_items.map((item: any) =>
+            updateItem('equipment', item.equipment_id, { status: 'Rented' })
+          )
+        );
+        refreshAvailableEquipment();
+      }
+
       onSave();
     } catch (err) {
       console.error('Failed to save rental transaction:', err);
