@@ -4,7 +4,7 @@ import { useCrud } from '../../context/CrudContext';
 import MaintenanceRecordList from '../MaintenanceRecordList';
 import MaintenanceFilterBar from './MaintenanceFilterBar';
 import DeleteMaintenanceModal from './DeleteMaintenanceModal';
-import { PlusCircle, ListChecks } from 'lucide-react';
+import { PlusCircle, ListChecks, ArrowLeft } from 'lucide-react';
 import { MaintenanceRecord } from '../../types';
 import { useNavigate, useLocation } from 'react-router-dom';
 
@@ -34,8 +34,9 @@ const MaintenanceTab: React.FC<MaintenanceTabProps> = ({
   const [recordToDelete, setRecordToDelete] = useState<MaintenanceRecord | null>(null);
   const [isConfirmDeleteModalOpen, setIsConfirmDeleteModalOpen] = useState(false);
   const navigate = useNavigate();
+  const [fromPath, setFromPath] = useState<string | null>(null);
 
-  const location = useLocation() as { state?: { equipmentId?: string } };
+  const location = useLocation() as { state?: { equipmentId?: string; from?: string } };
 
   useEffect(() => {
     if (equipmentListForFilter.length === 0 && !loadingEquipmentList) {
@@ -47,6 +48,7 @@ const MaintenanceTab: React.FC<MaintenanceTabProps> = ({
     if (location.state?.equipmentId) {
       setMaintenanceFilters({ equipment_id: location.state.equipmentId, maintenance_type: null });
       setMaintenanceSearchQuery('');
+      setFromPath(location.state.from || null);
       navigate('/maintenance', { replace: true });
     }
   }, [location.state, setMaintenanceFilters, setMaintenanceSearchQuery, navigate]);
@@ -91,6 +93,14 @@ const MaintenanceTab: React.FC<MaintenanceTabProps> = ({
 
   return (
     <>
+      {fromPath && (
+        <button
+          onClick={() => navigate(fromPath)}
+          className="mb-4 flex items-center text-brand-blue"
+        >
+          <ArrowLeft className="h-4 w-4 mr-1" /> Back
+        </button>
+      )}
       <div className="mb-6 border-b border-light-gray-200">
         <nav className="-mb-px flex space-x-4 overflow-x-auto" aria-label="Maintenance Tabs">
           {maintenanceSubTabsData.map((subTab) => (
