@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Customer, CustomerFormData } from '../types';
 import { useCrud } from '../context/CrudContext';
 import { Save, X, Loader2 } from 'lucide-react';
@@ -30,6 +30,9 @@ const CustomerForm: React.FC<CustomerFormProps> = ({ customer, onSave, onCancel 
   const [formErrors, setFormErrors] = useState<Partial<Record<keyof CustomerFormData, string>>>({});
   const { createItem, updateItem, loading: crudLoading, error: crudError } = useCrud();
 
+  const originalPincodeRef = useRef<string>(customer?.shipping_pincode || '');
+  const [lookupPincode, setLookupPincode] = useState('');
+
   const {
     loading: pincodeDetailsLoading,
     error: pincodeError,
@@ -37,10 +40,12 @@ const CustomerForm: React.FC<CustomerFormProps> = ({ customer, onSave, onCancel 
     city: pincodeCity,
     state: pincodeState,
     isAreaSelect,
-  } = usePincodeLookup(formData.shipping_pincode);
+  } = usePincodeLookup(lookupPincode);
 
   useEffect(() => {
     if (customer) {
+      originalPincodeRef.current = customer.shipping_pincode || '';
+      setLookupPincode('');
       setFormData({
         full_name: customer.full_name || '',
         mobile_number_1: customer.mobile_number_1 || '',
@@ -53,14 +58,10 @@ const CustomerForm: React.FC<CustomerFormProps> = ({ customer, onSave, onCancel 
         shipping_state: customer.shipping_state || '',
         shipping_pincode: customer.shipping_pincode || '',
       });
-      // If editing, and there's a pincode, determine if area should be select or input
-      // This might require re-fetching pincode details if area options are not stored,
-      // or assuming that if shipping_area is set, it was correctly chosen.
-      // For simplicity, we'll let it be a text input on edit unless pincode is changed.
-      // area selection will be determined by pincode lookup
     } else {
+      originalPincodeRef.current = '';
+      setLookupPincode('');
       setFormData(initialFormData);
-      // area selection will be determined by pincode lookup
     }
   }, [customer]);
 
@@ -86,22 +87,31 @@ const CustomerForm: React.FC<CustomerFormProps> = ({ customer, onSave, onCancel 
     return Object.keys(errors).length === 0;
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-    if (formErrors[name as keyof CustomerFormData]) {
-        setFormErrors(prev => ({...prev, [name]: undefined}));
+
+    if (name === 'shipping_pincode') {
+      if (value !== originalPincodeRef.current) {
+        setLookupPincode(value);
+        setFormData(prev => ({
+          ...prev,
+          shipping_pincode: value,
+          shipping_area: '',
+          shipping_city: '',
+          shipping_state: '',
+        }));
+      } else {
+        setLookupPincode('');
+        setFormData(prev => ({ ...prev, shipping_pincode: value }));
+      }
+    } else {
+      setFormData(prev => ({ ...prev, [name]: value }));
     }
 
-    // If pincode is changed, reset related fields and area options
-    if (name === 'shipping_pincode') {
-        setFormData(prev => ({
-            ...prev,
-            shipping_area: '',
-            shipping_city: '',
-            shipping_state: '',
-            [name]: value // ensure pincode itself is updated
-        }));
+    if (formErrors[name as keyof CustomerFormData]) {
+      setFormErrors(prev => ({ ...prev, [name]: undefined }));
     }
   };
 
@@ -132,6 +142,9 @@ const CustomerForm: React.FC<CustomerFormProps> = ({ customer, onSave, onCancel 
   };
 
   useEffect(() => {
+    if (!lookupPincode) {
+      return;
+    }
     setFormData(prev => {
       let area = prev.shipping_area;
       if (areaOptions.length === 1 && !isAreaSelect) {
@@ -153,7 +166,7 @@ const CustomerForm: React.FC<CustomerFormProps> = ({ customer, onSave, onCancel 
         shipping_area: area,
       };
     });
-  }, [pincodeCity, pincodeState, areaOptions, isAreaSelect]);
+  }, [lookupPincode, pincodeCity, pincodeState, areaOptions, isAreaSelect]);
 
 
   const inputClass = "mt-1 block w-full px-3 py-2 bg-white border border-light-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-brand-blue focus:border-brand-blue sm:text-sm";
