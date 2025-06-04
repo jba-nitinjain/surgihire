@@ -66,7 +66,7 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
   onCancel,
 }) => {
   const [formData, setFormData] = useState<RentalTransactionFormData>(initialFormData);
-  const [formErrors, setFormErrors] = useState<Partial<Record<keyof RentalTransactionFormData | `rental_items.${number}.equipment_id` | `rental_items.${number}.quantity` | `rental_items.${number}.unit_rental_rate`, string>>>({});
+  const [formErrors, setFormErrors] = useState<Partial<Record<keyof RentalTransactionFormData | `rental_items.${number}.equipment_id` | `rental_items.${number}.unit_rental_rate`, string>>>({});
   const { createItem, updateItem, loading: crudLoading, error: crudError } = useCrud();
 
   const { customersForFilter: customers, loadingCustomers, fetchCustomersForSelection } = useRentalTransactions();
@@ -134,7 +134,6 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
           temp_id: String(item.rental_detail_id || crypto.randomUUID()),
           equipment_id: String(item.equipment_id),
           equipment_name: item.equipment_name || availableEquipment.find(eq => eq.equipment_id === item.equipment_id)?.equipment_name || 'Loading...',
-          quantity: String(item.quantity),
           unit_rental_rate: String(item.unit_rental_rate),
           default_equipment_rate: availableEquipment.find(eq => eq.equipment_id === item.equipment_id)?.rental_rate,
         })) || [],
@@ -186,9 +185,8 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
     setNumberOfDays(days);
 
     const dailyRateFromItems = formData.rental_items.reduce((sum, item) => {
-      const quantity = parseInt(item.quantity, 10) || 0;
       const rate = parseFloat(item.unit_rental_rate) || 0;
-      return sum + (quantity * rate);
+      return sum + rate;
     }, 0);
 
     setCalculatedTotalAmount(days * dailyRateFromItems);
@@ -244,7 +242,7 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
 
 
   const validateForm = (): boolean => {
-    const errors: Partial<Record<keyof RentalTransactionFormData | `rental_items.${number}.equipment_id` | `rental_items.${number}.quantity` | `rental_items.${number}.unit_rental_rate`, string>> = {};
+    const errors: Partial<Record<keyof RentalTransactionFormData | `rental_items.${number}.equipment_id` | `rental_items.${number}.unit_rental_rate`, string>> = {};
     if (!formData.customer_id) errors.customer_id = 'Customer is required.';
     if (!formData.rental_date) errors.rental_date = 'Rental date is required.';
     if (!formData.expected_return_date) {
@@ -273,7 +271,6 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
 
     formData.rental_items.forEach((item, index) => {
       if (!item.equipment_id) errors[`rental_items.${index}.equipment_id`] = 'Equipment is required.';
-      if (!item.quantity || parseInt(item.quantity, 10) <= 0) errors[`rental_items.${index}.quantity`] = 'Quantity must be positive.';
       if (!item.unit_rental_rate || parseFloat(item.unit_rental_rate) < 0) errors[`rental_items.${index}.unit_rental_rate`] = 'Rate must be non-negative.';
     });
 
@@ -323,7 +320,6 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
           temp_id: crypto.randomUUID(),
           equipment_id: '',
           equipment_name: '',
-          quantity: '1',
           unit_rental_rate: '0',
           default_equipment_rate: null,
         },
@@ -338,7 +334,6 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
     }));
     const newFormErrors = { ...formErrors };
     delete newFormErrors[`rental_items.${index}.equipment_id`];
-    delete newFormErrors[`rental_items.${index}.quantity`];
     delete newFormErrors[`rental_items.${index}.unit_rental_rate`];
     setFormErrors(newFormErrors);
   };
@@ -380,9 +375,8 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
       total_amount: calculatedTotalAmount, // Add calculated total amount
       rental_items: formData.rental_items.map(item => ({
         equipment_id: parseInt(item.equipment_id, 10),
-        quantity: parseInt(item.quantity, 10),
-        unit_rental_rate: parseFloat(item.unit_rental_rate),
-        ...(isEditing && rental?.rental_items?.find(ri => String(ri.equipment_id) === item.equipment_id)?.rental_detail_id
+        ...(isEditing &&
+          rental?.rental_items?.find(ri => String(ri.equipment_id) === item.equipment_id)?.rental_detail_id
             ? { rental_detail_id: rental.rental_items.find(ri => String(ri.equipment_id) === item.equipment_id)!.rental_detail_id }
             : {})
       })),
@@ -400,14 +394,10 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
               ? updateRentalDetail(item.rental_detail_id, {
                   rental_id: rental.rental_id,
                   equipment_id: item.equipment_id,
-                  quantity: item.quantity,
-                  unit_rental_rate: item.unit_rental_rate,
                 })
               : createRentalDetail({
                   rental_id: rental.rental_id,
                   equipment_id: item.equipment_id,
-                  quantity: item.quantity,
-                  unit_rental_rate: item.unit_rental_rate,
                 })
           )
         );
@@ -420,8 +410,6 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
               createRentalDetail({
                 rental_id: Number(newId),
                 equipment_id: item.equipment_id,
-                quantity: item.quantity,
-                unit_rental_rate: item.unit_rental_rate,
               })
             )
           );

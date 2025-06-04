@@ -114,7 +114,6 @@ export interface RentalItem {
   rental_id: number;
   equipment_id: number;
   equipment_name?: string; // For display
-  quantity: number;
   unit_rental_rate: number; // Rate per day for this specific item in this rental
   // Potentially other fields like discount, subtotal per item
 }
@@ -124,7 +123,6 @@ export interface RentalItemFormData {
   temp_id: string; // e.g., crypto.randomUUID()
   equipment_id: string; // Selected equipment ID (from form select)
   equipment_name?: string; // For display in the form
-  quantity: string; // Input as string
   unit_rental_rate: string; // Input as string, specific rate for this rental item
   // Default rate from equipment master can be pre-filled
   default_equipment_rate?: number | null;
