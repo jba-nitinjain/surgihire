@@ -3,6 +3,7 @@ import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import EquipmentCategoryForm from '../masters/EquipmentCategoryForm';
 import { EquipmentCategory } from '../../types';
 import { getEquipmentCategory } from '../../services/api/equipmentCategories';
+import { useEquipmentCategories } from '../../context/EquipmentCategoryContext';
 
 const EquipmentCategoryFormPage: React.FC = () => {
   const navigate = useNavigate();
@@ -11,6 +12,7 @@ const EquipmentCategoryFormPage: React.FC = () => {
 
   const [category, setCategory] = useState<EquipmentCategory | null>(location.state?.category || null);
   const [loading, setLoading] = useState<boolean>(!!id && !category);
+  const { refreshCategories } = useEquipmentCategories();
 
   useEffect(() => {
     if (id && !category) {
@@ -33,7 +35,7 @@ const EquipmentCategoryFormPage: React.FC = () => {
     <div className="p-4">
       <EquipmentCategoryForm
         category={category}
-        onSave={() => navigate('/masters/equipment-categories')}
+        onSave={() => { refreshCategories(); navigate('/masters/equipment-categories'); }}
         onCancel={() => navigate(-1)}
       />
     </div>

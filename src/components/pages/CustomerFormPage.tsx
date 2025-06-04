@@ -3,6 +3,7 @@ import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import CustomerForm from '../CustomerForm';
 import { Customer } from '../../types';
 import { getCustomer } from '../../services/api/customers';
+import { useCustomers } from '../../context/CustomerContext';
 
 const CustomerFormPage: React.FC = () => {
   const navigate = useNavigate();
@@ -10,6 +11,7 @@ const CustomerFormPage: React.FC = () => {
   const location = useLocation() as { state?: { customer?: Customer } };
   const [customer, setCustomer] = useState<Customer | null>(location.state?.customer || null);
   const [loading, setLoading] = useState<boolean>(!!id && !customer);
+  const { refreshData: refreshCustomerData } = useCustomers();
 
   useEffect(() => {
     if (id && !customer) {
@@ -30,7 +32,7 @@ const CustomerFormPage: React.FC = () => {
     <div className="p-4">
       <CustomerForm
         customer={customer}
-        onSave={() => navigate('/customers')}
+        onSave={() => { refreshCustomerData(); navigate('/customers'); }}
         onCancel={() => navigate(-1)}
       />
     </div>

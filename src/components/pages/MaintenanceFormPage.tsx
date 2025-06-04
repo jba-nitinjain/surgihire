@@ -3,6 +3,7 @@ import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import MaintenanceRecordForm from '../MaintenanceRecordForm';
 import { MaintenanceRecord, MaintenanceRecordFormData } from '../../types';
 import { getMaintenanceRecord } from '../../services/api/maintenance';
+import { useMaintenanceRecords } from '../../context/MaintenanceRecordContext';
 
 const MaintenanceFormPage: React.FC = () => {
   const navigate = useNavigate();
@@ -11,6 +12,7 @@ const MaintenanceFormPage: React.FC = () => {
 
   const [record, setRecord] = useState<MaintenanceRecord | null>(location.state?.record || null);
   const [loading, setLoading] = useState<boolean>(!!id && !record);
+  const { refreshMaintenanceRecords } = useMaintenanceRecords();
 
   useEffect(() => {
     if (id && !record) {
@@ -44,7 +46,7 @@ const MaintenanceFormPage: React.FC = () => {
     <div className="p-4">
       <MaintenanceRecordForm
         record={formRecord}
-        onSave={() => navigate('/maintenance')}
+        onSave={() => { refreshMaintenanceRecords(); navigate('/maintenance'); }}
         onCancel={() => navigate(-1)}
         isEditMode={!!id}
       />
