@@ -37,10 +37,22 @@ interface RentalTransactionFormProps {
 
 const initialFormData: RentalTransactionFormData = {
   customer_id: '',
+  shipping_address: '',
+  shipping_area: '',
+  shipping_city: '',
+  shipping_state: '',
+  shipping_pincode: '',
+  billing_address: '',
+  billing_area: '',
+  billing_city: '',
+  billing_state: '',
+  billing_pincode: '',
+  mobile_number: '',
+  email: '',
   rental_date: new Date().toISOString().split('T')[0],
   expected_return_date: '',
   deposit: '',
-  payment_term_id: '',
+  payment_term: '',
   status: 'Draft',
   notes: '',
   rental_items: [],
@@ -78,10 +90,22 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
     if (rental) {
       setFormData({
         customer_id: rental.customer_id || '',
+        shipping_address: rental.shipping_address || '',
+        shipping_area: rental.shipping_area || '',
+        shipping_city: rental.shipping_city || '',
+        shipping_state: rental.shipping_state || '',
+        shipping_pincode: rental.shipping_pincode || '',
+        billing_address: rental.billing_address || '',
+        billing_area: rental.billing_area || '',
+        billing_city: rental.billing_city || '',
+        billing_state: rental.billing_state || '',
+        billing_pincode: rental.billing_pincode || '',
+        mobile_number: rental.mobile_number || '',
+        email: rental.email || '',
         rental_date: rental.rental_date ? new Date(rental.rental_date).toISOString().split('T')[0] : '',
         expected_return_date: rental.expected_return_date ? new Date(rental.expected_return_date).toISOString().split('T')[0] : '',
         deposit: rental.deposit !== null ? String(rental.deposit) : '',
-        payment_term_id: rental.payment_term_id !== null ? String(rental.payment_term_id) : '',
+        payment_term: rental.payment_term || '',
         status: rental.status || 'Draft',
         notes: rental.notes || '',
         rental_items: rental.rental_items?.map(item => ({
@@ -134,6 +158,19 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
       errors.expected_return_date = 'Expected return date is required.';
     } else if (formData.rental_date && new Date(formData.expected_return_date) < new Date(formData.rental_date)) {
       errors.expected_return_date = 'Return date cannot be before rental date.';
+    }
+
+    if (formData.shipping_pincode && !/^\d{6}$/.test(formData.shipping_pincode)) {
+      errors.shipping_pincode = 'Pincode must be 6 digits.';
+    }
+    if (formData.billing_pincode && !/^\d{6}$/.test(formData.billing_pincode)) {
+      errors.billing_pincode = 'Pincode must be 6 digits.';
+    }
+    if (formData.mobile_number && formData.mobile_number.trim() && !/^\d{10}$/.test(formData.mobile_number)) {
+      errors.mobile_number = 'Mobile number must be 10 digits.';
+    }
+    if (formData.email && formData.email.trim() && !/^[\w.-]+@[\w.-]+\.\w+$/.test(formData.email)) {
+      errors.email = 'Invalid email format.';
     }
 
     if (formData.deposit && (isNaN(parseFloat(formData.deposit)) || parseFloat(formData.deposit) < 0)) {
@@ -222,7 +259,7 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
     const apiData: any = {
       ...formData,
       deposit: formData.deposit ? parseFloat(formData.deposit) : null,
-      payment_term_id: formData.payment_term_id ? parseInt(formData.payment_term_id, 10) : null,
+      payment_term: formData.payment_term || null,
       total_amount: calculatedTotalAmount, // Add calculated total amount
       rental_items: formData.rental_items.map(item => ({
         equipment_id: parseInt(item.equipment_id, 10),
@@ -317,9 +354,61 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
                     {RENTAL_STATUSES_FORM.map(s => <option key={s} value={s}>{s}</option>)}
                 </select>
               </div>
-              {formErrors.status && <p className="text-xs text-red-500 mt-1">{formErrors.status}</p>}
-            </div>
-          </fieldset>
+          {formErrors.status && <p className="text-xs text-red-500 mt-1">{formErrors.status}</p>}
+        </div>
+      </fieldset>
+
+      <fieldset className="grid grid-cols-1 gap-y-6 gap-x-4 md:grid-cols-2">
+        <legend className="text-lg font-medium text-dark-text col-span-full mb-2">Shipping & Billing</legend>
+        <div className="md:col-span-2">
+          <label htmlFor="shipping_address" className={labelClass}>Shipping Address</label>
+          <textarea id="shipping_address" name="shipping_address" value={formData.shipping_address || ''} onChange={handleChange} rows={2} className={inputClass}></textarea>
+        </div>
+        <div>
+          <label htmlFor="shipping_area" className={labelClass}>Shipping Area</label>
+          <input type="text" id="shipping_area" name="shipping_area" value={formData.shipping_area || ''} onChange={handleChange} className={inputClass} />
+        </div>
+        <div>
+          <label htmlFor="shipping_city" className={labelClass}>Shipping City</label>
+          <input type="text" id="shipping_city" name="shipping_city" value={formData.shipping_city || ''} onChange={handleChange} className={inputClass} />
+        </div>
+        <div>
+          <label htmlFor="shipping_state" className={labelClass}>Shipping State</label>
+          <input type="text" id="shipping_state" name="shipping_state" value={formData.shipping_state || ''} onChange={handleChange} className={inputClass} />
+        </div>
+        <div>
+          <label htmlFor="shipping_pincode" className={labelClass}>Shipping Pincode</label>
+          <input type="text" id="shipping_pincode" name="shipping_pincode" value={formData.shipping_pincode || ''} onChange={handleChange} className={inputClass} maxLength={6} />
+        </div>
+        <div className="md:col-span-2">
+          <label htmlFor="billing_address" className={labelClass}>Billing Address</label>
+          <textarea id="billing_address" name="billing_address" value={formData.billing_address || ''} onChange={handleChange} rows={2} className={inputClass}></textarea>
+        </div>
+        <div>
+          <label htmlFor="billing_area" className={labelClass}>Billing Area</label>
+          <input type="text" id="billing_area" name="billing_area" value={formData.billing_area || ''} onChange={handleChange} className={inputClass} />
+        </div>
+        <div>
+          <label htmlFor="billing_city" className={labelClass}>Billing City</label>
+          <input type="text" id="billing_city" name="billing_city" value={formData.billing_city || ''} onChange={handleChange} className={inputClass} />
+        </div>
+        <div>
+          <label htmlFor="billing_state" className={labelClass}>Billing State</label>
+          <input type="text" id="billing_state" name="billing_state" value={formData.billing_state || ''} onChange={handleChange} className={inputClass} />
+        </div>
+        <div>
+          <label htmlFor="billing_pincode" className={labelClass}>Billing Pincode</label>
+          <input type="text" id="billing_pincode" name="billing_pincode" value={formData.billing_pincode || ''} onChange={handleChange} className={inputClass} maxLength={6} />
+        </div>
+        <div>
+          <label htmlFor="mobile_number" className={labelClass}>Mobile Number</label>
+          <input type="text" id="mobile_number" name="mobile_number" value={formData.mobile_number || ''} onChange={handleChange} className={inputClass} />
+        </div>
+        <div>
+          <label htmlFor="email" className={labelClass}>Email</label>
+          <input type="email" id="email" name="email" value={formData.email || ''} onChange={handleChange} className={inputClass} />
+        </div>
+      </fieldset>
 
           <RentalItemsSection
             items={formData.rental_items}
@@ -336,14 +425,14 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
           <fieldset className="grid grid-cols-1 gap-y-6 gap-x-4 md:grid-cols-2">
             <legend className="text-lg font-medium text-dark-text col-span-full mb-2">Payment & Notes</legend>
             <div>
-              <label htmlFor="payment_term_id" className={labelClass}>Payment Term</label>
+              <label htmlFor="payment_term" className={labelClass}>Payment Term</label>
               <div className="mt-1 relative rounded-md shadow-sm">
                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     {loadingPaymentPlans ? <Loader2 className={`${iconClass} animate-spin`} /> : <ListChecks className={iconClass} />}
                 </div>
-                <select name="payment_term_id" id="payment_term_id" value={formData.payment_term_id || ''} onChange={handleChange} className={`${inputClass} pl-10`} disabled={loadingPaymentPlans}>
+                <select name="payment_term" id="payment_term" value={formData.payment_term || ''} onChange={handleChange} className={`${inputClass} pl-10`} disabled={loadingPaymentPlans}>
                   <option value="">{loadingPaymentPlans ? "Loading..." : "Select Payment Term"}</option>
-                  {paymentPlans.map((pt: PaymentPlanType) => <option key={pt.plan_id} value={String(pt.plan_id)}>{pt.plan_name}</option>)}
+                  {paymentPlans.map((pt: PaymentPlanType) => <option key={pt.plan_id} value={pt.plan_name}>{pt.plan_name}</option>)}
                 </select>
               </div>
             </div>
