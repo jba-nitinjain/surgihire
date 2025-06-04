@@ -9,12 +9,20 @@ interface PaymentFormProps {
   onCancel: () => void;
 }
 
+const todayStr = new Date().toISOString().split('T')[0];
+const DEFAULT_MODE_KEY = 'default_payment_mode';
+const getStoredDefaultMode = () =>
+  typeof window !== 'undefined' && typeof localStorage !== 'undefined'
+    ? localStorage.getItem(DEFAULT_MODE_KEY)
+    : null;
+const storedDefaultMode = getStoredDefaultMode();
+
 const initialFormData: PaymentFormData = {
   rental_id: '',
   nature: 'rental',
-  payment_date: '',
+  payment_date: todayStr,
   payment_amount: '',
-  payment_mode: '',
+  payment_mode: storedDefaultMode || 'Cash',
   payment_reference: '',
   notes: '',
 };
@@ -43,9 +51,15 @@ const PaymentForm: React.FC<PaymentFormProps> = ({ payment, onSave, onCancel }) 
         notes: payment.notes ?? '',
       });
     } else {
-      setModeSelect('');
-      setOtherMode('');
-      setFormData(initialFormData);
+      const stored = getStoredDefaultMode() || 'Cash';
+      const isKnown = KNOWN_MODES.includes(stored);
+      setModeSelect(isKnown ? stored : 'Others');
+      setOtherMode(isKnown ? '' : stored);
+      setFormData({
+        ...initialFormData,
+        payment_date: todayStr,
+        payment_mode: stored,
+      });
     }
   }, [payment]);
 
@@ -121,17 +135,31 @@ const PaymentForm: React.FC<PaymentFormProps> = ({ payment, onSave, onCancel }) 
           {formErrors.rental_id && <p className="text-red-600 text-sm mt-1">{formErrors.rental_id}</p>}
         </div>
         <div>
-          <label htmlFor="nature" className="block text-sm font-medium text-dark-text mb-1">Nature</label>
-          <select
-            id="nature"
-            name="nature"
-            value={formData.nature || 'rental'}
-            onChange={handleChange}
-            className={inputClass}
-          >
-            <option value="rental">Rental Receipt</option>
-            <option value="deposit">Deposit</option>
-          </select>
+          <span className="block text-sm font-medium text-dark-text mb-1">Nature</span>
+          <div className="flex space-x-4">
+            <label className="inline-flex items-center">
+              <input
+                type="radio"
+                name="nature"
+                value="rental"
+                checked={formData.nature === 'rental'}
+                onChange={handleChange}
+                className="text-brand-blue focus:ring-brand-blue"
+              />
+              <span className="ml-2">Rental Receipt</span>
+            </label>
+            <label className="inline-flex items-center">
+              <input
+                type="radio"
+                name="nature"
+                value="deposit"
+                checked={formData.nature === 'deposit'}
+                onChange={handleChange}
+                className="text-brand-blue focus:ring-brand-blue"
+              />
+              <span className="ml-2">Deposit</span>
+            </label>
+          </div>
         </div>
         <div>
           <label htmlFor="payment_date" className="block text-sm font-medium text-dark-text mb-1">
@@ -169,20 +197,34 @@ const PaymentForm: React.FC<PaymentFormProps> = ({ payment, onSave, onCancel }) 
           <label htmlFor="payment_mode_select" className="block text-sm font-medium text-dark-text mb-1">
             Mode
           </label>
-          <select
-            id="payment_mode_select"
-            value={modeSelect}
-            onChange={handleModeSelectChange}
-            className={inputClass}
-          >
-            <option value="">Select</option>
-            {KNOWN_MODES.map(m => (
-              <option key={m} value={m}>
-                {m}
-              </option>
-            ))}
-            <option value="Others">Others</option>
-          </select>
+          <div className="flex items-center space-x-2">
+            <select
+              id="payment_mode_select"
+              value={modeSelect}
+              onChange={handleModeSelectChange}
+              className={inputClass}
+            >
+              <option value="">Select</option>
+              {KNOWN_MODES.map(m => (
+                <option key={m} value={m}>
+                  {m}
+                </option>
+              ))}
+              <option value="Others">Others</option>
+            </select>
+            <button
+              type="button"
+              onClick={() => {
+                const mode = modeSelect === 'Others' ? otherMode : modeSelect;
+                if (mode) {
+                  localStorage.setItem(DEFAULT_MODE_KEY, mode);
+                }
+              }}
+              className="px-2 py-1 text-xs border rounded text-gray-600 hover:bg-light-gray-50"
+            >
+              Set Default
+            </button>
+          </div>
         </div>
         {modeSelect === 'Others' && (
           <div>
