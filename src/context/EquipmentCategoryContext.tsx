@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { EquipmentCategory, PaginationParams, ApiResponse } from '../types';
-import { fetchEquipmentCategories, searchEquipmentCategories } from '../services/api';
+import { fetchEquipmentCategories, searchEquipmentCategories } from '../services/api/equipmentCategories';
 
 interface EquipmentCategoryContextType {
   categories: EquipmentCategory[];

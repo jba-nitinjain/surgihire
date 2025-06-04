@@ -6,7 +6,7 @@ import RentalTransactionForm from '../rentals/RentalTransactionForm';
 import SearchBox from '../ui/SearchBox';
 import { PlusCircle } from 'lucide-react'; // Unused icons like Filter, CalendarIcon removed
 import { RentalTransaction } from '../../types'; // Unused Customer type import removed
-import { getRental, fetchRentalDetailsByRentalId } from '../../services/api';
+import { getRental, fetchRentalDetailsByRentalId } from '../../services/api/rentals';
 
 // Define rental statuses for filter dropdown
 const RENTAL_STATUSES = ["Draft", "Pending Confirmation", "Confirmed/Booked", "Active/Rented Out", "Returned/Completed", "Overdue", "Cancelled"];

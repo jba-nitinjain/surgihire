@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { MaintenanceRecord, PaginationParams, ApiResponse, Equipment } from '../types';
-import { fetchMaintenanceRecords, searchMaintenanceRecords, fetchEquipment } from '../services/api';
+import { fetchMaintenanceRecords, searchMaintenanceRecords } from '../services/api/maintenance';
+import { fetchEquipment } from '../services/api/equipment';
 
 const CONTEXT_NAME = "MaintenanceRecordContext";
 

@@ -1,5 +1,37 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
-import * as api from '../services/api'; // Imports all exports from api.ts
+import {
+  createCustomer,
+  updateCustomer,
+  deleteCustomer,
+} from '../services/api/customers';
+import {
+  createEquipment,
+  updateEquipment,
+  deleteEquipment,
+} from '../services/api/equipment';
+import {
+  createEquipmentCategory,
+  updateEquipmentCategory,
+  deleteEquipmentCategory,
+} from '../services/api/equipmentCategories';
+import {
+  createPaymentPlan,
+  updatePaymentPlan,
+  deletePaymentPlan,
+} from '../services/api/paymentPlans';
+import {
+  createMaintenanceRecord,
+  updateMaintenanceRecord,
+  deleteMaintenanceRecord,
+} from '../services/api/maintenance';
+import {
+  createRental,
+  updateRental,
+  deleteRental,
+  createPaymentSchedule,
+  updatePaymentSchedule,
+  deletePaymentSchedule,
+} from '../services/api/rentals';
 
 interface CrudContextType {
   createItem: (table: string, data: Record<string, any>) => Promise<any>;
@@ -34,26 +66,26 @@ export const CrudProvider: React.FC<CrudProviderProps> = ({ children }) => {
       let response;
       switch (table) {
         case 'customers':
-          response = await api.createCustomer(data);
+          response = await createCustomer(data);
           break;
         case 'equipment':
-          response = await api.createEquipment(data);
+          response = await createEquipment(data);
           break;
         case 'rental_transactions':
-          response = await api.createRental(data);
+          response = await createRental(data);
           break;
         case 'payment_schedules':
-          response = await api.createPaymentSchedule(data);
+          response = await createPaymentSchedule(data);
           break;
         case 'equipment_categories':
-          response = await api.createEquipmentCategory(data);
+          response = await createEquipmentCategory(data);
           break;
         case 'payment_plans':
-          response = await api.createPaymentPlan(data);
+          response = await createPaymentPlan(data);
           break;
         // --- ADDED CASE FOR MAINTENANCE RECORDS ---
         case 'maintenance_records':
-          response = await api.createMaintenanceRecord(data);
+          response = await createMaintenanceRecord(data);
           break;
         // --- END ADDED CASE ---
         default:
@@ -78,26 +110,26 @@ export const CrudProvider: React.FC<CrudProviderProps> = ({ children }) => {
       let response;
       switch (table) {
         case 'customers':
-          response = await api.updateCustomer(String(id), data);
+          response = await updateCustomer(String(id), data);
           break;
         case 'equipment':
-          response = await api.updateEquipment(Number(id), data);
+          response = await updateEquipment(Number(id), data);
           break;
         case 'rental_transactions':
-          response = await api.updateRental(Number(id), data);
+          response = await updateRental(Number(id), data);
           break;
         case 'payment_schedules':
-          response = await api.updatePaymentSchedule(Number(id), data);
+          response = await updatePaymentSchedule(Number(id), data);
           break;
         case 'equipment_categories':
-          response = await api.updateEquipmentCategory(Number(id), data);
+          response = await updateEquipmentCategory(Number(id), data);
           break;
         case 'payment_plans':
-          response = await api.updatePaymentPlan(Number(id), data);
+          response = await updatePaymentPlan(Number(id), data);
           break;
         // --- ADDED CASE FOR MAINTENANCE RECORDS ---
         case 'maintenance_records':
-          response = await api.updateMaintenanceRecord(Number(id), data);
+          response = await updateMaintenanceRecord(Number(id), data);
           break;
         // --- END ADDED CASE ---
         default:
@@ -122,26 +154,26 @@ export const CrudProvider: React.FC<CrudProviderProps> = ({ children }) => {
       let response;
       switch (table) {
         case 'customers':
-          response = await api.deleteCustomer(String(id));
+          response = await deleteCustomer(String(id));
           break;
         case 'equipment':
-          response = await api.deleteEquipment(Number(id));
+          response = await deleteEquipment(Number(id));
           break;
         case 'rental_transactions':
-          response = await api.deleteRental(Number(id));
+          response = await deleteRental(Number(id));
           break;
         case 'payment_schedules':
-          response = await api.deletePaymentSchedule(Number(id));
+          response = await deletePaymentSchedule(Number(id));
           break;
         case 'equipment_categories':
-          response = await api.deleteEquipmentCategory(Number(id));
+          response = await deleteEquipmentCategory(Number(id));
           break;
         case 'payment_plans':
-          response = await api.deletePaymentPlan(Number(id));
+          response = await deletePaymentPlan(Number(id));
           break;
         // --- ADDED CASE FOR MAINTENANCE RECORDS ---
         case 'maintenance_records':
-          response = await api.deleteMaintenanceRecord(Number(id));
+          response = await deleteMaintenanceRecord(Number(id));
           break;
         // --- END ADDED CASE ---
         default:

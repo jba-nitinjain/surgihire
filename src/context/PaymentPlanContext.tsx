@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { PaymentPlan, PaginationParams, ApiResponse } from '../types';
-import { fetchPaymentPlans, searchPaymentPlans } from '../services/api';
+import { fetchPaymentPlans, searchPaymentPlans } from '../services/api/paymentPlans';
 
 // const CONTEXT_NAME = "PaymentPlanContext"; // For logging
 

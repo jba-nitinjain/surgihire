@@ -11,7 +11,7 @@ import { useCrud } from '../../context/CrudContext';
 import { useRentalTransactions } from '../../context/RentalTransactionContext';
 import { usePaymentPlans } from '../../context/PaymentPlanContext';
 import { useEquipment } from '../../context/EquipmentContext';
-import { createRentalDetail, updateRentalDetail } from '../../services/api';
+import { createRentalDetail, updateRentalDetail } from '../../services/api/rentals';
 import {
   Save,
   X,
