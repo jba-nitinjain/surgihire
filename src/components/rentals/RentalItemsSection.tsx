@@ -42,7 +42,7 @@ const RentalItemsSection: React.FC<Props> = ({
           >
             <Trash2 size={16} />
           </button>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div className="md:col-span-2">
               <label htmlFor={`item_equipment_${index}`} className={`${labelClass} text-xs`}>Equipment <span className="text-red-500">*</span></label>
               <select
@@ -60,18 +60,6 @@ const RentalItemsSection: React.FC<Props> = ({
                 ))}
               </select>
               {formErrors[`rental_items.${index}.equipment_id`] && <p className="text-xs text-red-500 mt-1">{formErrors[`rental_items.${index}.equipment_id`]}</p>}
-            </div>
-            <div>
-              <label htmlFor={`item_quantity_${index}`} className={`${labelClass} text-xs`}>Quantity <span className="text-red-500">*</span></label>
-              <input
-                type="number"
-                id={`item_quantity_${index}`}
-                value={item.quantity}
-                onChange={(e) => handleItemChange(index, 'quantity', e.target.value)}
-                className={`${inputClass} text-xs py-1.5`}
-                min="1"
-              />
-               {formErrors[`rental_items.${index}.quantity`] && <p className="text-xs text-red-500 mt-1">{formErrors[`rental_items.${index}.quantity`]}</p>}
             </div>
             <div>
               <label htmlFor={`item_rate_${index}`} className={`${labelClass} text-xs`}>Unit Rate (₹/day) <span className="text-red-500">*</span></label>
