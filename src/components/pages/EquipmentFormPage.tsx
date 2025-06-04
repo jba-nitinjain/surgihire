@@ -3,6 +3,7 @@ import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import EquipmentForm from '../EquipmentForm';
 import { Equipment } from '../../types';
 import { getEquipmentItem } from '../../services/api/equipment';
+import { useEquipment } from '../../context/EquipmentContext';
 
 const EquipmentFormPage: React.FC = () => {
   const navigate = useNavigate();
@@ -10,6 +11,7 @@ const EquipmentFormPage: React.FC = () => {
   const location = useLocation() as { state?: { equipment?: Equipment } };
   const [equipment, setEquipment] = useState<Equipment | null>(location.state?.equipment || null);
   const [loading, setLoading] = useState<boolean>(!!id && !equipment);
+  const { refreshEquipmentData } = useEquipment();
 
   useEffect(() => {
     if (id && !equipment) {
@@ -29,7 +31,7 @@ const EquipmentFormPage: React.FC = () => {
     <div className="p-4">
       <EquipmentForm
         equipment={equipment}
-        onSave={() => navigate('/equipment')}
+        onSave={() => { refreshEquipmentData(); navigate('/equipment'); }}
         onCancel={() => navigate(-1)}
       />
     </div>

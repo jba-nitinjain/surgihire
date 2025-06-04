@@ -3,6 +3,7 @@ import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import PaymentPlanForm from '../masters/PaymentPlanForm';
 import { PaymentPlan } from '../../types';
 import { getPaymentPlan } from '../../services/api/paymentPlans';
+import { usePaymentPlans } from '../../context/PaymentPlanContext';
 
 const PaymentPlanFormPage: React.FC = () => {
   const navigate = useNavigate();
@@ -11,6 +12,7 @@ const PaymentPlanFormPage: React.FC = () => {
 
   const [plan, setPlan] = useState<PaymentPlan | null>(location.state?.plan || null);
   const [loading, setLoading] = useState<boolean>(!!id && !plan);
+  const { refreshPaymentPlans } = usePaymentPlans();
 
   useEffect(() => {
     if (id && !plan) {
@@ -33,7 +35,7 @@ const PaymentPlanFormPage: React.FC = () => {
     <div className="p-4">
       <PaymentPlanForm
         plan={plan}
-        onSave={() => navigate('/masters/payment-plans')}
+        onSave={() => { refreshPaymentPlans(); navigate('/masters/payment-plans'); }}
         onCancel={() => navigate(-1)}
       />
     </div>

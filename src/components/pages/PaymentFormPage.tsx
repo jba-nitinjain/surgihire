@@ -3,6 +3,7 @@ import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import PaymentForm from '../payments/PaymentForm';
 import { Payment } from '../../types';
 import { getPayment } from '../../services/api/payments';
+import { usePayments } from '../../context/PaymentContext';
 
 const PaymentFormPage: React.FC = () => {
   const navigate = useNavigate();
@@ -10,6 +11,7 @@ const PaymentFormPage: React.FC = () => {
   const location = useLocation() as { state?: { payment?: Payment } };
   const [payment, setPayment] = useState<Payment | null>(location.state?.payment || null);
   const [loading, setLoading] = useState<boolean>(!!id && !payment);
+  const { refreshPayments } = usePayments();
 
   useEffect(() => {
     if (id && !payment) {
@@ -32,7 +34,7 @@ const PaymentFormPage: React.FC = () => {
     <div className="p-4">
       <PaymentForm
         payment={payment}
-        onSave={() => navigate('/payments')}
+        onSave={() => { refreshPayments(); navigate('/payments'); }}
         onCancel={() => navigate(-1)}
       />
     </div>

@@ -3,6 +3,7 @@ import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import RentalTransactionForm from '../rentals/RentalTransactionForm';
 import { RentalTransaction } from '../../types';
 import { getRental, fetchRentalDetailsByRentalId } from '../../services/api/rentals';
+import { useRentalTransactions } from '../../context/RentalTransactionContext';
 
 const RentalFormPage: React.FC = () => {
   const navigate = useNavigate();
@@ -11,6 +12,7 @@ const RentalFormPage: React.FC = () => {
 
   const [rental, setRental] = useState<RentalTransaction | null>(location.state?.rental || null);
   const [loading, setLoading] = useState<boolean>(!!id && !rental);
+  const { refreshRentalTransactions } = useRentalTransactions();
 
   useEffect(() => {
     if (id && !rental) {
@@ -40,7 +42,7 @@ const RentalFormPage: React.FC = () => {
     <div className="p-4">
       <RentalTransactionForm
         rental={rental}
-        onSave={() => navigate('/rentals')}
+        onSave={() => { refreshRentalTransactions(); navigate('/rentals'); }}
         onCancel={() => navigate(-1)}
       />
     </div>
