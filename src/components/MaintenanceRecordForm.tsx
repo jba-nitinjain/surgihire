@@ -6,7 +6,6 @@ import { MaintenanceRecordFormData } from '../types';
 import { useMaintenanceRecords } from '../context/MaintenanceRecordContext'; // To get equipment list
 import { useCrud } from '../context/CrudContext'; // To get loading state from CRUD operations
 import { Save, X, Loader2, Wrench, ChevronDown } from 'lucide-react';
-import Modal from './ui/Modal';
 import MaintenanceRecordInfo from './maintenance/MaintenanceRecordInfo';
 import MaintenanceRecordExtra from './maintenance/MaintenanceRecordExtra';
 
@@ -164,16 +163,16 @@ const MaintenanceRecordForm: React.FC<MaintenanceRecordFormProps> = ({
   const iconClass = "h-5 w-5 text-gray-400";
 
   return (
-    <Modal
-      title={(
-        <span className="flex items-center">
+    <div className="bg-white rounded-lg shadow max-w-2xl mx-auto">
+      <div className="flex justify-between items-center p-4 border-b border-light-gray-200">
+        <h2 className="text-xl font-semibold text-brand-blue flex items-center">
           <Wrench className="h-6 w-6 mr-2 text-brand-blue" />
           {isEditMode ? 'Edit Maintenance Record' : 'Add New Maintenance Record'}
-        </span>
-      )}
-      widthClasses="max-w-2xl"
-      onClose={onCancel}
-    >
+        </h2>
+        <button onClick={onCancel} className="p-2 rounded-full hover:bg-light-gray-100">
+          <X className="h-5 w-5 text-dark-text" />
+        </button>
+      </div>
         <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-6 overflow-y-auto">
           {crudError && (
             <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded" role="alert">
@@ -267,7 +266,7 @@ const MaintenanceRecordForm: React.FC<MaintenanceRecordFormProps> = ({
             </button>
           </div>
         </form>
-    </Modal>
+    </div>
   );
 };
 

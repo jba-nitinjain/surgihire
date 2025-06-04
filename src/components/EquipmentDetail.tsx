@@ -19,6 +19,8 @@ interface EquipmentDetailProps {
   onClose: () => void;
   onEdit: (equipment: Equipment) => void;
   onViewMaintenance: (equipmentId: string) => void;
+  /** When true (default) render inside a modal overlay */
+  isModal?: boolean;
 }
 
 const EquipmentDetail: React.FC<EquipmentDetailProps> = ({
@@ -26,7 +28,8 @@ const EquipmentDetail: React.FC<EquipmentDetailProps> = ({
   categoryName, // Use the passed categoryName
   onClose,
   onEdit,
-  onViewMaintenance
+  onViewMaintenance,
+  isModal = true,
 }) => {
   if (!equipment) {
     return null;
@@ -41,8 +44,8 @@ const EquipmentDetail: React.FC<EquipmentDetailProps> = ({
     onViewMaintenance(String(equipment.equipment_id));
   };
 
-  return (
-    <Modal widthClasses="max-w-lg h-full overflow-y-auto animate-slide-in-right shadow-2xl bg-light-gray-50" onClose={onClose}>
+  const content = (
+        <>
         <div className="sticky top-0 bg-white z-10 shadow-sm">
           <div className="flex justify-between items-center p-4 border-b border-light-gray-200">
             <button
@@ -100,7 +103,15 @@ const EquipmentDetail: React.FC<EquipmentDetailProps> = ({
             <MaintenanceLocationSection equipment={equipment} />
           </div>
         </div>
+    </>
+  );
+
+  return isModal ? (
+    <Modal widthClasses="max-w-lg h-full overflow-y-auto animate-slide-in-right shadow-2xl bg-light-gray-50" onClose={onClose}>
+      {content}
     </Modal>
+  ) : (
+    <div className="max-w-3xl mx-auto bg-white rounded-lg shadow">{content}</div>
   );
 };
 

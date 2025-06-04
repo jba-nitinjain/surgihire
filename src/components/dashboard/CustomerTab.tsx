@@ -1,52 +1,30 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useCustomers } from '../../context/CustomerContext';
 import CustomerList from '../CustomerList';
-import CustomerDetail from '../CustomerDetail';
-import CustomerForm from '../CustomerForm';
+import { useNavigate } from 'react-router-dom';
 import SearchBox from '../ui/SearchBox';
 import { PlusCircle } from 'lucide-react';
 import { Customer } from '../../types';
 
 // No props needed from Dashboard for its internal UI state management
 const CustomerTab: React.FC = () => {
-  const { searchQuery, setSearchQuery, refreshData } = useCustomers();
+  const { searchQuery, setSearchQuery } = useCustomers();
 
   // State managed within CustomerTab
-  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
-  const [isCustomerFormOpen, setIsCustomerFormOpen] = useState(false);
-  const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
+  const navigate = useNavigate();
 
   const handleSelectCustomerForDetail = (customer: Customer) => {
-    setSelectedCustomer(customer);
-    setIsCustomerFormOpen(false); // Close form if open
-    setEditingCustomer(null);
-  };
-
-  const handleCloseCustomerDetail = () => {
-    setSelectedCustomer(null);
+    navigate(`/customers/${customer.customer_id}`, { state: { customer } });
   };
 
   const handleOpenCustomerFormForCreate = () => {
-    setEditingCustomer(null);
-    setSelectedCustomer(null); // Close detail if open
-    setIsCustomerFormOpen(true);
+    navigate('/customers/new');
   };
 
   const handleOpenCustomerFormForEdit = (customer: Customer) => {
-    setEditingCustomer(customer);
-    setSelectedCustomer(null); // Close detail view
-    setIsCustomerFormOpen(true);
+    navigate(`/customers/${customer.customer_id}/edit`, { state: { customer } });
   };
 
-  const handleCloseCustomerForm = () => {
-    setIsCustomerFormOpen(false);
-    setEditingCustomer(null);
-  };
-
-  const handleSaveCustomerForm = () => {
-    handleCloseCustomerForm();
-    refreshData(); // Refresh customer list from context
-  };
 
   return (
     <>
@@ -65,21 +43,6 @@ const CustomerTab: React.FC = () => {
         onSelectCustomer={handleSelectCustomerForDetail}
         onEditCustomer={handleOpenCustomerFormForEdit}
       />
-
-      {selectedCustomer && !isCustomerFormOpen && ( // Show detail only if form is not open
-        <CustomerDetail
-          customer={selectedCustomer}
-          onClose={handleCloseCustomerDetail}
-          onEdit={() => handleOpenCustomerFormForEdit(selectedCustomer)}
-        />
-      )}
-      {isCustomerFormOpen && (
-        <CustomerForm
-          customer={editingCustomer}
-          onSave={handleSaveCustomerForm}
-          onCancel={handleCloseCustomerForm}
-        />
-      )}
     </>
   );
 };
