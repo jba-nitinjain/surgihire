@@ -1,6 +1,7 @@
 import React from 'react';
 import { useCustomers } from '../../context/CustomerContext';
 import CustomerList from '../CustomerList';
+
 import { useNavigate } from 'react-router-dom';
 import SearchBox from '../ui/SearchBox';
 import { PlusCircle } from 'lucide-react';
@@ -11,17 +12,12 @@ const CustomerTab: React.FC = () => {
   const { searchQuery, setSearchQuery } = useCustomers();
 
   // State managed within CustomerTab
-  const navigate = useNavigate();
 
-  const handleSelectCustomerForDetail = (customer: Customer) => {
-    navigate(`/customers/${customer.customer_id}`, { state: { customer } });
-  };
-
-  const handleOpenCustomerFormForCreate = () => {
     navigate('/customers/new');
   };
 
   const handleOpenCustomerFormForEdit = (customer: Customer) => {
+
     navigate(`/customers/${customer.customer_id}/edit`, { state: { customer } });
   };
 
@@ -43,6 +39,7 @@ const CustomerTab: React.FC = () => {
         onSelectCustomer={handleSelectCustomerForDetail}
         onEditCustomer={handleOpenCustomerFormForEdit}
       />
+
     </>
   );
 };

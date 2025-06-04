@@ -4,6 +4,7 @@ import { useEquipmentCategories } from '../../context/EquipmentCategoryContext';
 
 import EquipmentList from '../EquipmentList';
 import { useNavigate } from 'react-router-dom';
+
 import EquipmentFilterPanel from './EquipmentFilterPanel';
 import { PlusCircle } from 'lucide-react';
 import { Equipment } from '../../types';
@@ -37,7 +38,7 @@ const EquipmentTab: React.FC<EquipmentTabProps> = ({
     refreshCategories: refreshEqCategoriesForFilter,
   } = useEquipmentCategories();
 
-  const navigate = useNavigate();
+
 
   useEffect(() => {
     if (allEquipmentCategories.length === 0 && !eqCategoriesLoadingForFilter && !eqCategoriesFilterError) {
@@ -54,16 +55,11 @@ const EquipmentTab: React.FC<EquipmentTabProps> = ({
   }, [initialEquipmentIdToView, clearInitialEquipmentIdToView, navigate]);
 
   const handleSelectEquipmentForDetail = (equipment: Equipment) => {
-    navigate(`/equipment/${equipment.equipment_id}`, { state: { equipment } });
-  };
 
-  const handleOpenEquipmentFormForCreate = () => {
     navigate('/equipment/new');
   };
 
   const handleOpenEquipmentFormForEdit = (item: Equipment) => {
-    navigate(`/equipment/${item.equipment_id}/edit`, { state: { equipment: item } });
-  };
 
   return (
       <>
@@ -87,6 +83,7 @@ const EquipmentTab: React.FC<EquipmentTabProps> = ({
         onViewMaintenance={onViewMaintenanceForEquipment}
         onViewDetail={handleSelectEquipmentForDetail}
       />
+
     </>
   );
 };
