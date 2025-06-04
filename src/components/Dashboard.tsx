@@ -10,6 +10,7 @@ import { useEquipmentCategories } from '../context/EquipmentCategoryContext';
 import { usePaymentPlans } from '../context/PaymentPlanContext';
 import { useMaintenanceRecords } from '../context/MaintenanceRecordContext';
 import { useRentalTransactions } from '../context/RentalTransactionContext'; // Import new context hook
+import { usePayments } from '../context/PaymentContext';
 
 // Import Tab components
 import CustomerTab from './dashboard/CustomerTab';
@@ -17,6 +18,7 @@ import EquipmentTab from './dashboard/EquipmentTab';
 import MastersTab from './dashboard/MastersTab';
 import MaintenanceTab from './dashboard/MaintenanceTab';
 import RentalsTab from './dashboard/RentalsTab'; // Import new tab component
+import PaymentsTab from './dashboard/PaymentsTab';
 import Footer from './Footer';
 import { Outlet, useNavigate, useLocation, useMatch } from 'react-router-dom';
 
@@ -36,6 +38,7 @@ const Dashboard: React.FC<DashboardProps> = ({ sidebarOpen, setSidebarOpen }) =>
   const { refreshPaymentPlans, loading: ppLoading } = usePaymentPlans();
   const { refreshMaintenanceRecords, loading: maintenanceLoading } = useMaintenanceRecords();
   const { refreshRentalTransactions, loading: rentalsLoading } = useRentalTransactions(); // Add rentals refresh and loading
+  const { refreshPayments, loading: paymentsLoading } = usePayments();
 
   const mainTabs = [
     { id: 'customers', label: 'Customers', icon: <Users size={18} /> },
@@ -53,6 +56,7 @@ const Dashboard: React.FC<DashboardProps> = ({ sidebarOpen, setSidebarOpen }) =>
       case 'customers': refreshCustomerData(); break;
       case 'equipment': refreshEquipmentData(); break;
       case 'rentals': refreshRentalTransactions(); break; // Add refresh for rentals
+      case 'payments': refreshPayments(); break;
       case 'masters':
         refreshEqCategories();
         refreshPaymentPlans();
@@ -66,6 +70,7 @@ const Dashboard: React.FC<DashboardProps> = ({ sidebarOpen, setSidebarOpen }) =>
     if (activeTab === 'customers') return customersLoading;
     if (activeTab === 'equipment') return equipmentLoading;
     if (activeTab === 'rentals') return rentalsLoading; // Add loading for rentals
+    if (activeTab === 'payments') return paymentsLoading;
     if (activeTab === 'masters') return eqCategoriesLoading || ppLoading;
     if (activeTab === 'maintenance') return maintenanceLoading;
     return false;
@@ -179,9 +184,7 @@ const Dashboard: React.FC<DashboardProps> = ({ sidebarOpen, setSidebarOpen }) =>
               );
             }
             if (activeTab === 'payments' && isPaymentsBase) {
-              return (
-                <div className="text-center p-10 text-gray-500 bg-white rounded-lg shadow">Payments module coming soon.</div>
-              );
+              return <PaymentsTab />;
             }
             return <Outlet />;
           })()}
