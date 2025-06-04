@@ -5,6 +5,7 @@ import {
   X, ArrowLeft, Edit3, ListChecks
 } from 'lucide-react';
 import { formatDate, formatCurrency } from '../utils/formatting'; // Import utilities
+import Modal from './ui/Modal';
 
 interface EquipmentDetailProps {
   equipment: Equipment | null;
@@ -36,8 +37,7 @@ const EquipmentDetail: React.FC<EquipmentDetailProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-end">
-      <div className="w-full max-w-lg bg-light-gray-50 h-full overflow-y-auto animate-slide-in-right shadow-2xl">
+    <Modal widthClasses="max-w-lg h-full overflow-y-auto animate-slide-in-right shadow-2xl bg-light-gray-50" onClose={onClose}>
         <div className="sticky top-0 bg-white z-10 shadow-sm">
           <div className="flex justify-between items-center p-4 border-b border-light-gray-200">
             <button
@@ -222,8 +222,7 @@ const EquipmentDetail: React.FC<EquipmentDetailProps> = ({
 
           </div>
         </div>
-      </div>
-    </div>
+    </Modal>
   );
 };
 

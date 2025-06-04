@@ -3,6 +3,7 @@ import { Equipment, EquipmentFormData, EquipmentCategory } from '../types';
 import { useCrud } from '../context/CrudContext';
 import { useEquipmentCategories } from '../context/EquipmentCategoryContext'; 
 import { Save, X, Loader2, Package, Tag, Hash, CalendarDays, MapPin, Info, Wrench, Layers, IndianRupee } from 'lucide-react'; // Changed DollarSign to IndianRupee
+import Modal from './ui/Modal';
 
 interface EquipmentFormProps {
   equipment?: Equipment | null;
@@ -168,18 +169,16 @@ const EquipmentForm: React.FC<EquipmentFormProps> = ({ equipment, onSave, onCanc
   const iconClass = "h-5 w-5 text-gray-400 mr-2";
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-3xl max-h-[90vh] flex flex-col">
-        <div className="flex justify-between items-center p-4 sm:p-6 border-b border-light-gray-200">
-          <h2 className="text-xl font-semibold text-brand-blue flex items-center">
-            <Package className="h-6 w-6 mr-2 text-brand-blue" />
-            {isEditing ? 'Edit Equipment' : 'Add New Equipment'}
-          </h2>
-          <button onClick={onCancel} className="p-2 rounded-full hover:bg-light-gray-100">
-            <X className="h-5 w-5 text-dark-text" />
-          </button>
-        </div>
-
+    <Modal
+      title={(
+        <span className="flex items-center">
+          <Package className="h-6 w-6 mr-2 text-brand-blue" />
+          {isEditing ? 'Edit Equipment' : 'Add New Equipment'}
+        </span>
+      )}
+      widthClasses="max-w-3xl"
+      onClose={onCancel}
+    >
         <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-6 overflow-y-auto">
           {crudError && (
             <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded" role="alert">
@@ -338,8 +337,7 @@ const EquipmentForm: React.FC<EquipmentFormProps> = ({ equipment, onSave, onCanc
             </button>
           </div>
         </form>
-      </div>
-    </div>
+    </Modal>
   );
 };
 
