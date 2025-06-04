@@ -5,8 +5,10 @@ import React, { useState, useEffect } from 'react';
 import { MaintenanceRecordFormData } from '../types';
 import { useMaintenanceRecords } from '../context/MaintenanceRecordContext'; // To get equipment list
 import { useCrud } from '../context/CrudContext'; // To get loading state from CRUD operations
-import { Save, X, Loader2, Package, CalendarDays, Wrench, User, IndianRupee, Info, ChevronDown } from 'lucide-react';
+import { Save, X, Loader2, Wrench, ChevronDown } from 'lucide-react';
 import Modal from './ui/Modal';
+import MaintenanceRecordInfo from './maintenance/MaintenanceRecordInfo';
+import MaintenanceRecordExtra from './maintenance/MaintenanceRecordExtra';
 
 interface MaintenanceRecordFormProps {
   record?: MaintenanceRecordFormData; // For editing
@@ -180,50 +182,17 @@ const MaintenanceRecordForm: React.FC<MaintenanceRecordFormProps> = ({
             </div>
           )}
 
+          <MaintenanceRecordInfo
+            formData={formData}
+            formErrors={formErrors}
+            equipmentList={equipmentListForFilter}
+            loadingEquipment={loadingEquipmentList}
+            handleChange={handleGenericChange}
+            inputClass={inputClass}
+            labelClass={labelClass}
+          />
+
           <fieldset className="grid grid-cols-1 gap-y-6 gap-x-4 md:grid-cols-2">
-            <div>
-              <label htmlFor="equipment_id" className={labelClass}>Equipment <span className="text-red-500">*</span></label>
-              <div className="mt-1 relative rounded-md shadow-sm">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  {loadingEquipmentList ? <Loader2 className={`${iconClass} animate-spin`} /> : <Package className={iconClass} />}
-                </div>
-                <select
-                  id="equipment_id"
-                  name="equipment_id"
-                  value={formData.equipment_id}
-                  onChange={handleGenericChange} // Correctly uses the updated handleGenericChange
-                  required
-                  disabled={loadingEquipmentList}
-                  className={`${inputClass} pl-10`}
-                >
-                  <option value="">{loadingEquipmentList ? 'Loading Equipment...' : 'Select Equipment'}</option>
-                  {!loadingEquipmentList && equipmentListForFilter.map(equipment => (
-                    <option key={equipment.equipment_id} value={String(equipment.equipment_id)}>
-                      {equipment.equipment_name} ({equipment.serial_number || 'N/A'})
-                    </option>
-                  ))}
-                </select>
-              </div>
-              {formErrors.equipment_id && <p className="text-xs text-red-500 mt-1">{formErrors.equipment_id}</p>}
-            </div>
-
-            <div>
-              <label htmlFor="maintenance_date" className={labelClass}>Maintenance Date <span className="text-red-500">*</span></label>
-              <div className="mt-1 relative rounded-md shadow-sm">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><CalendarDays className={iconClass} /></div>
-                <input
-                  type="date"
-                  id="maintenance_date"
-                  name="maintenance_date"
-                  value={formData.maintenance_date}
-                  onChange={handleGenericChange}
-                  required
-                  className={`${inputClass} pl-10`}
-                />
-              </div>
-              {formErrors.maintenance_date && <p className="text-xs text-red-500 mt-1">{formErrors.maintenance_date}</p>}
-            </div>
-
             {/* Maintenance Type Dropdown and Custom Input */}
             <div className="md:col-span-2">
               <label htmlFor="maintenance_type_dropdown" className={labelClass}>Maintenance Type</label>
@@ -265,57 +234,15 @@ const MaintenanceRecordForm: React.FC<MaintenanceRecordFormProps> = ({
                 </div>
               )}
             </div>
-
-
-            <div>
-              <label htmlFor="technician" className={labelClass}>Technician</label>
-              <div className="mt-1 relative rounded-md shadow-sm">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><User className={iconClass} /></div>
-                <input
-                  type="text"
-                  id="technician"
-                  name="technician"
-                  value={formData.technician || ''}
-                  onChange={handleGenericChange}
-                  className={`${inputClass} pl-10`}
-                />
-              </div>
-            </div>
-
-            <div className="md:col-span-2">
-              <label htmlFor="cost" className={labelClass}>Cost (₹)</label>
-              <div className="mt-1 relative rounded-md shadow-sm">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><IndianRupee className={iconClass} /></div>
-                <input
-                  type="number"
-                  id="cost"
-                  name="cost"
-                  value={formData.cost || ''}
-                  onChange={handleGenericChange}
-                  step="0.01"
-                  min="0"
-                  placeholder="0.00"
-                  className={`${inputClass} pl-10`}
-                />
-              </div>
-              {formErrors.cost && <p className="text-xs text-red-500 mt-1">{formErrors.cost}</p>}
-            </div>
-
-            <div className="md:col-span-2">
-              <label htmlFor="notes" className={labelClass}>Notes</label>
-               <div className="mt-1 relative rounded-md shadow-sm">
-                <div className="absolute inset-y-0 left-0 top-2 pl-3 flex items-start pointer-events-none"><Info className={iconClass} /></div>
-                <textarea
-                    id="notes"
-                    name="notes"
-                    value={formData.notes || ''}
-                    onChange={handleGenericChange}
-                    rows={3}
-                    className={`${inputClass} pl-10`}
-                ></textarea>
-              </div>
-            </div>
           </fieldset>
+
+          <MaintenanceRecordExtra
+            formData={formData}
+            formErrors={formErrors}
+            handleChange={handleGenericChange}
+            inputClass={inputClass}
+            labelClass={labelClass}
+          />
 
           <div className="flex justify-end items-center pt-6 border-t border-light-gray-200 mt-auto">
             <button
