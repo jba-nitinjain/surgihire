@@ -78,15 +78,6 @@ const CustomerCard: React.FC<CustomerCardProps> = ({ customer, onClick, onEdit, 
               >
                 <Edit3 size={20} />
               </button>
-              {onViewRentals && (
-                <button
-                  onClick={(e) => { e.stopPropagation(); onViewRentals(String(customer.customer_id)); }}
-                  className="p-1 text-green-600 hover:text-green-700 rounded-full hover:bg-light-gray-100"
-                  aria-label="View Rentals"
-                >
-                  <CalendarCheck2 size={20} />
-                </button>
-              )}
               <button
                 onClick={handleDeleteClick}
                 disabled={crudLoading}
@@ -141,6 +132,16 @@ const CustomerCard: React.FC<CustomerCardProps> = ({ customer, onClick, onEdit, 
             </div>
           </div>
         </div>
+        {onViewRentals && Number(customer.has_active_rentals) > 0 && (
+          <div className="px-6 py-3 border-t border-light-gray-100 flex justify-end">
+            <button
+              onClick={(e) => { e.stopPropagation(); onViewRentals(String(customer.customer_id)); }}
+              className="text-brand-blue border border-brand-blue text-xs px-2 py-1 rounded hover:bg-brand-blue/10"
+            >
+              View Rentals
+            </button>
+          </div>
+        )}
       </div>
 
       <ConfirmationModal
