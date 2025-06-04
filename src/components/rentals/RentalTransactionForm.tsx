@@ -90,6 +90,85 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
 
   const isEditing = !!rental;
 
+  // Debounce utility
+  const debounce = <F extends (...args: any[]) => any>(func: F, waitFor: number) => {
+    let timeout: ReturnType<typeof setTimeout> | null = null;
+    return (...args: Parameters<F>): Promise<ReturnType<F>> =>
+      new Promise(resolve => {
+        if (timeout) {
+          clearTimeout(timeout);
+        }
+        timeout = setTimeout(() => resolve(func(...args)), waitFor);
+      });
+  };
+
+  const fetchPincodeDetails = useCallback(
+    async (pincode: string, type: 'shipping' | 'billing') => {
+      const setLoading = type === 'shipping' ? setShippingPincodeDetailsLoading : setBillingPincodeDetailsLoading;
+      const setError = type === 'shipping' ? setShippingPincodeError : setBillingPincodeError;
+      const setAreaOptionsFunc = type === 'shipping' ? setShippingAreaOptions : setBillingAreaOptions;
+      const setIsAreaSelectFunc = type === 'shipping' ? setShippingIsAreaSelect : setBillingIsAreaSelect;
+
+      if (pincode.length !== 6 || !/^\d{6}$/.test(pincode)) {
+        setError(null);
+        setFormData(prev => ({
+          ...prev,
+          [`${type}_area`]: '',
+          [`${type}_city`]: '',
+          [`${type}_state`]: '',
+        }));
+        setAreaOptionsFunc([]);
+        setIsAreaSelectFunc(false);
+        return;
+      }
+
+      setLoading(true);
+      setError(null);
+      setAreaOptionsFunc([]);
+      setIsAreaSelectFunc(false);
+
+      try {
+        const response = await fetch(`https://api.postalpincode.in/pincode/${pincode}`);
+        const data: PincodeApiResponse = await response.json();
+
+        if (data && data[0] && data[0].Status === 'Success' && data[0].PostOffice && data[0].PostOffice.length > 0) {
+          const postOffices = data[0].PostOffice as PostOffice[];
+          const firstPostOffice = postOffices[0];
+
+          setFormData(prev => ({
+            ...prev,
+            [`${type}_city`]: firstPostOffice.District || '',
+            [`${type}_state`]: firstPostOffice.State || '',
+            [`${type}_area`]: postOffices.length === 1 ? firstPostOffice.Name || '' : '',
+          }));
+
+          if (postOffices.length > 1) {
+            setAreaOptionsFunc(postOffices.map(po => ({ value: po.Name, label: po.Name })));
+            setIsAreaSelectFunc(true);
+          } else {
+            setIsAreaSelectFunc(false);
+          }
+        } else if (data && data[0] && (data[0].Status === 'Error' || data[0].Status === '404' || !data[0].PostOffice || data[0].PostOffice.length === 0)) {
+          setError(data[0].Message || 'Pincode not found or no post offices listed.');
+          setFormData(prev => ({ ...prev, [`${type}_city`]: '', [`${type}_state`]: '', [`${type}_area`]: '' }));
+        } else {
+          setError('Invalid response from pincode API.');
+          setFormData(prev => ({ ...prev, [`${type}_city`]: '', [`${type}_state`]: '', [`${type}_area`]: '' }));
+        }
+      } catch (err) {
+        console.error('Pincode API error:', err);
+        setError('Failed to fetch pincode details. Check network connection.');
+        setFormData(prev => ({ ...prev, [`${type}_city`]: '', [`${type}_state`]: '', [`${type}_area`]: '' }));
+      } finally {
+        setLoading(false);
+      }
+    },
+    []
+  );
+
+  const debouncedFetchPincodeDetails = useCallback(debounce(fetchPincodeDetails, 700), [fetchPincodeDetails]);
+
+
   useEffect(() => {
     if (customers.length === 0 && !loadingCustomers) fetchCustomersForSelection();
     if (paymentPlans.length === 0 && !loadingPaymentPlans) refreshPaymentPlans();
@@ -328,83 +407,6 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
     }));
   };
 
-  // Debounce utility
-  const debounce = <F extends (...args: any[]) => any>(func: F, waitFor: number) => {
-    let timeout: ReturnType<typeof setTimeout> | null = null;
-    return (...args: Parameters<F>): Promise<ReturnType<F>> =>
-      new Promise(resolve => {
-        if (timeout) {
-          clearTimeout(timeout);
-        }
-        timeout = setTimeout(() => resolve(func(...args)), waitFor);
-      });
-  };
-
-  const fetchPincodeDetails = useCallback(
-    async (pincode: string, type: 'shipping' | 'billing') => {
-      const setLoading = type === 'shipping' ? setShippingPincodeDetailsLoading : setBillingPincodeDetailsLoading;
-      const setError = type === 'shipping' ? setShippingPincodeError : setBillingPincodeError;
-      const setAreaOptionsFunc = type === 'shipping' ? setShippingAreaOptions : setBillingAreaOptions;
-      const setIsAreaSelectFunc = type === 'shipping' ? setShippingIsAreaSelect : setBillingIsAreaSelect;
-
-      if (pincode.length !== 6 || !/^\d{6}$/.test(pincode)) {
-        setError(null);
-        setFormData(prev => ({
-          ...prev,
-          [`${type}_area`]: '',
-          [`${type}_city`]: '',
-          [`${type}_state`]: '',
-        }));
-        setAreaOptionsFunc([]);
-        setIsAreaSelectFunc(false);
-        return;
-      }
-
-      setLoading(true);
-      setError(null);
-      setAreaOptionsFunc([]);
-      setIsAreaSelectFunc(false);
-
-      try {
-        const response = await fetch(`https://api.postalpincode.in/pincode/${pincode}`);
-        const data: PincodeApiResponse = await response.json();
-
-        if (data && data[0] && data[0].Status === 'Success' && data[0].PostOffice && data[0].PostOffice.length > 0) {
-          const postOffices = data[0].PostOffice as PostOffice[];
-          const firstPostOffice = postOffices[0];
-
-          setFormData(prev => ({
-            ...prev,
-            [`${type}_city`]: firstPostOffice.District || '',
-            [`${type}_state`]: firstPostOffice.State || '',
-            [`${type}_area`]: postOffices.length === 1 ? firstPostOffice.Name || '' : '',
-          }));
-
-          if (postOffices.length > 1) {
-            setAreaOptionsFunc(postOffices.map(po => ({ value: po.Name, label: po.Name })));
-            setIsAreaSelectFunc(true);
-          } else {
-            setIsAreaSelectFunc(false);
-          }
-        } else if (data && data[0] && (data[0].Status === 'Error' || data[0].Status === '404' || !data[0].PostOffice || data[0].PostOffice.length === 0)) {
-          setError(data[0].Message || 'Pincode not found or no post offices listed.');
-          setFormData(prev => ({ ...prev, [`${type}_city`]: '', [`${type}_state`]: '', [`${type}_area`]: '' }));
-        } else {
-          setError('Invalid response from pincode API.');
-          setFormData(prev => ({ ...prev, [`${type}_city`]: '', [`${type}_state`]: '', [`${type}_area`]: '' }));
-        }
-      } catch (err) {
-        console.error('Pincode API error:', err);
-        setError('Failed to fetch pincode details. Check network connection.');
-        setFormData(prev => ({ ...prev, [`${type}_city`]: '', [`${type}_state`]: '', [`${type}_area`]: '' }));
-      } finally {
-        setLoading(false);
-      }
-    },
-    []
-  );
-
-  const debouncedFetchPincodeDetails = useCallback(debounce(fetchPincodeDetails, 700), [fetchPincodeDetails]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
