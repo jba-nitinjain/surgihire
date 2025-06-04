@@ -172,7 +172,7 @@ const EquipmentForm: React.FC<EquipmentFormProps> = ({ equipment, onSave, onCanc
   const iconClass = "h-5 w-5 text-gray-400 mr-2";
 
   return (
-    <div className="bg-white rounded-lg shadow max-w-3xl mx-auto">
+    <div className="bg-white rounded-lg shadow w-full mx-auto">
       <div className="flex justify-between items-center p-4 border-b border-light-gray-200">
         <h2 className="text-xl font-semibold text-brand-blue flex items-center">
           <Package className="h-6 w-6 mr-2 text-brand-blue" />

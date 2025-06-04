@@ -212,7 +212,7 @@ const CustomerDetail: React.FC<CustomerDetailProps> = ({ customer, onClose, onEd
         {content}
       </Modal>
     ) : (
-      <div className="max-w-3xl mx-auto bg-white rounded-lg shadow">{content}</div>
+      <div className="w-full mx-auto bg-white rounded-lg shadow">{content}</div>
     )
   );
 };
