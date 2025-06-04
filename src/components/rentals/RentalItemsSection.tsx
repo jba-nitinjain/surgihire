@@ -2,6 +2,7 @@ import React from 'react';
 import { RentalItemFormData, Equipment as EquipmentType } from '../../types';
 import { Trash2, PackagePlus } from 'lucide-react';
 import { formatCurrency } from '../../utils/formatting';
+import { TextField, SelectField } from '../ui/FormField';
 
 interface Props {
   items: RentalItemFormData[];
@@ -11,7 +12,6 @@ interface Props {
   handleItemChange: (index: number, field: keyof RentalItemFormData, value: string) => void;
   removeItem: (index: number) => void;
   addItem: () => void;
-  inputClass: string;
   labelClass: string;
 }
 
@@ -23,7 +23,6 @@ const RentalItemsSection: React.FC<Props> = ({
   handleItemChange,
   removeItem,
   addItem,
-  inputClass,
   labelClass,
 }) => (
   <fieldset>
@@ -45,11 +44,11 @@ const RentalItemsSection: React.FC<Props> = ({
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             <div className="md:col-span-2">
               <label htmlFor={`item_equipment_${index}`} className={`${labelClass} text-xs`}>Equipment <span className="text-red-500">*</span></label>
-              <select
+              <SelectField
                 id={`item_equipment_${index}`}
                 value={item.equipment_id}
                 onChange={(e) => handleItemChange(index, 'equipment_id', e.target.value)}
-                className={`${inputClass} text-xs py-1.5`}
+                className="text-xs py-1.5"
                 disabled={loadingEquipment}
               >
                 <option value="">{loadingEquipment ? 'Loading...' : 'Select Equipment'}</option>
@@ -58,29 +57,29 @@ const RentalItemsSection: React.FC<Props> = ({
                     {eq.equipment_name} (SN: {eq.serial_number || 'N/A'}) - Rate: {formatCurrency(eq.rental_rate)}
                   </option>
                 ))}
-              </select>
+              </SelectField>
               {formErrors[`rental_items.${index}.equipment_id`] && <p className="text-xs text-red-500 mt-1">{formErrors[`rental_items.${index}.equipment_id`]}</p>}
             </div>
             <div>
               <label htmlFor={`item_quantity_${index}`} className={`${labelClass} text-xs`}>Quantity <span className="text-red-500">*</span></label>
-              <input
+              <TextField
                 type="number"
                 id={`item_quantity_${index}`}
                 value={item.quantity}
                 onChange={(e) => handleItemChange(index, 'quantity', e.target.value)}
-                className={`${inputClass} text-xs py-1.5`}
+                className="text-xs py-1.5"
                 min="1"
               />
                {formErrors[`rental_items.${index}.quantity`] && <p className="text-xs text-red-500 mt-1">{formErrors[`rental_items.${index}.quantity`]}</p>}
             </div>
             <div>
               <label htmlFor={`item_rate_${index}`} className={`${labelClass} text-xs`}>Unit Rate (₹/day) <span className="text-red-500">*</span></label>
-              <input
+              <TextField
                 type="number"
                 id={`item_rate_${index}`}
                 value={item.unit_rental_rate}
                 onChange={(e) => handleItemChange(index, 'unit_rental_rate', e.target.value)}
-                className={`${inputClass} text-xs py-1.5`}
+                className="text-xs py-1.5"
                 step="0.01"
                 min="0"
                 placeholder={item.default_equipment_rate !== null ? String(item.default_equipment_rate) : '0.00'}

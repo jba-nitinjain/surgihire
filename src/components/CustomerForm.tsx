@@ -215,7 +215,6 @@ const CustomerForm: React.FC<CustomerFormProps> = ({ customer, onSave, onCancel 
   }, [formData.shipping_pincode, debouncedFetchPincodeDetails]);
 
 
-  const inputClass = "mt-1 block w-full px-3 py-2 bg-white border border-light-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-brand-blue focus:border-brand-blue sm:text-sm";
   const labelClass = "block text-sm font-medium text-dark-text";
 
   return (
@@ -236,7 +235,6 @@ const CustomerForm: React.FC<CustomerFormProps> = ({ customer, onSave, onCancel 
             formData={formData}
             formErrors={formErrors}
             handleChange={handleChange}
-            inputClass={inputClass}
             labelClass={labelClass}
           />
 
@@ -248,7 +246,6 @@ const CustomerForm: React.FC<CustomerFormProps> = ({ customer, onSave, onCancel 
             pincodeError={pincodeError}
             areaOptions={areaOptions}
             isAreaSelect={isAreaSelect}
-            inputClass={inputClass}
             labelClass={labelClass}
           />
           
