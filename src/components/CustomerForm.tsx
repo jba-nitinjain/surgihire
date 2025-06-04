@@ -1,10 +1,11 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { Customer, CustomerFormData, PincodeApiResponse, PostOffice } from '../types';
+import React, { useState, useEffect } from 'react';
+import { Customer, CustomerFormData } from '../types';
 import { useCrud } from '../context/CrudContext';
 import { Save, X, Loader2 } from 'lucide-react';
 import Modal from './ui/Modal';
 import CustomerPersonalInfoSection from './customers/CustomerPersonalInfoSection';
 import CustomerShippingInfoSection from './customers/CustomerShippingInfoSection';
+import usePincodeLookup from '../utils/usePincodeLookup';
 
 interface CustomerFormProps {
   customer?: Customer | null; // For editing, null/undefined for creating
@@ -30,11 +31,14 @@ const CustomerForm: React.FC<CustomerFormProps> = ({ customer, onSave, onCancel 
   const [formErrors, setFormErrors] = useState<Partial<Record<keyof CustomerFormData, string>>>({});
   const { createItem, updateItem, loading: crudLoading, error: crudError } = useCrud();
 
-  // State for pincode lookup
-  const [pincodeDetailsLoading, setPincodeDetailsLoading] = useState(false);
-  const [pincodeError, setPincodeError] = useState<string | null>(null);
-  const [areaOptions, setAreaOptions] = useState<{ value: string; label: string }[]>([]);
-  const [isAreaSelect, setIsAreaSelect] = useState(false);
+  const {
+    loading: pincodeDetailsLoading,
+    error: pincodeError,
+    areaOptions,
+    city: pincodeCity,
+    state: pincodeState,
+    isAreaSelect,
+  } = usePincodeLookup(formData.shipping_pincode);
 
   useEffect(() => {
     if (customer) {
@@ -54,10 +58,10 @@ const CustomerForm: React.FC<CustomerFormProps> = ({ customer, onSave, onCancel 
       // This might require re-fetching pincode details if area options are not stored,
       // or assuming that if shipping_area is set, it was correctly chosen.
       // For simplicity, we'll let it be a text input on edit unless pincode is changed.
-      setIsAreaSelect(false); 
+      // area selection will be determined by pincode lookup
     } else {
       setFormData(initialFormData);
-      setIsAreaSelect(false);
+      // area selection will be determined by pincode lookup
     }
   }, [customer]);
 
@@ -99,9 +103,6 @@ const CustomerForm: React.FC<CustomerFormProps> = ({ customer, onSave, onCancel 
             shipping_state: '',
             [name]: value // ensure pincode itself is updated
         }));
-        setIsAreaSelect(false);
-        setAreaOptions([]);
-        setPincodeError(null);
     }
   };
 
@@ -131,88 +132,29 @@ const CustomerForm: React.FC<CustomerFormProps> = ({ customer, onSave, onCancel 
     }
   };
 
-  // Debounce function
-  const debounce = <F extends (...args: any[]) => any>(func: F, waitFor: number) => {
-    let timeout: ReturnType<typeof setTimeout> | null = null;
-    return (...args: Parameters<F>): Promise<ReturnType<F>> =>
-      new Promise(resolve => {
-        if (timeout) {
-          clearTimeout(timeout);
-        }
-        timeout = setTimeout(() => resolve(func(...args)), waitFor);
-      });
-  };
-
-  const fetchPincodeDetails = useCallback(async (pincode: string) => {
-    if (pincode.length !== 6 || !/^\d{6}$/.test(pincode)) {
-      setPincodeError(null); // Clear error if not a 6 digit pincode
-      setFormData(prev => ({
-        ...prev,
-        shipping_area: prev.shipping_pincode === pincode ? prev.shipping_area : '', // Keep area if pincode hasn't changed from what caused options
-        shipping_city: '',
-        shipping_state: '',
-      }));
-      setIsAreaSelect(false);
-      setAreaOptions([]);
-      return;
-    }
-
-    setPincodeDetailsLoading(true);
-    setPincodeError(null);
-    setAreaOptions([]);
-    setIsAreaSelect(false);
-
-    try {
-      const response = await fetch(`https://api.postalpincode.in/pincode/${pincode}`);
-      const data: PincodeApiResponse = await response.json();
-
-      if (data && data[0] && data[0].Status === 'Success' && data[0].PostOffice && data[0].PostOffice.length > 0) {
-        const postOffices = data[0].PostOffice;
-        const firstPostOffice = postOffices[0];
-        
-        setFormData(prev => ({
-          ...prev,
-          shipping_city: firstPostOffice.District || '',
-          shipping_state: firstPostOffice.State || '',
-          // Set area if only one option, otherwise clear for selection
-          shipping_area: postOffices.length === 1 ? firstPostOffice.Name || '' : '', 
-        }));
-
-        if (postOffices.length > 1) {
-          setAreaOptions(postOffices.map(po => ({ value: po.Name, label: po.Name })));
-          setIsAreaSelect(true);
-        } else {
-          setIsAreaSelect(false);
-        }
-      } else if (data && data[0] && (data[0].Status === 'Error' || data[0].Status === '404' || !data[0].PostOffice || data[0].PostOffice.length === 0) ) {
-        setPincodeError(data[0].Message || 'Pincode not found or no post offices listed.');
-         setFormData(prev => ({ ...prev, shipping_city: '', shipping_state: '', shipping_area: '' }));
-      } else {
-        setPincodeError('Invalid response from pincode API.');
-        setFormData(prev => ({ ...prev, shipping_city: '', shipping_state: '', shipping_area: '' }));
-      }
-    } catch (err) {
-      console.error("Pincode API error:", err);
-      setPincodeError('Failed to fetch pincode details. Check network connection.');
-      setFormData(prev => ({ ...prev, shipping_city: '', shipping_state: '', shipping_area: '' }));
-    } finally {
-      setPincodeDetailsLoading(false);
-    }
-  }, []); // No dependencies, it's a stable function
-
-  const debouncedFetchPincodeDetails = useCallback(debounce(fetchPincodeDetails, 700), [fetchPincodeDetails]);
-
   useEffect(() => {
-    if (formData.shipping_pincode && formData.shipping_pincode.length === 6) {
-      debouncedFetchPincodeDetails(formData.shipping_pincode);
-    } else {
-      // Clear suggestions if pincode is not 6 digits
-      setAreaOptions([]);
-      setIsAreaSelect(false);
-      // Optionally clear city/state if pincode is incomplete/invalid
-      // setFormData(prev => ({ ...prev, shipping_city: '', shipping_state: '' }));
-    }
-  }, [formData.shipping_pincode, debouncedFetchPincodeDetails]);
+    setFormData(prev => {
+      let area = prev.shipping_area;
+      if (areaOptions.length === 1 && !isAreaSelect) {
+        area = areaOptions[0].value;
+      } else if (areaOptions.length === 0) {
+        area = '';
+      }
+      if (
+        prev.shipping_city === pincodeCity &&
+        prev.shipping_state === pincodeState &&
+        prev.shipping_area === area
+      ) {
+        return prev;
+      }
+      return {
+        ...prev,
+        shipping_city: pincodeCity,
+        shipping_state: pincodeState,
+        shipping_area: area,
+      };
+    });
+  }, [pincodeCity, pincodeState, areaOptions, isAreaSelect]);
 
 
   const inputClass = "mt-1 block w-full px-3 py-2 bg-white border border-light-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-brand-blue focus:border-brand-blue sm:text-sm";
