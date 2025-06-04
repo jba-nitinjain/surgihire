@@ -3,7 +3,7 @@ import { useEquipment } from '../../context/EquipmentContext';
 import { useEquipmentCategories } from '../../context/EquipmentCategoryContext';
 import { getEquipmentItem } from '../../services/api/equipment'; // Import for fetching single equipment
 import EquipmentList from '../EquipmentList';
-import EquipmentForm from '../EquipmentForm';
+import { useNavigate } from 'react-router-dom';
 import EquipmentDetail from '../EquipmentDetail';
 import EquipmentFilterPanel from './EquipmentFilterPanel';
 import { PlusCircle } from 'lucide-react';
@@ -26,7 +26,6 @@ const EquipmentTab: React.FC<EquipmentTabProps> = ({
     equipmentList, // Use the list from context
     searchQuery: equipmentSearchQuery,
     setSearchQuery: setEquipmentSearchQuery,
-    refreshEquipmentData,
     filters: equipmentFilters,
     setFilters: setEquipmentFilters,
     loading: equipmentListLoading, // Loading state for the list
@@ -41,8 +40,7 @@ const EquipmentTab: React.FC<EquipmentTabProps> = ({
   } = useEquipmentCategories();
 
   const [selectedEquipment, setSelectedEquipment] = useState<Equipment | null>(null);
-  const [isEquipmentFormOpen, setIsEquipmentFormOpen] = useState(false);
-  const [editingEquipment, setEditingEquipment] = useState<Equipment | null>(null);
+  const navigate = useNavigate();
   const [detailLoading, setDetailLoading] = useState(false); // Loading state for single equipment detail
 
   useEffect(() => {
@@ -86,8 +84,6 @@ const EquipmentTab: React.FC<EquipmentTabProps> = ({
 
   const handleSelectEquipmentForDetail = (equipment: Equipment) => {
     setSelectedEquipment(equipment);
-    setIsEquipmentFormOpen(false);
-    setEditingEquipment(null);
   };
 
   const handleCloseEquipmentDetail = () => {
@@ -95,25 +91,13 @@ const EquipmentTab: React.FC<EquipmentTabProps> = ({
   };
 
   const handleOpenEquipmentFormForCreate = () => {
-    setEditingEquipment(null);
     setSelectedEquipment(null);
-    setIsEquipmentFormOpen(true);
+    navigate('/equipment/new');
   };
 
   const handleOpenEquipmentFormForEdit = (item: Equipment) => {
-    setEditingEquipment(item);
     setSelectedEquipment(null);
-    setIsEquipmentFormOpen(true);
-  };
-
-  const handleCloseEquipmentForm = () => {
-    setIsEquipmentFormOpen(false);
-    setEditingEquipment(null);
-  };
-
-  const handleSaveEquipmentForm = () => {
-    handleCloseEquipmentForm();
-    refreshEquipmentData();
+    navigate(`/equipment/${item.equipment_id}/edit`, { state: { equipment: item } });
   };
 
   if (detailLoading) {
@@ -148,14 +132,7 @@ const EquipmentTab: React.FC<EquipmentTabProps> = ({
         onViewDetail={handleSelectEquipmentForDetail}
       />
 
-      {isEquipmentFormOpen && (
-        <EquipmentForm
-          equipment={editingEquipment}
-          onSave={handleSaveEquipmentForm}
-          onCancel={handleCloseEquipmentForm}
-        />
-      )}
-      {selectedEquipment && !isEquipmentFormOpen && (
+      {selectedEquipment && (
         <EquipmentDetail
           equipment={selectedEquipment}
           categoryName={getCategoryNameById(selectedEquipment.category_id)}

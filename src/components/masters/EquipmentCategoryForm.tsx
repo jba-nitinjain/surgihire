@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { EquipmentCategory, EquipmentCategoryFormData } from '../../types';
 import { useCrud } from '../../context/CrudContext';
 import { Save, X, Loader2, Tag, Info } from 'lucide-react';
-import Modal from '../ui/Modal';
 
 interface EquipmentCategoryFormProps {
   category?: EquipmentCategory | null;
@@ -78,16 +77,16 @@ const EquipmentCategoryForm: React.FC<EquipmentCategoryFormProps> = ({ category,
 
 
   return (
-    <Modal
-      title={(
-        <span className="flex items-center">
+    <div className="bg-white rounded-lg shadow max-w-lg mx-auto">
+      <div className="flex justify-between items-center p-4 border-b border-light-gray-200">
+        <h2 className="text-xl font-semibold text-brand-blue flex items-center">
           <Tag className="h-6 w-6 mr-2 text-brand-blue" />
           {category ? 'Edit Equipment Category' : 'Add New Equipment Category'}
-        </span>
-      )}
-      widthClasses="max-w-lg"
-      onClose={onCancel}
-    >
+        </h2>
+        <button onClick={onCancel} className="p-2 rounded-full hover:bg-light-gray-100">
+          <X className="h-5 w-5 text-dark-text" />
+        </button>
+      </div>
         <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-6 overflow-y-auto">
           {crudError && (
             <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded" role="alert">
@@ -136,7 +135,7 @@ const EquipmentCategoryForm: React.FC<EquipmentCategoryFormProps> = ({ category,
             </button>
           </div>
         </form>
-    </Modal>
+    </div>
   );
 };
 
