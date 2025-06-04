@@ -3,7 +3,7 @@ import { useRentalTransactions } from '../../context/RentalTransactionContext';
 import RentalTransactionList from '../rentals/RentalTransactionList';
 // import RentalTransactionDetail from '../rentals/RentalTransactionDetail'; // Keep commented if not yet implemented
 import SearchBox from '../ui/SearchBox';
-import { PlusCircle } from 'lucide-react'; // Unused icons like Filter, CalendarIcon removed
+import { PlusCircle, ArrowLeft } from 'lucide-react'; // Unused icons like Filter, CalendarIcon removed
 import { RentalTransaction } from '../../types';
 import { useNavigate, useLocation } from 'react-router-dom';
 
@@ -24,6 +24,7 @@ const RentalsTab: React.FC = () => {
   } = useRentalTransactions();
 
   const navigate = useNavigate();
+  const [fromPath, setFromPath] = useState<string | null>(null);
   // const [selectedRental, setSelectedRental] = useState<RentalTransaction | null>(null); // For detail view
 
   useEffect(() => {
@@ -32,12 +33,13 @@ const RentalsTab: React.FC = () => {
     }
   }, [customersForFilter.length, loadingCustomers, fetchCustomersForSelection]);
 
-  const location = useLocation() as { state?: { customerId?: string } };
+  const location = useLocation() as { state?: { customerId?: string; from?: string } };
 
   useEffect(() => {
     if (location.state?.customerId) {
       setFilters({ customer_id: location.state.customerId, status: null });
       setSearchQuery('');
+      setFromPath(location.state.from || null);
       navigate('/rentals', { replace: true });
     }
   }, [location.state, setFilters, setSearchQuery, navigate]);
@@ -63,6 +65,14 @@ const RentalsTab: React.FC = () => {
 
   return (
     <>
+      {fromPath && (
+        <button
+          onClick={() => navigate(fromPath)}
+          className="mb-4 flex items-center text-brand-blue"
+        >
+          <ArrowLeft className="h-4 w-4 mr-1" /> Back
+        </button>
+      )}
       {/* Filter UI */}
       <div className="mb-6 p-4 bg-white rounded-lg shadow">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">

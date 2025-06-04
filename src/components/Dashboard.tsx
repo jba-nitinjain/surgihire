@@ -85,11 +85,11 @@ const Dashboard: React.FC<DashboardProps> = ({ sidebarOpen, setSidebarOpen }) =>
   };
 
   const handleViewMaintenanceForEquipment = (equipmentId: string) => {
-    navigate('/maintenance', { state: { equipmentId } });
+    navigate('/maintenance', { state: { equipmentId, from: location.pathname } });
   };
 
   const handleViewRentalsForCustomer = (customerId: string) => {
-    navigate('/rentals', { state: { customerId } });
+    navigate('/rentals', { state: { customerId, from: location.pathname } });
   };
 
   useEffect(() => {

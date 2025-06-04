@@ -32,7 +32,7 @@ const EquipmentDetailPage: React.FC = () => {
   }
 
   const handleViewMaintenance = (equipmentId: string) => {
-    navigate('/', { state: { maintenanceEquipmentId: equipmentId } });
+    navigate('/maintenance', { state: { equipmentId, from: location.pathname } });
   };
 
   return (
