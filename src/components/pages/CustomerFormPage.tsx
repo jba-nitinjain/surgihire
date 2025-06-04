@@ -30,7 +30,7 @@ const CustomerFormPage: React.FC = () => {
     <div className="p-4">
       <CustomerForm
         customer={customer}
-        onSave={() => navigate('/')}
+        onSave={() => navigate('/customers')}
         onCancel={() => navigate(-1)}
       />
     </div>

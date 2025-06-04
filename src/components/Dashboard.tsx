@@ -18,7 +18,7 @@ import MastersTab from './dashboard/MastersTab';
 import MaintenanceTab from './dashboard/MaintenanceTab';
 import RentalsTab from './dashboard/RentalsTab'; // Import new tab component
 import Footer from './Footer';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 
 interface DashboardProps {
   sidebarOpen: boolean;
@@ -26,10 +26,9 @@ interface DashboardProps {
 }
 
 const Dashboard: React.FC<DashboardProps> = ({ sidebarOpen, setSidebarOpen }) => {
+  const navigate = useNavigate();
+  const location = useLocation();
   const [activeTab, setActiveTab] = useState('customers');
-  const [initialMaintenanceEquipmentId, setInitialMaintenanceEquipmentId] = useState<string | null>(null);
-  const [equipmentIdForDetailView, setEquipmentIdForDetailView] = useState<number | null>(null);
-  const [initialRentalCustomerId, setInitialRentalCustomerId] = useState<string | null>(null);
 
   const { refreshData: refreshCustomerData, loading: customersLoading } = useCustomers();
   const { refreshEquipmentData, loading: equipmentLoading } = useEquipment();
@@ -73,38 +72,25 @@ const Dashboard: React.FC<DashboardProps> = ({ sidebarOpen, setSidebarOpen }) =>
   };
 
   const handleNavigateToEquipmentDetail = (equipmentId: number) => {
-    setEquipmentIdForDetailView(equipmentId);
-    setActiveTab('equipment');
-    setInitialMaintenanceEquipmentId(null);
-  };
-
-  const clearEquipmentIdForDetailView = () => {
-    setEquipmentIdForDetailView(null);
+    navigate(`/equipment/${equipmentId}`);
   };
 
   const handleViewMaintenanceForEquipment = (equipmentId: string) => {
-    setInitialMaintenanceEquipmentId(equipmentId);
-    setActiveTab('maintenance');
-    setEquipmentIdForDetailView(null);
+    navigate('/maintenance', { state: { equipmentId } });
   };
 
   const handleViewRentalsForCustomer = (customerId: string) => {
-    setInitialRentalCustomerId(customerId);
-    setActiveTab('rentals');
+    navigate('/rentals', { state: { customerId } });
   };
 
   useEffect(() => {
-    if (activeTab !== 'maintenance' && initialMaintenanceEquipmentId) {
-      setInitialMaintenanceEquipmentId(null);
-    }
-    if (activeTab !== 'equipment' && equipmentIdForDetailView) {
-      // Consider if this auto-clearing is always desired
-      // setEquipmentIdForDetailView(null);
-    }
-    if (activeTab !== 'rentals' && initialRentalCustomerId) {
-      setInitialRentalCustomerId(null);
-    }
-  }, [activeTab, initialMaintenanceEquipmentId, equipmentIdForDetailView, initialRentalCustomerId]);
+    if (location.pathname.startsWith('/equipment')) setActiveTab('equipment');
+    else if (location.pathname.startsWith('/rentals')) setActiveTab('rentals');
+    else if (location.pathname.startsWith('/maintenance')) setActiveTab('maintenance');
+    else if (location.pathname.startsWith('/masters')) setActiveTab('masters');
+    else if (location.pathname.startsWith('/payments')) setActiveTab('payments');
+    else setActiveTab('customers');
+  }, [location.pathname]);
 
   return (
     <div className="min-h-screen bg-light-gray-50 flex">
@@ -122,9 +108,15 @@ const Dashboard: React.FC<DashboardProps> = ({ sidebarOpen, setSidebarOpen }) =>
               <li key={tab.id}>
                 <button
                   onClick={() => {
-                    setActiveTab(tab.id);
-                    if (tab.id !== 'maintenance') setInitialMaintenanceEquipmentId(null);
-                    if (tab.id !== 'equipment') setEquipmentIdForDetailView(null);
+                    const paths: Record<string, string> = {
+                      customers: '/customers',
+                      equipment: '/equipment',
+                      rentals: '/rentals',
+                      maintenance: '/maintenance',
+                      masters: '/masters/equipment-categories',
+                      payments: '/payments',
+                    };
+                    navigate(paths[tab.id] || '/');
                     if (sidebarOpen && window.innerWidth < 768) setSidebarOpen(false);
                   }}
                   className={`w-full flex items-center px-4 py-2 rounded-md transition-colors ${activeTab === tab.id ? 'bg-brand-blue text-white shadow-sm' : 'text-dark-text hover:bg-light-gray-100'}`}
@@ -159,25 +151,14 @@ const Dashboard: React.FC<DashboardProps> = ({ sidebarOpen, setSidebarOpen }) =>
             <CustomerTab onViewRentalsForCustomer={handleViewRentalsForCustomer} />
           )}
           {activeTab === 'equipment' && (
-            <EquipmentTab
-              onViewMaintenanceForEquipment={handleViewMaintenanceForEquipment}
-              initialEquipmentIdToView={equipmentIdForDetailView}
-              clearInitialEquipmentIdToView={clearEquipmentIdForDetailView}
-            />
+            <EquipmentTab onViewMaintenanceForEquipment={handleViewMaintenanceForEquipment} />
           )}
           {activeTab === 'rentals' && (
-            <RentalsTab
-              key={initialRentalCustomerId}
-              initialCustomerIdFilter={initialRentalCustomerId}
-            />
+            <RentalsTab />
           )} {/* Render new RentalsTab */}
           {activeTab === 'masters' && <MastersTab />}
           {activeTab === 'maintenance' && (
-            <MaintenanceTab
-              key={initialMaintenanceEquipmentId}
-              initialEquipmentIdFilter={initialMaintenanceEquipmentId}
-              navigateToEquipmentDetail={handleNavigateToEquipmentDetail}
-            />
+            <MaintenanceTab navigateToEquipmentDetail={handleNavigateToEquipmentDetail} />
           )}
           {activeTab === 'payments' && <div className="text-center p-10 text-gray-500 bg-white rounded-lg shadow">Payments module coming soon.</div>}
         </div>

@@ -2,20 +2,18 @@ import React, { useState, useEffect } from 'react';
 import { useMaintenanceRecords } from '../../context/MaintenanceRecordContext';
 import { useCrud } from '../../context/CrudContext';
 import MaintenanceRecordList from '../MaintenanceRecordList';
-import MaintenanceRecordForm from '../MaintenanceRecordForm';
 import MaintenanceFilterBar from './MaintenanceFilterBar';
 import DeleteMaintenanceModal from './DeleteMaintenanceModal';
 import { PlusCircle, ListChecks } from 'lucide-react';
-import { MaintenanceRecord, MaintenanceRecordFormData } from '../../types';
+import { MaintenanceRecord } from '../../types';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 interface MaintenanceTabProps {
-  initialEquipmentIdFilter?: string | null;
   navigateToEquipmentDetail: (equipmentId: number) => void;
 }
 
 
 const MaintenanceTab: React.FC<MaintenanceTabProps> = ({
-  initialEquipmentIdFilter,
   navigateToEquipmentDetail,
 }) => {
   const {
@@ -30,13 +28,14 @@ const MaintenanceTab: React.FC<MaintenanceTabProps> = ({
     loadingEquipmentList,
   } = useMaintenanceRecords();
 
-  const { createItem, updateItem, deleteItem, loading: crudLoading } = useCrud();
+  const { deleteItem, loading: crudLoading } = useCrud();
 
   const [activeMaintenanceSubTab, setActiveMaintenanceSubTab] = useState('list');
-  const [isMaintenanceFormOpen, setIsMaintenanceFormOpen] = useState(false);
-  const [editingMaintenanceRecord, setEditingMaintenanceRecord] = useState<MaintenanceRecord | null>(null);
   const [recordToDelete, setRecordToDelete] = useState<MaintenanceRecord | null>(null);
   const [isConfirmDeleteModalOpen, setIsConfirmDeleteModalOpen] = useState(false);
+  const navigate = useNavigate();
+
+  const location = useLocation() as { state?: { equipmentId?: string } };
 
   useEffect(() => {
     if (equipmentListForFilter.length === 0 && !loadingEquipmentList) {
@@ -45,53 +44,23 @@ const MaintenanceTab: React.FC<MaintenanceTabProps> = ({
   }, [equipmentListForFilter.length, loadingEquipmentList, fetchEquipmentListForFilter]);
 
   useEffect(() => {
-    if (initialEquipmentIdFilter) {
-      setMaintenanceFilters({ equipment_id: initialEquipmentIdFilter, maintenance_type: null });
+    if (location.state?.equipmentId) {
+      setMaintenanceFilters({ equipment_id: location.state.equipmentId, maintenance_type: null });
       setMaintenanceSearchQuery('');
+      navigate('/maintenance', { replace: true });
     }
-  }, [initialEquipmentIdFilter, setMaintenanceFilters, setMaintenanceSearchQuery]);
+  }, [location.state, setMaintenanceFilters, setMaintenanceSearchQuery, navigate]);
 
   const maintenanceSubTabsData = [
     { id: 'list', label: 'Records List', icon: <ListChecks size={16} /> },
   ];
 
   const handleOpenMaintenanceFormForCreate = () => {
-    setEditingMaintenanceRecord(null);
-    setIsMaintenanceFormOpen(true);
+    navigate('/maintenance/new');
   };
 
   const handleOpenMaintenanceFormForEdit = (record: MaintenanceRecord) => {
-    setEditingMaintenanceRecord(record);
-    setIsMaintenanceFormOpen(true);
-  };
-
-  const handleCloseMaintenanceForm = () => {
-    setIsMaintenanceFormOpen(false);
-    setEditingMaintenanceRecord(null);
-    setActiveMaintenanceSubTab('list');
-  };
-
-  const handleSaveMaintenanceForm = async (data: MaintenanceRecordFormData) => {
-    const apiData: any = {
-      ...data,
-      cost: data.cost ? parseFloat(data.cost) : null,
-      equipment_id: parseInt(String(data.equipment_id), 10),
-    };
-    if (apiData.maintenance_type === '') apiData.maintenance_type = null;
-    if (apiData.technician === '') apiData.technician = null;
-    if (apiData.notes === '') apiData.notes = null;
-
-    try {
-      if (editingMaintenanceRecord && editingMaintenanceRecord.maintenance_id) {
-        await updateItem('maintenance_records', editingMaintenanceRecord.maintenance_id, apiData);
-      } else {
-        await createItem('maintenance_records', apiData);
-      }
-      refreshMaintenanceRecords();
-      handleCloseMaintenanceForm();
-    } catch (error) {
-      console.error("Failed to save maintenance record:", error);
-    }
+    navigate(`/maintenance/${record.maintenance_id}/edit`, { state: { record } });
   };
 
   // Corrected handleDeleteRecordClick to accept recordId
@@ -129,8 +98,6 @@ const MaintenanceTab: React.FC<MaintenanceTabProps> = ({
               key={subTab.id}
               onClick={() => {
                 setActiveMaintenanceSubTab(subTab.id);
-                setIsMaintenanceFormOpen(false);
-                setEditingMaintenanceRecord(null);
               }}
               className={`whitespace-nowrap pb-3 px-1 border-b-2 font-medium text-sm flex items-center
                 ${activeMaintenanceSubTab === subTab.id
@@ -145,7 +112,7 @@ const MaintenanceTab: React.FC<MaintenanceTabProps> = ({
         </nav>
       </div>
 
-      {activeMaintenanceSubTab === 'list' && !isMaintenanceFormOpen && (
+      {activeMaintenanceSubTab === 'list' && (
           <>
             <MaintenanceFilterBar
               searchQuery={maintenanceSearchQuery}
@@ -163,26 +130,10 @@ const MaintenanceTab: React.FC<MaintenanceTabProps> = ({
           </div>
           <MaintenanceRecordList
             onEditRecord={handleOpenMaintenanceFormForEdit}
-            onDeleteRecord={handleDeleteRecordClick} // This now correctly matches the expected signature
+            onDeleteRecord={handleDeleteRecordClick}
             onViewEquipmentDetail={navigateToEquipmentDetail}
           />
         </>
-      )}
-
-      {isMaintenanceFormOpen && (
-        <MaintenanceRecordForm
-          record={editingMaintenanceRecord ? {
-            equipment_id: String(editingMaintenanceRecord.equipment_id),
-            maintenance_date: editingMaintenanceRecord.maintenance_date,
-            maintenance_type: editingMaintenanceRecord.maintenance_type || '',
-            technician: editingMaintenanceRecord.technician || '',
-            cost: editingMaintenanceRecord.cost !== null ? String(editingMaintenanceRecord.cost) : '',
-            notes: editingMaintenanceRecord.notes || '',
-          } : undefined}
-          onSave={handleSaveMaintenanceForm}
-          onCancel={handleCloseMaintenanceForm}
-          isEditMode={!!editingMaintenanceRecord}
-        />
       )}
 
        <DeleteMaintenanceModal
