@@ -87,6 +87,10 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
   const [originalShippingPincode, setOriginalShippingPincode] = useState('');
   const [originalBillingPincode, setOriginalBillingPincode] = useState('');
 
+  // When creating a new rental, user can opt to update the customer's
+  // stored address with the shipping address from this form.
+  const [updateCustomerAddress, setUpdateCustomerAddress] = useState<boolean>(false);
+
   const shouldFetchShipping =
     formData.shipping_pincode !== originalShippingPincode;
   const {
@@ -442,6 +446,19 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
         refreshAvailableEquipment();
       }
 
+      // Update customer's active rental flag and optionally address
+      const customerUpdates: Record<string, any> = {
+        has_active_rentals: EQUIPMENT_RENTAL_STATUSES.includes(apiData.status) ? 1 : 0,
+      };
+      if (!isEditing && updateCustomerAddress) {
+        customerUpdates.shipping_address = apiData.shipping_address || null;
+        customerUpdates.shipping_area = apiData.shipping_area || null;
+        customerUpdates.shipping_city = apiData.shipping_city || null;
+        customerUpdates.shipping_state = apiData.shipping_state || null;
+        customerUpdates.shipping_pincode = apiData.shipping_pincode || null;
+      }
+      await updateItem('customers', apiData.customer_id, customerUpdates);
+
       if (recordPay && newId) {
         refreshRentalTransactions();
         navigate('/payments/new', { state: { payment: { rental_id: newId } } });
@@ -536,6 +553,21 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
             inputClass={inputClass}
             labelClass={labelClass}
           />
+
+          {!isEditing && (
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                id="update_customer_address"
+                checked={updateCustomerAddress}
+                onChange={(e) => setUpdateCustomerAddress(e.target.checked)}
+                className="h-4 w-4 text-brand-blue border-gray-300 rounded"
+              />
+              <label htmlFor="update_customer_address" className="ml-2 text-sm text-dark-text">
+                Update customer with this shipping address
+              </label>
+            </div>
+          )}
 
           <RentalItemsSection
             items={formData.rental_items}
