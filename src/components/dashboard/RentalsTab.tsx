@@ -4,8 +4,8 @@ import RentalTransactionList from '../rentals/RentalTransactionList';
 import RentalTransactionForm from '../rentals/RentalTransactionForm';
 // import RentalTransactionDetail from '../rentals/RentalTransactionDetail'; // Keep commented if not yet implemented
 import SearchBox from '../ui/SearchBox';
-import { PlusCircle } from 'lucide-react';
-import { RentalTransaction } from '../../types';
+import { PlusCircle } from 'lucide-react'; // Unused icons like Filter, CalendarIcon removed
+import { RentalTransaction } from '../../types'; // Unused Customer type import removed
 
 // Define rental statuses for filter dropdown
 const RENTAL_STATUSES = ["Draft", "Pending Confirmation", "Confirmed/Booked", "Active/Rented Out", "Returned/Completed", "Overdue", "Cancelled"];
@@ -131,6 +131,8 @@ const RentalsTab: React.FC = () => {
       </div>
 
       {/* This is the crucial part: RentalTransactionList should only receive props it expects. */}
+      {/* The error message indicates line 142, which is likely where this component is invoked if the file is longer. */}
+      {/* Assuming this is the only invocation of RentalTransactionList in this file. */}
       <RentalTransactionList
         onEditRental={handleOpenRentalFormForEdit}
         // onViewRentalDetail={handleSelectRentalForDetail} // If you implement a detail view
