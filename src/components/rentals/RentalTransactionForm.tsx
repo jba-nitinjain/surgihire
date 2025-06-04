@@ -30,6 +30,7 @@ import {
 import Modal from '../ui/Modal';
 import RentalItemsSection from './RentalItemsSection';
 import { formatCurrency } from '../../utils/formatting'; // Import formatCurrency
+import { TextField, SelectField, TextAreaField } from '../ui/FormField';
 
 const RENTAL_STATUSES_FORM = ["Draft", "Pending Confirmation", "Confirmed/Booked", "Active/Rented Out", "Returned/Completed", "Overdue", "Cancelled"];
 
@@ -476,7 +477,6 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
     }
   };
 
-  const inputClass = "mt-1 block w-full px-3 py-2 bg-white border border-light-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-brand-blue focus:border-brand-blue sm:text-sm disabled:bg-light-gray-100";
   const labelClass = "block text-sm font-medium text-dark-text";
   const iconClass = "h-5 w-5 text-gray-400";
 
@@ -507,23 +507,23 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   {loadingCustomers ? <Loader2 className={`${iconClass} animate-spin`} /> : <User className={iconClass} />}
                 </div>
-                <select name="customer_id" id="customer_id" value={formData.customer_id} onChange={handleChange} className={`${inputClass} pl-10`} required disabled={loadingCustomers}>
+                <SelectField name="customer_id" id="customer_id" value={formData.customer_id} onChange={handleChange} className="pl-10" required disabled={loadingCustomers}>
                   <option value="">{loadingCustomers ? "Loading..." : "Select Customer"}</option>
                   {customers.map((c: CustomerType) => <option key={c.customer_id} value={c.customer_id}>{c.full_name}</option>)}
-                </select>
+                </SelectField>
               </div>
               {formErrors.customer_id && <p className="text-xs text-red-500 mt-1">{formErrors.customer_id}</p>}
             </div>
 
             <div>
               <label htmlFor="rental_date" className={labelClass}>Rental Date <span className="text-red-500">*</span></label>
-              <input type="date" name="rental_date" id="rental_date" value={formData.rental_date} onChange={handleChange} className={inputClass} required />
+              <TextField type="date" name="rental_date" id="rental_date" value={formData.rental_date} onChange={handleChange} required />
               {formErrors.rental_date && <p className="text-xs text-red-500 mt-1">{formErrors.rental_date}</p>}
             </div>
 
             <div>
               <label htmlFor="expected_return_date" className={labelClass}>Expected Return Date <span className="text-red-500">*</span></label>
-              <input type="date" name="expected_return_date" id="expected_return_date" value={formData.expected_return_date || ''} onChange={handleChange} className={inputClass} required />
+              <TextField type="date" name="expected_return_date" id="expected_return_date" value={formData.expected_return_date || ''} onChange={handleChange} required />
               {formErrors.expected_return_date && <p className="text-xs text-red-500 mt-1">{formErrors.expected_return_date}</p>}
             </div>
              <div>
@@ -538,9 +538,9 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
               <label htmlFor="status" className={labelClass}>Status <span className="text-red-500">*</span></label>
                <div className="mt-1 relative rounded-md shadow-sm">
                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><ChevronDown className={iconClass} /></div>
-                <select name="status" id="status" value={formData.status || ''} onChange={handleChange} className={`${inputClass} pl-10`} required>
+                <SelectField name="status" id="status" value={formData.status || ''} onChange={handleChange} className="pl-10" required>
                     {RENTAL_STATUSES_FORM.map(s => <option key={s} value={s}>{s}</option>)}
-                </select>
+                </SelectField>
               </div>
           {formErrors.status && <p className="text-xs text-red-500 mt-1">{formErrors.status}</p>}
         </div>
@@ -554,32 +554,32 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
         </div>
         <div className="md:col-span-2">
           <label htmlFor="shipping_address" className={labelClass}>Shipping Address</label>
-          <textarea id="shipping_address" name="shipping_address" value={formData.shipping_address || ''} onChange={handleChange} rows={2} className={inputClass}></textarea>
+          <TextAreaField id="shipping_address" name="shipping_address" value={formData.shipping_address || ''} onChange={handleChange} rows={2} />
         </div>
         <div>
           <label htmlFor="shipping_area" className={labelClass}>Shipping Area</label>
           {shippingIsAreaSelect ? (
-            <select id="shipping_area" name="shipping_area" value={formData.shipping_area || ''} onChange={handleChange} className={inputClass}>
+            <SelectField id="shipping_area" name="shipping_area" value={formData.shipping_area || ''} onChange={handleChange}>
               <option value="">Select Area</option>
               {shippingAreaOptions.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
-            </select>
+            </SelectField>
           ) : (
-            <input type="text" id="shipping_area" name="shipping_area" value={formData.shipping_area || ''} onChange={handleChange} className={inputClass} readOnly={shippingAreaOptions.length > 0 && !shippingIsAreaSelect} />
+            <TextField type="text" id="shipping_area" name="shipping_area" value={formData.shipping_area || ''} onChange={handleChange} readOnly={shippingAreaOptions.length > 0 && !shippingIsAreaSelect} />
           )}
           {formErrors.shipping_area && <p className="text-xs text-red-500 mt-1">{formErrors.shipping_area}</p>}
         </div>
         <div>
           <label htmlFor="shipping_city" className={labelClass}>Shipping City</label>
-          <input type="text" id="shipping_city" name="shipping_city" value={formData.shipping_city || ''} onChange={handleChange} className={inputClass} readOnly />
+          <TextField type="text" id="shipping_city" name="shipping_city" value={formData.shipping_city || ''} onChange={handleChange} readOnly />
         </div>
         <div>
           <label htmlFor="shipping_state" className={labelClass}>Shipping State</label>
-          <input type="text" id="shipping_state" name="shipping_state" value={formData.shipping_state || ''} onChange={handleChange} className={inputClass} readOnly />
+          <TextField type="text" id="shipping_state" name="shipping_state" value={formData.shipping_state || ''} onChange={handleChange} readOnly />
         </div>
         <div>
           <label htmlFor="shipping_pincode" className={labelClass}>Shipping Pincode</label>
           <div className="relative">
-            <input type="text" id="shipping_pincode" name="shipping_pincode" value={formData.shipping_pincode || ''} onChange={handleChange} className={inputClass} maxLength={6} />
+            <TextField type="text" id="shipping_pincode" name="shipping_pincode" value={formData.shipping_pincode || ''} onChange={handleChange} maxLength={6} />
             {shippingPincodeDetailsLoading && (
               <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                 <Loader2 className="h-5 w-5 text-gray-400 animate-spin" />
@@ -591,32 +591,32 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
         </div>
         <div className="md:col-span-2">
           <label htmlFor="billing_address" className={labelClass}>Billing Address</label>
-          <textarea id="billing_address" name="billing_address" value={formData.billing_address || ''} onChange={handleChange} rows={2} className={inputClass}></textarea>
+          <TextAreaField id="billing_address" name="billing_address" value={formData.billing_address || ''} onChange={handleChange} rows={2} />
         </div>
         <div>
           <label htmlFor="billing_area" className={labelClass}>Billing Area</label>
           {billingIsAreaSelect ? (
-            <select id="billing_area" name="billing_area" value={formData.billing_area || ''} onChange={handleChange} className={inputClass}>
+            <SelectField id="billing_area" name="billing_area" value={formData.billing_area || ''} onChange={handleChange}>
               <option value="">Select Area</option>
               {billingAreaOptions.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
-            </select>
+            </SelectField>
           ) : (
-            <input type="text" id="billing_area" name="billing_area" value={formData.billing_area || ''} onChange={handleChange} className={inputClass} readOnly={billingAreaOptions.length > 0 && !billingIsAreaSelect} />
+            <TextField type="text" id="billing_area" name="billing_area" value={formData.billing_area || ''} onChange={handleChange} readOnly={billingAreaOptions.length > 0 && !billingIsAreaSelect} />
           )}
           {formErrors.billing_area && <p className="text-xs text-red-500 mt-1">{formErrors.billing_area}</p>}
         </div>
         <div>
           <label htmlFor="billing_city" className={labelClass}>Billing City</label>
-          <input type="text" id="billing_city" name="billing_city" value={formData.billing_city || ''} onChange={handleChange} className={inputClass} readOnly />
+          <TextField type="text" id="billing_city" name="billing_city" value={formData.billing_city || ''} onChange={handleChange} readOnly />
         </div>
         <div>
           <label htmlFor="billing_state" className={labelClass}>Billing State</label>
-          <input type="text" id="billing_state" name="billing_state" value={formData.billing_state || ''} onChange={handleChange} className={inputClass} readOnly />
+          <TextField type="text" id="billing_state" name="billing_state" value={formData.billing_state || ''} onChange={handleChange} readOnly />
         </div>
         <div>
           <label htmlFor="billing_pincode" className={labelClass}>Billing Pincode</label>
           <div className="relative">
-            <input type="text" id="billing_pincode" name="billing_pincode" value={formData.billing_pincode || ''} onChange={handleChange} className={inputClass} maxLength={6} />
+            <TextField type="text" id="billing_pincode" name="billing_pincode" value={formData.billing_pincode || ''} onChange={handleChange} maxLength={6} />
             {billingPincodeDetailsLoading && (
               <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                 <Loader2 className="h-5 w-5 text-gray-400 animate-spin" />
@@ -628,11 +628,11 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
         </div>
         <div>
           <label htmlFor="mobile_number" className={labelClass}>Mobile Number</label>
-          <input type="text" id="mobile_number" name="mobile_number" value={formData.mobile_number || ''} onChange={handleChange} className={inputClass} />
+          <TextField type="text" id="mobile_number" name="mobile_number" value={formData.mobile_number || ''} onChange={handleChange} />
         </div>
         <div>
           <label htmlFor="email" className={labelClass}>Email</label>
-          <input type="email" id="email" name="email" value={formData.email || ''} onChange={handleChange} className={inputClass} />
+          <TextField type="email" id="email" name="email" value={formData.email || ''} onChange={handleChange} />
         </div>
       </fieldset>
 
@@ -644,7 +644,6 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
             handleItemChange={handleItemChange}
             removeItem={removeItem}
             addItem={addItem}
-            inputClass={inputClass}
             labelClass={labelClass}
           />
 
@@ -656,17 +655,17 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     {loadingPaymentPlans ? <Loader2 className={`${iconClass} animate-spin`} /> : <ListChecks className={iconClass} />}
                 </div>
-                <select name="payment_term" id="payment_term" value={formData.payment_term || ''} onChange={handleChange} className={`${inputClass} pl-10`} disabled={loadingPaymentPlans}>
+                <SelectField name="payment_term" id="payment_term" value={formData.payment_term || ''} onChange={handleChange} className="pl-10" disabled={loadingPaymentPlans}>
                   <option value="">{loadingPaymentPlans ? "Loading..." : "Select Payment Term"}</option>
                   {paymentPlans.map((pt: PaymentPlanType) => <option key={pt.plan_id} value={pt.plan_name}>{pt.plan_name}</option>)}
-                </select>
+                </SelectField>
               </div>
             </div>
             <div>
               <label htmlFor="deposit" className={labelClass}>Deposit Amount (₹)</label>
               <div className="mt-1 relative rounded-md shadow-sm">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><IndianRupee className={iconClass} /></div>
-                <input type="number" name="deposit" id="deposit" value={formData.deposit || ''} onChange={handleChange} className={`${inputClass} pl-10`} step="0.01" min="0"/>
+                <TextField type="number" name="deposit" id="deposit" value={formData.deposit || ''} onChange={handleChange} className="pl-10" step="0.01" min="0"/>
               </div>
               {formErrors.deposit && <p className="text-xs text-red-500 mt-1">{formErrors.deposit}</p>}
             </div>
@@ -682,7 +681,7 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
               <label htmlFor="notes" className={labelClass}>Notes</label>
               <div className="mt-1 relative rounded-md shadow-sm">
                 <div className="absolute inset-y-0 left-0 top-2 pl-3 flex items-start pointer-events-none"><Info className={iconClass} /></div>
-                <textarea name="notes" id="notes" value={formData.notes || ''} onChange={handleChange} rows={3} className={`${inputClass} pl-10`}></textarea>
+                <TextAreaField name="notes" id="notes" value={formData.notes || ''} onChange={handleChange} rows={3} className="pl-10" />
               </div>
             </div>
           </fieldset>

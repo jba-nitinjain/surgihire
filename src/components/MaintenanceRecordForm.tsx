@@ -7,6 +7,7 @@ import { useMaintenanceRecords } from '../context/MaintenanceRecordContext'; // 
 import { useCrud } from '../context/CrudContext'; // To get loading state from CRUD operations
 import { Save, X, Loader2, Package, CalendarDays, Wrench, User, IndianRupee, Info, ChevronDown } from 'lucide-react';
 import Modal from './ui/Modal';
+import { TextField, TextAreaField, SelectField } from './ui/FormField';
 
 interface MaintenanceRecordFormProps {
   record?: MaintenanceRecordFormData; // For editing
@@ -157,7 +158,6 @@ const MaintenanceRecordForm: React.FC<MaintenanceRecordFormProps> = ({
     onSave(formData);
   };
 
-  const inputClass = "mt-1 block w-full px-3 py-2 bg-white border border-light-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-brand-blue focus:border-brand-blue sm:text-sm disabled:bg-light-gray-100";
   const labelClass = "block text-sm font-medium text-dark-text";
   const iconClass = "h-5 w-5 text-gray-400";
 
@@ -187,14 +187,14 @@ const MaintenanceRecordForm: React.FC<MaintenanceRecordFormProps> = ({
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   {loadingEquipmentList ? <Loader2 className={`${iconClass} animate-spin`} /> : <Package className={iconClass} />}
                 </div>
-                <select
+                <SelectField
                   id="equipment_id"
                   name="equipment_id"
                   value={formData.equipment_id}
                   onChange={handleGenericChange} // Correctly uses the updated handleGenericChange
                   required
                   disabled={loadingEquipmentList}
-                  className={`${inputClass} pl-10`}
+                  className="pl-10"
                 >
                   <option value="">{loadingEquipmentList ? 'Loading Equipment...' : 'Select Equipment'}</option>
                   {!loadingEquipmentList && equipmentListForFilter.map(equipment => (
@@ -202,7 +202,7 @@ const MaintenanceRecordForm: React.FC<MaintenanceRecordFormProps> = ({
                       {equipment.equipment_name} ({equipment.serial_number || 'N/A'})
                     </option>
                   ))}
-                </select>
+                </SelectField>
               </div>
               {formErrors.equipment_id && <p className="text-xs text-red-500 mt-1">{formErrors.equipment_id}</p>}
             </div>
@@ -211,14 +211,14 @@ const MaintenanceRecordForm: React.FC<MaintenanceRecordFormProps> = ({
               <label htmlFor="maintenance_date" className={labelClass}>Maintenance Date <span className="text-red-500">*</span></label>
               <div className="mt-1 relative rounded-md shadow-sm">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><CalendarDays className={iconClass} /></div>
-                <input
+                <TextField
                   type="date"
                   id="maintenance_date"
                   name="maintenance_date"
                   value={formData.maintenance_date}
                   onChange={handleGenericChange}
                   required
-                  className={`${inputClass} pl-10`}
+                  className="pl-10"
                 />
               </div>
               {formErrors.maintenance_date && <p className="text-xs text-red-500 mt-1">{formErrors.maintenance_date}</p>}
@@ -229,19 +229,19 @@ const MaintenanceRecordForm: React.FC<MaintenanceRecordFormProps> = ({
               <label htmlFor="maintenance_type_dropdown" className={labelClass}>Maintenance Type</label>
               <div className="mt-1 relative rounded-md shadow-sm">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><Wrench className={iconClass} /></div>
-                <select
+                <SelectField
                   id="maintenance_type_dropdown"
                   name="maintenance_type_dropdown"
                   value={selectedDropdownMaintenanceType}
                   onChange={handleDropdownChange} // Specific handler for this dropdown
-                  className={`${inputClass} pl-10 pr-8 appearance-none`}
+                  className="pl-10 pr-8 appearance-none"
                 >
                   <option value="">Select Type...</option>
                   {PREDEFINED_MAINTENANCE_TYPES.map(type => (
                     <option key={type} value={type}>{type}</option>
                   ))}
                   <option value={CUSTOM_MAINTENANCE_TYPE_KEY}>Other (Specify)</option>
-                </select>
+                </SelectField>
                 <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                     <ChevronDown className="h-4 w-4 text-gray-400" />
                 </div>
@@ -252,14 +252,14 @@ const MaintenanceRecordForm: React.FC<MaintenanceRecordFormProps> = ({
               {selectedDropdownMaintenanceType === CUSTOM_MAINTENANCE_TYPE_KEY && (
                 <div className="mt-2">
                   <label htmlFor="custom_maintenance_type" className={`${labelClass} text-xs`}>Specify Other Type:</label>
-                  <input
+                  <TextField
                     type="text"
                     id="custom_maintenance_type"
                     name="custom_maintenance_type"
                     value={customMaintenanceTypeValue}
                     onChange={handleCustomInputChange} // Specific handler
                     placeholder="Enter custom maintenance type"
-                    className={`${inputClass} pl-3`}
+                    className="pl-3"
                   />
                    {formErrors.maintenance_type && <p className="text-xs text-red-500 mt-1">{formErrors.maintenance_type}</p>}
                 </div>
@@ -271,13 +271,13 @@ const MaintenanceRecordForm: React.FC<MaintenanceRecordFormProps> = ({
               <label htmlFor="technician" className={labelClass}>Technician</label>
               <div className="mt-1 relative rounded-md shadow-sm">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><User className={iconClass} /></div>
-                <input
+                <TextField
                   type="text"
                   id="technician"
                   name="technician"
                   value={formData.technician || ''}
                   onChange={handleGenericChange}
-                  className={`${inputClass} pl-10`}
+                  className="pl-10"
                 />
               </div>
             </div>
@@ -286,7 +286,7 @@ const MaintenanceRecordForm: React.FC<MaintenanceRecordFormProps> = ({
               <label htmlFor="cost" className={labelClass}>Cost (₹)</label>
               <div className="mt-1 relative rounded-md shadow-sm">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><IndianRupee className={iconClass} /></div>
-                <input
+                <TextField
                   type="number"
                   id="cost"
                   name="cost"
@@ -295,7 +295,7 @@ const MaintenanceRecordForm: React.FC<MaintenanceRecordFormProps> = ({
                   step="0.01"
                   min="0"
                   placeholder="0.00"
-                  className={`${inputClass} pl-10`}
+                  className="pl-10"
                 />
               </div>
               {formErrors.cost && <p className="text-xs text-red-500 mt-1">{formErrors.cost}</p>}
@@ -305,14 +305,14 @@ const MaintenanceRecordForm: React.FC<MaintenanceRecordFormProps> = ({
               <label htmlFor="notes" className={labelClass}>Notes</label>
                <div className="mt-1 relative rounded-md shadow-sm">
                 <div className="absolute inset-y-0 left-0 top-2 pl-3 flex items-start pointer-events-none"><Info className={iconClass} /></div>
-                <textarea
+                <TextAreaField
                     id="notes"
                     name="notes"
                     value={formData.notes || ''}
                     onChange={handleGenericChange}
                     rows={3}
-                    className={`${inputClass} pl-10`}
-                ></textarea>
+                    className="pl-10"
+                />
               </div>
             </div>
           </fieldset>

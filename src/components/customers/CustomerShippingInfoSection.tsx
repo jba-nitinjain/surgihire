@@ -1,6 +1,7 @@
 import React from 'react';
 import { CustomerFormData } from '../../types';
 import { Loader2 } from 'lucide-react';
+import { TextField, TextAreaField, SelectField } from '../ui/FormField';
 
 interface AreaOption {
   value: string;
@@ -15,7 +16,6 @@ interface Props {
   pincodeError: string | null;
   areaOptions: AreaOption[];
   isAreaSelect: boolean;
-  inputClass: string;
   labelClass: string;
 }
 
@@ -27,26 +27,24 @@ const CustomerShippingInfoSection: React.FC<Props> = ({
   pincodeError,
   areaOptions,
   isAreaSelect,
-  inputClass,
   labelClass,
 }) => (
   <fieldset className="grid grid-cols-1 gap-6 md:grid-cols-2">
     <legend className="text-lg font-medium text-dark-text col-span-full">Shipping Information</legend>
     <div className="md:col-span-2">
       <label htmlFor="shipping_address" className={labelClass}>Address Line</label>
-      <textarea name="shipping_address" id="shipping_address" value={formData.shipping_address || ''} onChange={handleChange} rows={2} className={inputClass}></textarea>
+      <TextAreaField name="shipping_address" id="shipping_address" value={formData.shipping_address || ''} onChange={handleChange} rows={2} />
     </div>
 
     <div>
       <label htmlFor="shipping_pincode" className={labelClass}>Pincode</label>
       <div className="relative">
-        <input
+        <TextField
           type="text"
           name="shipping_pincode"
           id="shipping_pincode"
           value={formData.shipping_pincode || ''}
           onChange={handleChange}
-          className={inputClass}
           maxLength={6}
         />
         {pincodeDetailsLoading && (
@@ -62,23 +60,23 @@ const CustomerShippingInfoSection: React.FC<Props> = ({
     <div>
       <label htmlFor="shipping_area" className={labelClass}>Area</label>
       {isAreaSelect ? (
-        <select name="shipping_area" id="shipping_area" value={formData.shipping_area || ''} onChange={handleChange} className={inputClass}>
+        <SelectField name="shipping_area" id="shipping_area" value={formData.shipping_area || ''} onChange={handleChange}>
           <option value="">Select Area</option>
           {areaOptions.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
-        </select>
+        </SelectField>
       ) : (
-        <input type="text" name="shipping_area" id="shipping_area" value={formData.shipping_area || ''} onChange={handleChange} className={inputClass} readOnly={areaOptions.length > 0 && !isAreaSelect} />
+        <TextField type="text" name="shipping_area" id="shipping_area" value={formData.shipping_area || ''} onChange={handleChange} readOnly={areaOptions.length > 0 && !isAreaSelect} />
       )}
       {formErrors.shipping_area && <p className="text-xs text-red-500 mt-1">{formErrors.shipping_area}</p>}
     </div>
 
     <div>
       <label htmlFor="shipping_city" className={labelClass}>City</label>
-      <input type="text" name="shipping_city" id="shipping_city" value={formData.shipping_city || ''} onChange={handleChange} className={inputClass} readOnly />
+      <TextField type="text" name="shipping_city" id="shipping_city" value={formData.shipping_city || ''} onChange={handleChange} readOnly />
     </div>
     <div>
       <label htmlFor="shipping_state" className={labelClass}>State</label>
-      <input type="text" name="shipping_state" id="shipping_state" value={formData.shipping_state || ''} onChange={handleChange} className={inputClass} readOnly />
+      <TextField type="text" name="shipping_state" id="shipping_state" value={formData.shipping_state || ''} onChange={handleChange} readOnly />
     </div>
   </fieldset>
 );
