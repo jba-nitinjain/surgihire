@@ -150,7 +150,9 @@ const EquipmentCard: React.FC<EquipmentCardProps> = ({ equipment, onEdit, onView
             <span className={`px-2.5 py-1 text-xs font-semibold rounded-full ${getStatusColor(equipment.status)}`}>
                 {equipment.status || 'Unknown'}
             </span>
+
             {onViewMaintenance && Number(equipment.maintenance_record_count) > 0 && (
+
                 <button
                     onClick={(e) => { e.stopPropagation(); onViewMaintenance(String(equipment.equipment_id)); }}
                     className="text-brand-blue border border-brand-blue text-xs px-2 py-1 rounded hover:bg-brand-blue/10 ml-2"
