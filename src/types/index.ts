@@ -14,6 +14,8 @@ export interface Customer {
   shipping_state: string | null;
   shipping_pincode: string | null;
   registration_date: string;
+  /** Indicates if the customer currently has any active rentals */
+  has_active_rentals?: boolean;
 }
 
 export interface CustomerFormData {
@@ -44,6 +46,8 @@ export interface Equipment {
   last_maintenance_date: string | null;
   next_calibration_date: string | null;
   location: string | null;
+  /** Number of maintenance records associated with this equipment */
+  maintenance_record_count?: number;
 }
 
 export interface EquipmentFormData {
