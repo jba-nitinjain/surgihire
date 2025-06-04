@@ -2,7 +2,7 @@ import React from 'react';
 import { Customer } from '../types';
 import {
   User, Mail, Phone, MapPin, Calendar, X,
-  ArrowLeft, Edit3
+  ArrowLeft, Edit3, CalendarCheck2
 } from 'lucide-react';
 import { formatDate } from '../utils/formatting'; // Import formatDate utility
 import Modal from './ui/Modal';
@@ -11,6 +11,7 @@ interface CustomerDetailProps {
   customer: Customer | null;
   onClose: () => void;
   onEdit: (customer: Customer) => void;
+  onViewRentals?: (customerId: string) => void;
   /**
    * Render the detail inside a modal overlay. Defaults to true.
    * When false, the component renders inline for use on dedicated pages.
@@ -18,7 +19,7 @@ interface CustomerDetailProps {
   isModal?: boolean;
 }
 
-const CustomerDetail: React.FC<CustomerDetailProps> = ({ customer, onClose, onEdit, isModal = true }) => {
+const CustomerDetail: React.FC<CustomerDetailProps> = ({ customer, onClose, onEdit, onViewRentals, isModal = true }) => {
   if (!customer) {
     return null;
   }
@@ -34,6 +35,12 @@ const CustomerDetail: React.FC<CustomerDetailProps> = ({ customer, onClose, onEd
 
   const handleEditClick = () => {
     onEdit(customer);
+  };
+
+  const handleViewRentalsClick = () => {
+    if (onViewRentals) {
+      onViewRentals(String(customer.customer_id));
+    }
   };
 
   const content = (
@@ -56,7 +63,16 @@ const CustomerDetail: React.FC<CustomerDetailProps> = ({ customer, onClose, onEd
                 >
                     <Edit3 className="h-5 w-5" />
                 </button>
-                 <button
+                {onViewRentals && (
+                  <button
+                      onClick={handleViewRentalsClick}
+                      className="p-2 rounded-full hover:bg-light-gray-100 text-green-600"
+                      aria-label="View Rentals"
+                  >
+                      <CalendarCheck2 className="h-5 w-5" />
+                  </button>
+                )}
+                <button
                     onClick={onClose}
                     className="p-2 rounded-full hover:bg-light-gray-100"
                     aria-label="Close"

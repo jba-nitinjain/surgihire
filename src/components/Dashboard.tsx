@@ -28,6 +28,7 @@ const Dashboard: React.FC<DashboardProps> = ({ sidebarOpen, setSidebarOpen }) =>
   const [activeTab, setActiveTab] = useState('customers');
   const [initialMaintenanceEquipmentId, setInitialMaintenanceEquipmentId] = useState<string | null>(null);
   const [equipmentIdForDetailView, setEquipmentIdForDetailView] = useState<number | null>(null);
+  const [initialRentalCustomerId, setInitialRentalCustomerId] = useState<string | null>(null);
 
   const { refreshData: refreshCustomerData, loading: customersLoading } = useCustomers();
   const { refreshEquipmentData, loading: equipmentLoading } = useEquipment();
@@ -86,6 +87,11 @@ const Dashboard: React.FC<DashboardProps> = ({ sidebarOpen, setSidebarOpen }) =>
     setEquipmentIdForDetailView(null);
   };
 
+  const handleViewRentalsForCustomer = (customerId: string) => {
+    setInitialRentalCustomerId(customerId);
+    setActiveTab('rentals');
+  };
+
   useEffect(() => {
     if (activeTab !== 'maintenance' && initialMaintenanceEquipmentId) {
       setInitialMaintenanceEquipmentId(null);
@@ -94,7 +100,10 @@ const Dashboard: React.FC<DashboardProps> = ({ sidebarOpen, setSidebarOpen }) =>
       // Consider if this auto-clearing is always desired
       // setEquipmentIdForDetailView(null);
     }
-  }, [activeTab, initialMaintenanceEquipmentId, equipmentIdForDetailView]);
+    if (activeTab !== 'rentals' && initialRentalCustomerId) {
+      setInitialRentalCustomerId(null);
+    }
+  }, [activeTab, initialMaintenanceEquipmentId, equipmentIdForDetailView, initialRentalCustomerId]);
 
   return (
     <div className="min-h-screen bg-light-gray-50 flex">
@@ -145,7 +154,9 @@ const Dashboard: React.FC<DashboardProps> = ({ sidebarOpen, setSidebarOpen }) =>
         </header>
 
         <div className="flex-grow">
-          {activeTab === 'customers' && <CustomerTab />}
+          {activeTab === 'customers' && (
+            <CustomerTab onViewRentalsForCustomer={handleViewRentalsForCustomer} />
+          )}
           {activeTab === 'equipment' && (
             <EquipmentTab
               onViewMaintenanceForEquipment={handleViewMaintenanceForEquipment}
@@ -153,7 +164,12 @@ const Dashboard: React.FC<DashboardProps> = ({ sidebarOpen, setSidebarOpen }) =>
               clearInitialEquipmentIdToView={clearEquipmentIdForDetailView}
             />
           )}
-          {activeTab === 'rentals' && <RentalsTab />} {/* Render new RentalsTab */}
+          {activeTab === 'rentals' && (
+            <RentalsTab
+              key={initialRentalCustomerId}
+              initialCustomerIdFilter={initialRentalCustomerId}
+            />
+          )} {/* Render new RentalsTab */}
           {activeTab === 'masters' && <MastersTab />}
           {activeTab === 'maintenance' && (
             <MaintenanceTab

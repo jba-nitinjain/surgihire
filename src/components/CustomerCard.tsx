@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Customer } from '../types';
-import { User, Mail, Phone, MapPin, Calendar, Edit3, Trash2, Loader2 } from 'lucide-react';
+import { User, Mail, Phone, MapPin, Calendar, Edit3, Trash2, Loader2, CalendarCheck2 } from 'lucide-react';
 import { useCrud } from '../context/CrudContext';
 import ConfirmationModal from './ui/ConfirmationModal';
 import { useCustomers } from '../context/CustomerContext';
@@ -10,9 +10,10 @@ interface CustomerCardProps {
   customer: Customer;
   onClick?: (customer: Customer) => void;
   onEdit: (customer: Customer) => void;
+  onViewRentals?: (customerId: string) => void;
 }
 
-const CustomerCard: React.FC<CustomerCardProps> = ({ customer, onClick, onEdit }) => {
+const CustomerCard: React.FC<CustomerCardProps> = ({ customer, onClick, onEdit, onViewRentals }) => {
   const { deleteItem, loading: crudLoading } = useCrud();
   const { refreshData } = useCustomers();
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
@@ -77,6 +78,15 @@ const CustomerCard: React.FC<CustomerCardProps> = ({ customer, onClick, onEdit }
               >
                 <Edit3 size={20} />
               </button>
+              {onViewRentals && (
+                <button
+                  onClick={(e) => { e.stopPropagation(); onViewRentals(String(customer.customer_id)); }}
+                  className="p-1 text-green-600 hover:text-green-700 rounded-full hover:bg-light-gray-100"
+                  aria-label="View Rentals"
+                >
+                  <CalendarCheck2 size={20} />
+                </button>
+              )}
               <button
                 onClick={handleDeleteClick}
                 disabled={crudLoading}
