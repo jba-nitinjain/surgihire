@@ -27,6 +27,7 @@ import RentalStatusDates from './RentalStatusDates';
 import RentalShippingBilling from './RentalShippingBilling';
 import { formatCurrency } from '../../utils/formatting'; // Import formatCurrency
 import usePincodeLookup from '../../utils/usePincodeLookup';
+import { useNavigate } from 'react-router-dom';
 
 const EQUIPMENT_RENTAL_STATUSES = ['Confirmed/Booked', 'Active/Rented Out'];
 
@@ -54,7 +55,6 @@ const initialFormData: RentalTransactionFormData = {
   email: '',
   rental_date: new Date().toISOString().split('T')[0],
   expected_return_date: '',
-  deposit: '',
   payment_term: '',
   status: 'Draft',
   notes: '',
@@ -70,9 +70,16 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
   const [formErrors, setFormErrors] = useState<Partial<Record<keyof RentalTransactionFormData | `rental_items.${number}.equipment_id` | `rental_items.${number}.unit_rental_rate`, string>>>({});
   const { createItem, updateItem, loading: crudLoading, error: crudError } = useCrud();
 
-  const { customersForFilter: customers, loadingCustomers, fetchCustomersForSelection } = useRentalTransactions();
+  const {
+    customersForFilter: customers,
+    loadingCustomers,
+    fetchCustomersForSelection,
+    refreshRentalTransactions,
+  } = useRentalTransactions();
   const { paymentPlans, loading: loadingPaymentPlans, refreshPaymentPlans } = usePaymentPlans();
   const { equipmentList: availableEquipment, loading: loadingEquipment, refreshEquipmentData: refreshAvailableEquipment } = useEquipment();
+
+  const navigate = useNavigate();
 
   const [numberOfDays, setNumberOfDays] = useState<number>(0);
   const [calculatedTotalAmount, setCalculatedTotalAmount] = useState<number>(0);
@@ -134,7 +141,6 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
         email: rental.email || '',
         rental_date: rental.rental_date ? new Date(rental.rental_date).toISOString().split('T')[0] : '',
         expected_return_date: rental.expected_return_date ? new Date(rental.expected_return_date).toISOString().split('T')[0] : '',
-        deposit: rental.deposit !== null ? String(rental.deposit) : '',
         payment_term: rental.payment_term || '',
         status: rental.status || 'Draft',
         notes: rental.notes || '',
@@ -278,9 +284,6 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
       errors.email = 'Invalid email format.';
     }
 
-    if (formData.deposit && (isNaN(parseFloat(formData.deposit)) || parseFloat(formData.deposit) < 0)) {
-      errors.deposit = 'Deposit must be a valid non-negative number.';
-    }
     if (!formData.status) errors.status = 'Status is required.';
 
     formData.rental_items.forEach((item, index) => {
@@ -376,15 +379,13 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
   };
 
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (recordPay = false) => {
     if (!validateForm()) {
       return;
     }
 
     const apiData: any = {
       ...formData,
-      deposit: formData.deposit ? parseFloat(formData.deposit) : null,
       payment_term: formData.payment_term || null,
       total_amount: calculatedTotalAmount, // Add calculated total amount
       rental_items: formData.rental_items.map(item => ({
@@ -400,8 +401,10 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
     if (apiData.notes === '') apiData.notes = null;
 
     try {
+      let newId: number | null = null;
       if (isEditing && rental && rental.rental_id) {
         await updateItem('rental_transactions', rental.rental_id, apiData);
+        newId = rental.rental_id;
         await Promise.all(
           apiData.rental_items.map((item: any) =>
             item.rental_detail_id
@@ -417,7 +420,7 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
         );
       } else {
         const res = await createItem('rental_transactions', apiData);
-        const newId = res?.data?.rental_id ?? res?.data?.insertId ?? null;
+        newId = res?.data?.rental_id ?? res?.data?.insertId ?? null;
         if (newId) {
           await Promise.all(
             apiData.rental_items.map((item: any) =>
@@ -439,7 +442,12 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
         refreshAvailableEquipment();
       }
 
-      onSave();
+      if (recordPay && newId) {
+        refreshRentalTransactions();
+        navigate('/payments/new', { state: { payment: { rental_id: newId } } });
+      } else {
+        onSave();
+      }
     } catch (err) {
       console.error('Failed to save rental transaction:', err);
     }
@@ -460,7 +468,7 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
           <X className="h-5 w-5 text-dark-text" />
         </button>
       </div>
-        <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-6 overflow-y-auto">
+        <form onSubmit={(e) => { e.preventDefault(); handleSubmit(false); }} className="p-4 sm:p-6 space-y-6 overflow-y-auto">
           {crudError && (
             <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded" role="alert">
               <p className="font-bold">Error Saving Rental</p>
@@ -555,14 +563,6 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
                 </select>
               </div>
             </div>
-            <div>
-              <label htmlFor="deposit" className={labelClass}>Deposit Amount (₹)</label>
-              <div className="mt-1 relative rounded-md shadow-sm">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><IndianRupee className={iconClass} /></div>
-                <input type="number" name="deposit" id="deposit" value={formData.deposit || ''} onChange={handleChange} className={`${inputClass} pl-10`} step="0.01" min="0"/>
-              </div>
-              {formErrors.deposit && <p className="text-xs text-red-500 mt-1">{formErrors.deposit}</p>}
-            </div>
 
             <div className="md:col-span-2">
                 <label className={labelClass}>Calculated Total Rental Amount</label>
@@ -601,6 +601,21 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
               )}
               {isEditing ? 'Save Changes' : 'Create Rental'}
             </button>
+            {!isEditing && (
+              <button
+                type="button"
+                onClick={() => handleSubmit(true)}
+                disabled={crudLoading || loadingCustomers || loadingPaymentPlans || loadingEquipment}
+                className="ml-3 px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-600 disabled:opacity-50"
+              >
+                {crudLoading ? (
+                  <Loader2 className="animate-spin h-4 w-4 mr-2" />
+                ) : (
+                  <Save className="inline h-4 w-4 mr-1" />
+                )}
+                Create & Record Payment
+              </button>
+            )}
           </div>
         </form>
     </div>

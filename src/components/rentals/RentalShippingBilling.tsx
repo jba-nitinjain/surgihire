@@ -53,11 +53,9 @@ const RentalShippingBilling: React.FC<Props> = ({
   inputClass,
   labelClass,
 }) => (
-  <fieldset className="grid grid-cols-1 gap-y-6 gap-x-4 md:grid-cols-2">
-    <legend className="text-lg font-medium text-dark-text col-span-full mb-2">
-      Shipping &amp; Billing
-    </legend>
-    <div className="col-span-full flex gap-4 text-xs">
+  <fieldset className="space-y-6">
+    <legend className="text-lg font-medium text-dark-text mb-2">Shipping &amp; Billing</legend>
+    <div className="flex gap-4 text-xs">
       <button
         type="button"
         onClick={copyShippingToBilling}
@@ -73,235 +71,223 @@ const RentalShippingBilling: React.FC<Props> = ({
         Copy Billing to Shipping
       </button>
     </div>
-    <div className="md:col-span-2">
-      <label htmlFor="shipping_address" className={labelClass}>
-        Shipping Address
-      </label>
-      <textarea
-        id="shipping_address"
-        name="shipping_address"
-        value={data.shipping_address || ''}
-        onChange={handleChange}
-        rows={2}
-        className={inputClass}
-      />
-    </div>
-    <div>
-      <label htmlFor="shipping_area" className={labelClass}>
-        Shipping Area
-      </label>
-      {shippingIsAreaSelect ? (
-        <select
-          id="shipping_area"
-          name="shipping_area"
-          value={data.shipping_area || ''}
-          onChange={handleChange}
-          className={inputClass}
-        >
-          <option value="">Select Area</option>
-          {shippingAreaOptions.map((opt) => (
-            <option key={opt.value} value={opt.value}>
-              {opt.label}
-            </option>
-          ))}
-        </select>
-      ) : (
-        <input
-          type="text"
-          id="shipping_area"
-          name="shipping_area"
-          value={data.shipping_area || ''}
-          onChange={handleChange}
-          className={inputClass}
-          readOnly={shippingAreaOptions.length > 0 && !shippingIsAreaSelect}
-        />
-      )}
-      {errors.shipping_area && (
-        <p className="text-xs text-red-500 mt-1">{errors.shipping_area}</p>
-      )}
-    </div>
-    <div>
-      <label htmlFor="shipping_city" className={labelClass}>
-        Shipping City
-      </label>
-      <input
-        type="text"
-        id="shipping_city"
-        name="shipping_city"
-        value={data.shipping_city || ''}
-        onChange={handleChange}
-        className={inputClass}
-        readOnly
-      />
-    </div>
-    <div>
-      <label htmlFor="shipping_state" className={labelClass}>
-        Shipping State
-      </label>
-      <input
-        type="text"
-        id="shipping_state"
-        name="shipping_state"
-        value={data.shipping_state || ''}
-        onChange={handleChange}
-        className={inputClass}
-        readOnly
-      />
-    </div>
-    <div>
-      <label htmlFor="shipping_pincode" className={labelClass}>
-        Shipping Pincode
-      </label>
-      <div className="relative">
-        <input
-          type="text"
-          id="shipping_pincode"
-          name="shipping_pincode"
-          value={data.shipping_pincode || ''}
-          onChange={handleChange}
-          className={inputClass}
-          maxLength={6}
-        />
-        {shippingPincodeDetailsLoading && (
-          <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-            <Loader2 className="h-5 w-5 text-gray-400 animate-spin" />
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="space-y-4">
+        <div>
+          <label htmlFor="shipping_address" className={labelClass}>Shipping Address</label>
+          <textarea
+            id="shipping_address"
+            name="shipping_address"
+            value={data.shipping_address || ''}
+            onChange={handleChange}
+            rows={2}
+            className={inputClass}
+          />
+        </div>
+        <div>
+          <label htmlFor="shipping_area" className={labelClass}>Shipping Area</label>
+          {shippingIsAreaSelect ? (
+            <select
+              id="shipping_area"
+              name="shipping_area"
+              value={data.shipping_area || ''}
+              onChange={handleChange}
+              className={inputClass}
+            >
+              <option value="">Select Area</option>
+              {shippingAreaOptions.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+          ) : (
+            <input
+              type="text"
+              id="shipping_area"
+              name="shipping_area"
+              value={data.shipping_area || ''}
+              onChange={handleChange}
+              className={inputClass}
+              readOnly={shippingAreaOptions.length > 0 && !shippingIsAreaSelect}
+            />
+          )}
+          {errors.shipping_area && (
+            <p className="text-xs text-red-500 mt-1">{errors.shipping_area}</p>
+          )}
+        </div>
+        <div>
+          <label htmlFor="shipping_city" className={labelClass}>Shipping City</label>
+          <input
+            type="text"
+            id="shipping_city"
+            name="shipping_city"
+            value={data.shipping_city || ''}
+            onChange={handleChange}
+            className={inputClass}
+            readOnly
+          />
+        </div>
+        <div>
+          <label htmlFor="shipping_state" className={labelClass}>Shipping State</label>
+          <input
+            type="text"
+            id="shipping_state"
+            name="shipping_state"
+            value={data.shipping_state || ''}
+            onChange={handleChange}
+            className={inputClass}
+            readOnly
+          />
+        </div>
+        <div>
+          <label htmlFor="shipping_pincode" className={labelClass}>Shipping Pincode</label>
+          <div className="relative">
+            <input
+              type="text"
+              id="shipping_pincode"
+              name="shipping_pincode"
+              value={data.shipping_pincode || ''}
+              onChange={handleChange}
+              className={inputClass}
+              maxLength={6}
+            />
+            {shippingPincodeDetailsLoading && (
+              <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                <Loader2 className="h-5 w-5 text-gray-400 animate-spin" />
+              </div>
+            )}
           </div>
-        )}
+          {errors.shipping_pincode && (
+            <p className="text-xs text-red-500 mt-1">{errors.shipping_pincode}</p>
+          )}
+          {shippingPincodeError && (
+            <p className="text-xs text-red-500 mt-1">{shippingPincodeError}</p>
+          )}
+        </div>
       </div>
-      {errors.shipping_pincode && (
-        <p className="text-xs text-red-500 mt-1">{errors.shipping_pincode}</p>
-      )}
-      {shippingPincodeError && (
-        <p className="text-xs text-red-500 mt-1">{shippingPincodeError}</p>
-      )}
-    </div>
-    <div className="md:col-span-2">
-      <label htmlFor="billing_address" className={labelClass}>
-        Billing Address
-      </label>
-      <textarea
-        id="billing_address"
-        name="billing_address"
-        value={data.billing_address || ''}
-        onChange={handleChange}
-        rows={2}
-        className={inputClass}
-      />
-    </div>
-    <div>
-      <label htmlFor="billing_area" className={labelClass}>
-        Billing Area
-      </label>
-      {billingIsAreaSelect ? (
-        <select
-          id="billing_area"
-          name="billing_area"
-          value={data.billing_area || ''}
-          onChange={handleChange}
-          className={inputClass}
-        >
-          <option value="">Select Area</option>
-          {billingAreaOptions.map((opt) => (
-            <option key={opt.value} value={opt.value}>
-              {opt.label}
-            </option>
-          ))}
-        </select>
-      ) : (
-        <input
-          type="text"
-          id="billing_area"
-          name="billing_area"
-          value={data.billing_area || ''}
-          onChange={handleChange}
-          className={inputClass}
-          readOnly={billingAreaOptions.length > 0 && !billingIsAreaSelect}
-        />
-      )}
-      {errors.billing_area && (
-        <p className="text-xs text-red-500 mt-1">{errors.billing_area}</p>
-      )}
-    </div>
-    <div>
-      <label htmlFor="billing_city" className={labelClass}>
-        Billing City
-      </label>
-      <input
-        type="text"
-        id="billing_city"
-        name="billing_city"
-        value={data.billing_city || ''}
-        onChange={handleChange}
-        className={inputClass}
-        readOnly
-      />
-    </div>
-    <div>
-      <label htmlFor="billing_state" className={labelClass}>
-        Billing State
-      </label>
-      <input
-        type="text"
-        id="billing_state"
-        name="billing_state"
-        value={data.billing_state || ''}
-        onChange={handleChange}
-        className={inputClass}
-        readOnly
-      />
-    </div>
-    <div>
-      <label htmlFor="billing_pincode" className={labelClass}>
-        Billing Pincode
-      </label>
-      <div className="relative">
-        <input
-          type="text"
-          id="billing_pincode"
-          name="billing_pincode"
-          value={data.billing_pincode || ''}
-          onChange={handleChange}
-          className={inputClass}
-          maxLength={6}
-        />
-        {billingPincodeDetailsLoading && (
-          <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-            <Loader2 className="h-5 w-5 text-gray-400 animate-spin" />
+      <div className="space-y-4">
+        <div>
+          <label htmlFor="billing_address" className={labelClass}>Billing Address</label>
+          <textarea
+            id="billing_address"
+            name="billing_address"
+            value={data.billing_address || ''}
+            onChange={handleChange}
+            rows={2}
+            className={inputClass}
+          />
+        </div>
+        <div>
+          <label htmlFor="billing_area" className={labelClass}>Billing Area</label>
+          {billingIsAreaSelect ? (
+            <select
+              id="billing_area"
+              name="billing_area"
+              value={data.billing_area || ''}
+              onChange={handleChange}
+              className={inputClass}
+            >
+              <option value="">Select Area</option>
+              {billingAreaOptions.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+          ) : (
+            <input
+              type="text"
+              id="billing_area"
+              name="billing_area"
+              value={data.billing_area || ''}
+              onChange={handleChange}
+              className={inputClass}
+              readOnly={billingAreaOptions.length > 0 && !billingIsAreaSelect}
+            />
+          )}
+          {errors.billing_area && (
+            <p className="text-xs text-red-500 mt-1">{errors.billing_area}</p>
+          )}
+        </div>
+        <div>
+          <label htmlFor="billing_city" className={labelClass}>Billing City</label>
+          <input
+            type="text"
+            id="billing_city"
+            name="billing_city"
+            value={data.billing_city || ''}
+            onChange={handleChange}
+            className={inputClass}
+            readOnly
+          />
+        </div>
+        <div>
+          <label htmlFor="billing_state" className={labelClass}>Billing State</label>
+          <input
+            type="text"
+            id="billing_state"
+            name="billing_state"
+            value={data.billing_state || ''}
+            onChange={handleChange}
+            className={inputClass}
+            readOnly
+          />
+        </div>
+        <div>
+          <label htmlFor="billing_pincode" className={labelClass}>Billing Pincode</label>
+          <div className="relative">
+            <input
+              type="text"
+              id="billing_pincode"
+              name="billing_pincode"
+              value={data.billing_pincode || ''}
+              onChange={handleChange}
+              className={inputClass}
+              maxLength={6}
+            />
+            {billingPincodeDetailsLoading && (
+              <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                <Loader2 className="h-5 w-5 text-gray-400 animate-spin" />
+              </div>
+            )}
           </div>
-        )}
+          {errors.billing_pincode && (
+            <p className="text-xs text-red-500 mt-1">{errors.billing_pincode}</p>
+          )}
+          {billingPincodeError && (
+            <p className="text-xs text-red-500 mt-1">{billingPincodeError}</p>
+          )}
+        </div>
       </div>
-      {errors.billing_pincode && (
-        <p className="text-xs text-red-500 mt-1">{errors.billing_pincode}</p>
-      )}
-      {billingPincodeError && (
-        <p className="text-xs text-red-500 mt-1">{billingPincodeError}</p>
-      )}
     </div>
-    <div>
-      <label htmlFor="mobile_number" className={labelClass}>
-        Mobile Number
-      </label>
-      <input
-        type="text"
-        id="mobile_number"
-        name="mobile_number"
-        value={data.mobile_number || ''}
-        onChange={handleChange}
-        className={inputClass}
-      />
-    </div>
-    <div>
-      <label htmlFor="email" className={labelClass}>
-        Email
-      </label>
-      <input
-        type="email"
-        id="email"
-        name="email"
-        value={data.email || ''}
-        onChange={handleChange}
-        className={inputClass}
-      />
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div>
+        <label htmlFor="mobile_number" className={labelClass}>
+          Mobile Number
+        </label>
+        <input
+          type="text"
+          id="mobile_number"
+          name="mobile_number"
+          value={data.mobile_number || ''}
+          onChange={handleChange}
+          className={inputClass}
+        />
+      </div>
+      <div>
+        <label htmlFor="email" className={labelClass}>
+          Email
+        </label>
+        <input
+          type="email"
+          id="email"
+          name="email"
+          value={data.email || ''}
+          onChange={handleChange}
+          className={inputClass}
+        />
+      </div>
     </div>
   </fieldset>
 );

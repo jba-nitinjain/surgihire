@@ -53,11 +53,13 @@ const RentalItemsSection: React.FC<Props> = ({
                 disabled={loadingEquipment}
               >
                 <option value="">{loadingEquipment ? 'Loading...' : 'Select Equipment'}</option>
-                {availableEquipment.map((eq) => (
-                  <option key={eq.equipment_id} value={String(eq.equipment_id)}>
-                    {eq.equipment_name} (SN: {eq.serial_number || 'N/A'}) - Rate: {formatCurrency(eq.rental_rate)}
-                  </option>
-                ))}
+                {availableEquipment
+                  .filter(eq => eq.status === 'Available')
+                  .map(eq => (
+                    <option key={eq.equipment_id} value={String(eq.equipment_id)}>
+                      {eq.equipment_name} (SN: {eq.serial_number || 'N/A'}) - Rate: {formatCurrency(eq.rental_rate)}
+                    </option>
+                  ))}
               </select>
               {formErrors[`rental_items.${index}.equipment_id`] && <p className="text-xs text-red-500 mt-1">{formErrors[`rental_items.${index}.equipment_id`]}</p>}
             </div>
