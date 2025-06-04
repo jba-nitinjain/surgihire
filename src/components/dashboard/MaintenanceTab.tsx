@@ -3,8 +3,8 @@ import { useMaintenanceRecords } from '../../context/MaintenanceRecordContext';
 import { useCrud } from '../../context/CrudContext';
 import MaintenanceRecordList from '../MaintenanceRecordList';
 import MaintenanceRecordForm from '../MaintenanceRecordForm';
-import SearchBox from '../ui/SearchBox';
-import ConfirmationModal from '../ui/ConfirmationModal';
+import MaintenanceFilterBar from './MaintenanceFilterBar';
+import DeleteMaintenanceModal from './DeleteMaintenanceModal';
 import { PlusCircle, ListChecks } from 'lucide-react';
 import { MaintenanceRecord, MaintenanceRecordFormData } from '../../types';
 
@@ -13,7 +13,6 @@ interface MaintenanceTabProps {
   navigateToEquipmentDetail: (equipmentId: number) => void;
 }
 
-const maintenanceTypesForFilter = ['Routine', 'Repair', 'Inspection', 'Upgrade', 'Calibration', 'Emergency'];
 
 const MaintenanceTab: React.FC<MaintenanceTabProps> = ({
   initialEquipmentIdFilter,
@@ -147,50 +146,15 @@ const MaintenanceTab: React.FC<MaintenanceTabProps> = ({
       </div>
 
       {activeMaintenanceSubTab === 'list' && !isMaintenanceFormOpen && (
-        <>
-          <div className="mb-6 p-4 bg-white rounded-lg shadow">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-              <div className="md:col-span-1">
-                <label htmlFor="maintenanceSearch" className="block text-sm font-medium text-dark-text mb-1">Search Records</label>
-                <SearchBox
-                  value={maintenanceSearchQuery}
-                  onChange={setMaintenanceSearchQuery}
-                  placeholder="Search by technician, notes..."
-                />
-              </div>
-              <div>
-                <label htmlFor="maintenanceTypeFilter" className="block text-sm font-medium text-dark-text mb-1">Maintenance Type</label>
-                <select
-                  id="maintenanceTypeFilter"
-                  name="maintenance_type"
-                  value={maintenanceFilters.maintenance_type || 'all'}
-                  onChange={(e) => setMaintenanceFilters({ ...maintenanceFilters, maintenance_type: e.target.value === 'all' ? null : e.target.value })}
-                  className="block w-full pl-3 pr-10 py-2 text-base border-light-gray-300 focus:outline-none focus:ring-brand-blue focus:border-brand-blue sm:text-sm rounded-md shadow-sm"
-                >
-                  <option value="all">All Types</option>
-                  {maintenanceTypesForFilter.map(type => (
-                    <option key={type} value={type}>{type}</option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label htmlFor="maintenanceEquipmentFilter" className="block text-sm font-medium text-dark-text mb-1">Equipment</label>
-                <select
-                  id="maintenanceEquipmentFilter"
-                  name="equipment_id"
-                  value={maintenanceFilters.equipment_id || 'all'}
-                  onChange={(e) => setMaintenanceFilters({ ...maintenanceFilters, equipment_id: e.target.value === 'all' ? null : e.target.value })}
-                  disabled={loadingEquipmentList}
-                  className="block w-full pl-3 pr-10 py-2 text-base border-light-gray-300 focus:outline-none focus:ring-brand-blue focus:border-brand-blue sm:text-sm rounded-md shadow-sm"
-                >
-                  <option value="all">{loadingEquipmentList ? "Loading Equipment..." : "All Equipment"}</option>
-                  {!loadingEquipmentList && equipmentListForFilter.map(eq => (
-                    <option key={eq.equipment_id} value={String(eq.equipment_id)}>{eq.equipment_name} ({eq.serial_number || 'N/A'})</option>
-                  ))}
-                </select>
-              </div>
-            </div>
-          </div>
+          <>
+            <MaintenanceFilterBar
+              searchQuery={maintenanceSearchQuery}
+              onSearchChange={setMaintenanceSearchQuery}
+              filters={maintenanceFilters}
+              onFiltersChange={setMaintenanceFilters}
+              equipmentList={equipmentListForFilter}
+              loadingEquipmentList={loadingEquipmentList}
+            />
 
           <div className="mb-6 flex justify-end">
             <button onClick={handleOpenMaintenanceFormForCreate} className="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-brand-blue hover:bg-brand-blue/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-blue transition-colors">
@@ -221,14 +185,12 @@ const MaintenanceTab: React.FC<MaintenanceTabProps> = ({
         />
       )}
 
-       <ConfirmationModal
+       <DeleteMaintenanceModal
         isOpen={isConfirmDeleteModalOpen}
-        title="Delete Maintenance Record"
-        message={`Are you sure you want to delete the maintenance record for "${recordToDelete?.equipment_name || `ID: ${recordToDelete?.equipment_id}`}" on ${recordToDelete?.maintenance_date}? This action cannot be undone.`}
+        record={recordToDelete}
         onConfirm={confirmDeleteRecord}
         onCancel={() => setIsConfirmDeleteModalOpen(false)}
         isLoading={crudLoading}
-        confirmText="Delete"
       />
     </>
   );
