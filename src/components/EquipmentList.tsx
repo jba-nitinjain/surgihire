@@ -1,46 +1,46 @@
-import React, { useEffect } from 'react'; // Added useEffect
+import React, { useEffect } from 'react';
 import { useEquipment } from '../context/EquipmentContext';
-import { useEquipmentCategories } from '../context/EquipmentCategoryContext'; // Import category context
+import { useEquipmentCategories } from '../context/EquipmentCategoryContext';
 import EquipmentCard from './EquipmentCard';
-import Spinner from './ui/Spinner';
-import Pagination from './ui/Pagination';
-import EmptyState from './ui/EmptyState';
-import ErrorDisplay from './ui/ErrorDisplay';
+import Spinner from '../components/ui/Spinner';
+import Pagination from '../components/ui/Pagination';
+import EmptyState from '../components/ui/EmptyState';
+import ErrorDisplay from '../components/ui/ErrorDisplay';
 import { Equipment } from '../types';
 import { Package } from 'lucide-react';
 
 interface EquipmentListProps {
   onEditEquipment: (equipment: Equipment) => void;
   onViewMaintenance: (equipmentId: string) => void;
+  onViewDetail: (equipment: Equipment) => void; // Added prop for viewing details
 }
 
 const EquipmentList: React.FC<EquipmentListProps> = ({
   onEditEquipment,
   onViewMaintenance,
+  onViewDetail, // Destructure new prop
 }) => {
-  const { 
-    equipmentList, 
-    loading, 
-    error, 
-    totalEquipment, 
-    currentPage, 
-    fetchEquipmentPage, // Renamed from fetchPage for clarity if it was generic before
+  const {
+    equipmentList,
+    loading,
+    error,
+    totalEquipment,
+    currentPage,
+    fetchEquipmentPage,
     refreshEquipmentData,
-    searchQuery 
+    searchQuery
   } = useEquipment();
 
-  // Fetch all categories to map IDs to names
   const { categories: equipmentCategories, loading: categoriesLoading, refreshCategories: refreshEqCategories, error: categoriesError } = useEquipmentCategories();
 
   useEffect(() => {
-    // Fetch categories if not already loaded, or if there was an error and we want to retry
-    if (equipmentCategories.length === 0 && !categoriesLoading) {
+    if (equipmentCategories.length === 0 && !categoriesLoading && !categoriesError) { // Added !categoriesError
       refreshEqCategories();
     }
-  }, [equipmentCategories.length, categoriesLoading, refreshEqCategories]);
+  }, [equipmentCategories.length, categoriesLoading, categoriesError, refreshEqCategories]);
 
 
-  const recordsPerPage = 10; 
+  const recordsPerPage = 10;
   const totalPages = Math.ceil(totalEquipment / recordsPerPage);
 
   const getCategoryName = (categoryId: number | null): string | undefined => {
@@ -60,13 +60,13 @@ const EquipmentList: React.FC<EquipmentListProps> = ({
   if (error) {
     return <ErrorDisplay message={error} onRetry={refreshEquipmentData} />;
   }
-   if (categoriesError && equipmentCategories.length === 0) { // Show error if categories failed to load and are needed
+   if (categoriesError && equipmentCategories.length === 0) {
     return <ErrorDisplay message={`Failed to load equipment categories: ${categoriesError}`} onRetry={refreshEqCategories} />;
   }
 
 
   if (equipmentList.length === 0) {
-    return <EmptyState 
+    return <EmptyState
              title={searchQuery ? "No equipment matches your search" : "No equipment found"}
              message={searchQuery ? "Try a different search term." : "Get started by adding new equipment."}
              icon={<Package className="w-16 h-16 text-gray-400" />}
@@ -82,24 +82,25 @@ const EquipmentList: React.FC<EquipmentListProps> = ({
       )}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {equipmentList.map(item => (
-          <EquipmentCard 
-            key={item.equipment_id} 
-            equipment={item} 
+          <EquipmentCard
+            key={item.equipment_id}
+            equipment={item}
             onEdit={onEditEquipment}
             onViewMaintenance={onViewMaintenance}
-            categoryName={getCategoryName(item.category_id)} // Pass the category name
+            categoryName={getCategoryName(item.category_id)}
+            onViewDetail={onViewDetail} // Pass onViewDetail to EquipmentCard
           />
         ))}
       </div>
-      
+
       {loading && equipmentList.length > 0 && (
         <div className="my-4 flex justify-center">
           <Spinner size="md" />
         </div>
       )}
-      
+
       {totalPages > 1 && (
-        <Pagination 
+        <Pagination
           currentPage={currentPage}
           totalPages={totalPages}
           onPageChange={fetchEquipmentPage}

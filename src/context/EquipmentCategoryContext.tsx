@@ -12,6 +12,7 @@ interface EquipmentCategoryContextType {
   setSearchQuery: (query: string) => void;
   fetchCategoriesPage: (page: number) => void;
   refreshCategories: () => void;
+  getCategoryNameById: (id: number | null | undefined) => string | undefined; // New function
 }
 
 const EquipmentCategoryContext = createContext<EquipmentCategoryContextType | undefined>(undefined);
@@ -31,14 +32,16 @@ interface EquipmentCategoryProviderProps {
 
 export const EquipmentCategoryProvider: React.FC<EquipmentCategoryProviderProps> = ({
   children,
-  recordsPerPage = 10,
+  recordsPerPage = 10, // Default, can be overridden
 }) => {
   const [categories, setCategories] = useState<EquipmentCategory[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false); // Default to false, set to true during fetch
   const [error, setError] = useState<string | null>(null);
   const [totalCategories, setTotalCategories] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQueryState] = useState(''); // Renamed to avoid conflict
+  const [initialLoadDone, setInitialLoadDone] = useState(false);
+
 
   const processApiResponse = (response: ApiResponse, page: number, currentSkip: number) => {
     if (response.success && Array.isArray(response.data)) {
@@ -57,14 +60,14 @@ export const EquipmentCategoryProvider: React.FC<EquipmentCategoryProviderProps>
       setTotalCategories(0);
     } else {
       setError(response.message || 'Unable to fetch equipment categories.');
-      if (categories.length === 0) {
+      if (categories.length === 0) { // Only clear if no data was previously loaded
         setCategories([]);
         setTotalCategories(0);
       }
     }
   };
 
-  const fetchCategoriesPage = useCallback(async (page: number, query: string = searchQuery) => {
+  const fetchCategoriesData = useCallback(async (page: number, query: string) => {
     setLoading(true);
     setError(null);
     try {
@@ -73,7 +76,7 @@ export const EquipmentCategoryProvider: React.FC<EquipmentCategoryProviderProps>
       const paginationParams: PaginationParams = { records: recordsPerPage, skip };
 
       if (query.trim()) {
-        response = await searchEquipmentCategories(query, paginationParams);
+        response = await searchEquipmentCategories(query.trim(), paginationParams);
       } else {
         response = await fetchEquipmentCategories(paginationParams);
       }
@@ -88,33 +91,48 @@ export const EquipmentCategoryProvider: React.FC<EquipmentCategoryProviderProps>
       }
     } finally {
       setLoading(false);
+      if (page === 1 && !query.trim()) {
+        setInitialLoadDone(true);
+      }
     }
-  }, [recordsPerPage, searchQuery, categories.length]);
+  }, [recordsPerPage, categories.length]); // categories.length for error handling logic
+
+  const setSearchQuery = (query: string) => {
+    setSearchQueryState(query);
+    setCurrentPage(1);
+    setInitialLoadDone(false);
+  };
 
   useEffect(() => {
-    if (!searchQuery) {
-      fetchCategoriesPage(1, '');
+    if (!searchQuery.trim() && !initialLoadDone && !loading) {
+      fetchCategoriesData(1, '');
     }
-  }, [fetchCategoriesPage]); // searchQuery removed to let debounce handle it
+  }, [searchQuery, initialLoadDone, loading, fetchCategoriesData]);
 
-   useEffect(() => {
+  useEffect(() => {
     const handler = setTimeout(() => {
       if (searchQuery.trim()) {
-        fetchCategoriesPage(1, searchQuery);
-      } else if (!searchQuery.trim() && categories.length === 0 && !loading) { 
-        fetchCategoriesPage(1, '');
+        fetchCategoriesData(1, searchQuery.trim());
       }
-    }, 500); 
+    }, 700); // Debounce time
 
-    return () => {
-      clearTimeout(handler);
-    };
-  }, [searchQuery, fetchCategoriesPage, categories.length, loading]);
+    return () => clearTimeout(handler);
+  }, [searchQuery, fetchCategoriesData]);
 
 
   const refreshCategories = () => {
-    fetchCategoriesPage(currentPage, searchQuery);
+    if (currentPage === 1 && !searchQuery.trim()) {
+        setInitialLoadDone(false);
+    }
+    fetchCategoriesData(currentPage, searchQuery);
   };
+
+  const getCategoryNameById = useCallback((id: number | null | undefined): string | undefined => {
+    if (id === null || id === undefined) return undefined;
+    const category = categories.find(cat => cat.category_id === id);
+    return category?.category_name;
+  }, [categories]);
+
 
   const value = {
     categories,
@@ -124,8 +142,9 @@ export const EquipmentCategoryProvider: React.FC<EquipmentCategoryProviderProps>
     currentPage,
     searchQuery,
     setSearchQuery,
-    fetchCategoriesPage: (page: number) => fetchCategoriesPage(page, searchQuery),
+    fetchCategoriesPage: (page: number) => fetchCategoriesData(page, searchQuery),
     refreshCategories,
+    getCategoryNameById,
   };
 
   return (

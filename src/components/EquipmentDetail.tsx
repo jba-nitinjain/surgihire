@@ -1,39 +1,31 @@
 import React from 'react';
-import { Equipment, EquipmentCategory } from '../types';
-import { 
-  Package, Tag, Hash, CalendarDays, MapPin, Info, Wrench, Layers, IndianRupee, 
+import { Equipment } from '../types'; // EquipmentCategory removed as categoryName is passed
+import {
+  Package, Tag, Hash, CalendarDays, MapPin, Info, Wrench, Layers,
   X, ArrowLeft, Edit3, ListChecks
 } from 'lucide-react';
+import { formatDate, formatCurrency } from '../utils/formatting'; // Import utilities
 
 interface EquipmentDetailProps {
   equipment: Equipment | null;
-  categoryName?: string;
+  categoryName?: string; // Category name is now passed as a prop
   onClose: () => void;
   onEdit: (equipment: Equipment) => void;
   onViewMaintenance: (equipmentId: string) => void;
 }
 
-const EquipmentDetail: React.FC<EquipmentDetailProps> = ({ 
-  equipment, 
-  categoryName,
-  onClose, 
+const EquipmentDetail: React.FC<EquipmentDetailProps> = ({
+  equipment,
+  categoryName, // Use the passed categoryName
+  onClose,
   onEdit,
-  onViewMaintenance 
+  onViewMaintenance
 }) => {
   if (!equipment) {
     return null;
   }
 
-  const formatDate = (dateString: string | null | undefined) => {
-    if (!dateString) return 'N/A';
-    try {
-      const date = new Date(dateString);
-      return new Intl.DateTimeFormat('en-US', {
-        year: 'numeric', month: 'long', day: 'numeric',
-        // hour: '2-digit', minute: '2-digit' // Removed time for dates like purchase_date
-      }).format(date);
-    } catch (e) { return dateString; }
-  };
+  // formatDate and formatCurrency are now imported
 
   const handleEditClick = () => {
     onEdit(equipment);
@@ -48,7 +40,7 @@ const EquipmentDetail: React.FC<EquipmentDetailProps> = ({
       <div className="w-full max-w-lg bg-light-gray-50 h-full overflow-y-auto animate-slide-in-right shadow-2xl">
         <div className="sticky top-0 bg-white z-10 shadow-sm">
           <div className="flex justify-between items-center p-4 border-b border-light-gray-200">
-            <button 
+            <button
               onClick={onClose}
               className="md:hidden p-2 rounded-full hover:bg-light-gray-100"
               aria-label="Back"
@@ -73,7 +65,7 @@ const EquipmentDetail: React.FC<EquipmentDetailProps> = ({
                 >
                     <ListChecks className="h-5 w-5" />
                 </button>
-                 <button 
+                 <button
                     onClick={onClose}
                     className="p-2 rounded-full hover:bg-light-gray-100"
                     aria-label="Close"
@@ -83,7 +75,7 @@ const EquipmentDetail: React.FC<EquipmentDetailProps> = ({
             </div>
           </div>
         </div>
-        
+
         <div className="p-6">
           <div className="bg-gradient-to-br from-brand-blue to-brand-blue/90 rounded-lg p-6 text-white mb-6 shadow">
             <div className="flex items-center gap-4">
@@ -96,7 +88,7 @@ const EquipmentDetail: React.FC<EquipmentDetailProps> = ({
               </div>
             </div>
           </div>
-          
+
           <div className="space-y-6">
             <section>
               <h4 className="text-sm font-medium text-dark-text uppercase tracking-wider mb-3">
@@ -113,7 +105,7 @@ const EquipmentDetail: React.FC<EquipmentDetailProps> = ({
                       </div>
                     </div>
                   )}
-                  {categoryName && (
+                  {categoryName && ( // Use the passed categoryName
                     <div className="flex p-4 items-start">
                       <Layers className="h-5 w-5 text-brand-blue mr-3 mt-1 flex-shrink-0" />
                       <div>
@@ -133,7 +125,7 @@ const EquipmentDetail: React.FC<EquipmentDetailProps> = ({
                   )}
                   {equipment.make && (
                     <div className="flex p-4 items-start">
-                      <Tag className="h-5 w-5 text-dark-text/70 mr-3 mt-1 flex-shrink-0" /> 
+                      <Tag className="h-5 w-5 text-dark-text/70 mr-3 mt-1 flex-shrink-0" />
                       <div>
                         <p className="text-xs text-dark-text/60 mb-0.5">Make</p>
                         <p className="text-sm text-dark-text">{equipment.make}</p>
@@ -168,12 +160,13 @@ const EquipmentDetail: React.FC<EquipmentDetailProps> = ({
                       </div>
                     </div>
                   )}
-                  {equipment.rental_rate !== null && equipment.rental_rate !== undefined && (
+                  {(equipment.rental_rate !== null && equipment.rental_rate !== undefined) && (
                     <div className="flex p-4 items-start">
-                      <IndianRupee className="h-5 w-5 text-brand-blue mr-3 mt-1 flex-shrink-0" />
+                      {/* Using text-green-600 for currency icon as before, but formatCurrency handles the symbol */}
+                       <span className={`h-5 w-5 mr-3 mt-1 flex-shrink-0 text-brand-blue font-semibold`}>{formatCurrency(equipment.rental_rate).charAt(0)}</span>
                       <div>
                         <p className="text-xs text-dark-text/60 mb-0.5">Rental Rate (per day)</p>
-                        <p className="text-sm text-dark-text">{Number(equipment.rental_rate).toLocaleString('en-IN', { style: 'currency', currency: 'INR' })}</p>
+                        <p className="text-sm text-dark-text">{formatCurrency(equipment.rental_rate)}</p>
                       </div>
                     </div>
                   )}

@@ -1,32 +1,30 @@
 import React from 'react';
 import { Customer } from '../types';
-import { 
-  User, Mail, Phone, MapPin, Calendar, X, 
-  ArrowLeft, Edit3, Trash2
+import {
+  User, Mail, Phone, MapPin, Calendar, X,
+  ArrowLeft, Edit3
 } from 'lucide-react';
+import { formatDate } from '../utils/formatting'; // Import formatDate utility
 
 interface CustomerDetailProps {
-  customer: Customer | null; // Allow null for when no customer is selected
+  customer: Customer | null;
   onClose: () => void;
-  onEdit: (customer: Customer) => void; // Add onEdit prop
-  // onDelete: (customerId: string) => void; // Add onDelete prop - or handle delete via card
+  onEdit: (customer: Customer) => void;
 }
 
 const CustomerDetail: React.FC<CustomerDetailProps> = ({ customer, onClose, onEdit }) => {
   if (!customer) {
-    return null; // Don't render if no customer is selected
+    return null;
   }
 
-  const formatDate = (dateString: string) => {
-    if (!dateString) return 'N/A';
-    try {
-      const date = new Date(dateString);
-      return new Intl.DateTimeFormat('en-US', {
+  // formatDate is now imported, with options for more detailed time
+  const formatDateWithTime = (dateString: string) => {
+    return formatDate(dateString, {
         year: 'numeric', month: 'long', day: 'numeric',
         hour: '2-digit', minute: '2-digit'
-      }).format(date);
-    } catch (e) { return dateString; }
+    });
   };
+
 
   const handleEditClick = () => {
     onEdit(customer);
@@ -37,7 +35,7 @@ const CustomerDetail: React.FC<CustomerDetailProps> = ({ customer, onClose, onEd
       <div className="w-full max-w-lg bg-light-gray-50 h-full overflow-y-auto animate-slide-in-right shadow-2xl">
         <div className="sticky top-0 bg-white z-10 shadow-sm">
           <div className="flex justify-between items-center p-4 border-b border-light-gray-200">
-            <button 
+            <button
               onClick={onClose}
               className="md:hidden p-2 rounded-full hover:bg-light-gray-100"
               aria-label="Back"
@@ -53,15 +51,7 @@ const CustomerDetail: React.FC<CustomerDetailProps> = ({ customer, onClose, onEd
                 >
                     <Edit3 className="h-5 w-5" />
                 </button>
-                {/* Delete button can be added here too, or rely on card's delete */}
-                {/* <button
-                    onClick={() => onDelete(customer.customer_id)}
-                    className="p-2 rounded-full hover:bg-red-100 text-red-600"
-                    aria-label="Delete Customer"
-                >
-                    <Trash2 className="h-5 w-5" />
-                </button> */}
-                 <button 
+                 <button
                     onClick={onClose}
                     className="p-2 rounded-full hover:bg-light-gray-100"
                     aria-label="Close"
@@ -71,7 +61,7 @@ const CustomerDetail: React.FC<CustomerDetailProps> = ({ customer, onClose, onEd
             </div>
           </div>
         </div>
-        
+
         <div className="p-6">
           <div className="bg-gradient-to-br from-brand-blue to-brand-blue/90 rounded-lg p-6 text-white mb-6 shadow">
             <div className="flex items-center gap-4">
@@ -84,7 +74,7 @@ const CustomerDetail: React.FC<CustomerDetailProps> = ({ customer, onClose, onEd
               </div>
             </div>
           </div>
-          
+
           <div className="space-y-6">
             <section>
               <h4 className="text-sm font-medium text-dark-text uppercase tracking-wider mb-3">
@@ -101,7 +91,7 @@ const CustomerDetail: React.FC<CustomerDetailProps> = ({ customer, onClose, onEd
                       </div>
                     </div>
                   )}
-                  
+
                   {customer.mobile_number_1 && (
                     <div className="flex p-4 items-start">
                       <Phone className="h-5 w-5 text-brand-blue mr-3 mt-1 flex-shrink-0" />
@@ -111,7 +101,7 @@ const CustomerDetail: React.FC<CustomerDetailProps> = ({ customer, onClose, onEd
                       </div>
                     </div>
                   )}
-                  
+
                   {customer.mobile_number_2 && (
                     <div className="flex p-4 items-start">
                       <Phone className="h-5 w-5 text-dark-text/70 mr-3 mt-1 flex-shrink-0" />
@@ -121,7 +111,7 @@ const CustomerDetail: React.FC<CustomerDetailProps> = ({ customer, onClose, onEd
                       </div>
                     </div>
                   )}
-                  
+
                   {customer.mobile_number_3 && (
                     <div className="flex p-4 items-start">
                       <Phone className="h-5 w-5 text-dark-text/70 mr-3 mt-1 flex-shrink-0" />
@@ -134,7 +124,7 @@ const CustomerDetail: React.FC<CustomerDetailProps> = ({ customer, onClose, onEd
                 </div>
               </div>
             </section>
-            
+
             <section>
               <h4 className="text-sm font-medium text-dark-text uppercase tracking-wider mb-3">
                 Shipping Information
@@ -151,7 +141,7 @@ const CustomerDetail: React.FC<CustomerDetailProps> = ({ customer, onClose, onEd
                             </div>
                             </div>
                         )}
-                        
+
                         {(customer.shipping_area || customer.shipping_city || customer.shipping_state || customer.shipping_pincode) && (
                             <div className="flex p-4 items-start">
                                 <MapPin className="h-5 w-5 text-dark-text/70 mr-3 mt-1 flex-shrink-0 invisible md:visible" /> {/* Placeholder for alignment */}
@@ -189,7 +179,7 @@ const CustomerDetail: React.FC<CustomerDetailProps> = ({ customer, onClose, onEd
                  )}
               </div>
             </section>
-            
+
             <section>
               <h4 className="text-sm font-medium text-dark-text uppercase tracking-wider mb-3">
                 Account Information
@@ -200,7 +190,7 @@ const CustomerDetail: React.FC<CustomerDetailProps> = ({ customer, onClose, onEd
                   <div>
                     <p className="text-xs text-dark-text/60 mb-0.5">Registration Date</p>
                     <p className="text-sm text-dark-text">
-                      {formatDate(customer.registration_date)}
+                      {formatDateWithTime(customer.registration_date)}
                     </p>
                   </div>
                 </div>

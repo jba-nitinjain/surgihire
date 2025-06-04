@@ -2,14 +2,14 @@ import React, { useState } from 'react';
 import { Customer } from '../types';
 import { User, Mail, Phone, MapPin, Calendar, Edit3, Trash2, MoreVertical, Loader2 } from 'lucide-react';
 import { useCrud } from '../context/CrudContext';
-import ConfirmationModal from './ui/ConfirmationModal'; // Import ConfirmationModal
+import ConfirmationModal from './ui/ConfirmationModal';
 import { useCustomers } from '../context/CustomerContext';
-
+import { formatDate } from '../utils/formatting'; // Import formatDate utility
 
 interface CustomerCardProps {
   customer: Customer;
   onClick?: (customer: Customer) => void;
-  onEdit: (customer: Customer) => void; // Callback for edit
+  onEdit: (customer: Customer) => void;
 }
 
 const CustomerCard: React.FC<CustomerCardProps> = ({ customer, onClick, onEdit }) => {
@@ -18,20 +18,11 @@ const CustomerCard: React.FC<CustomerCardProps> = ({ customer, onClick, onEdit }
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
 
-  const formatDate = (dateString: string) => {
-    if (!dateString) return 'N/A';
-    try {
-      const date = new Date(dateString);
-      return new Intl.DateTimeFormat('en-US', {
-        year: 'numeric', month: 'short', day: 'numeric'
-      }).format(date);
-    } catch (e) { return dateString; }
-  };
+  // formatDate is now imported from utils
 
   const hasShippingInfo = customer.shipping_address || customer.shipping_city || customer.shipping_state;
 
   const handleCardClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    // Prevent card click if menu button or its children are clicked
     if ((e.target as HTMLElement).closest('.customer-card-menu-button')) {
       return;
     }
@@ -39,13 +30,13 @@ const CustomerCard: React.FC<CustomerCardProps> = ({ customer, onClick, onEdit }
   };
 
   const handleEdit = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent card click
+    e.stopPropagation();
     onEdit(customer);
     setIsMenuOpen(false);
   };
 
   const handleDeleteClick = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent card click
+    e.stopPropagation();
     setIsConfirmModalOpen(true);
     setIsMenuOpen(false);
   };
@@ -53,10 +44,9 @@ const CustomerCard: React.FC<CustomerCardProps> = ({ customer, onClick, onEdit }
   const confirmDelete = async () => {
     try {
       await deleteItem('customers', customer.customer_id);
-      refreshData(); // Refresh list after deletion
+      refreshData();
     } catch (error) {
       console.error("Failed to delete customer:", error);
-      // Error handling can be enhanced, e.g., show a notification
     } finally {
       setIsConfirmModalOpen(false);
     }
@@ -65,14 +55,14 @@ const CustomerCard: React.FC<CustomerCardProps> = ({ customer, onClick, onEdit }
 
   return (
     <>
-      <div 
-        className="bg-white rounded-lg shadow-sm border border-light-gray-200 overflow-hidden hover:shadow-md 
+      <div
+        className="bg-white rounded-lg shadow-sm border border-light-gray-200 overflow-hidden hover:shadow-md
                   transition-shadow duration-300 cursor-pointer relative"
         onClick={handleCardClick}
       >
         <div className="p-6">
           <div className="flex justify-between items-start mb-4">
-            <div className="flex items-center min-w-0"> {/* Added min-w-0 for better truncation */}
+            <div className="flex items-center min-w-0">
               <div className="bg-brand-blue/10 text-brand-blue p-2 rounded-full mr-3 sm:mr-4 flex-shrink-0">
                 <User className="h-5 w-5" />
               </div>
@@ -80,8 +70,7 @@ const CustomerCard: React.FC<CustomerCardProps> = ({ customer, onClick, onEdit }
                 {customer.full_name || 'Unnamed Customer'}
               </h3>
             </div>
-            
-            {/* Actions Menu */}
+
             <div className="relative customer-card-menu-button">
               <button
                 onClick={(e) => {
@@ -94,9 +83,9 @@ const CustomerCard: React.FC<CustomerCardProps> = ({ customer, onClick, onEdit }
                 <MoreVertical size={20} />
               </button>
               {isMenuOpen && (
-                <div 
+                <div
                     className="absolute right-0 mt-2 w-40 bg-white rounded-md shadow-lg z-10 border border-light-gray-200"
-                    onClick={(e) => e.stopPropagation()} // Prevent menu close on item click if not desired
+                    onClick={(e) => e.stopPropagation()}
                 >
                   <button
                     onClick={handleEdit}
@@ -117,7 +106,7 @@ const CustomerCard: React.FC<CustomerCardProps> = ({ customer, onClick, onEdit }
               )}
             </div>
           </div>
-          
+
           <div className="space-y-3 text-sm">
             <div className="flex items-center text-dark-text/80">
                 <span className="text-xs font-medium text-brand-blue bg-light-gray-50 px-2 py-0.5 rounded-full">
@@ -131,14 +120,14 @@ const CustomerCard: React.FC<CustomerCardProps> = ({ customer, onClick, onEdit }
                 <span className="text-dark-text break-all">{customer.email}</span>
               </div>
             )}
-            
+
             {customer.mobile_number_1 && (
               <div className="flex items-start">
                 <Phone className="h-4 w-4 text-dark-text/70 mt-0.5 mr-2 flex-shrink-0" />
                 <span className="text-dark-text">{customer.mobile_number_1}</span>
               </div>
             )}
-            
+
             {hasShippingInfo && (
               <div className="flex items-start">
                 <MapPin className="h-4 w-4 text-dark-text/70 mt-0.5 mr-2 flex-shrink-0" />
@@ -152,7 +141,7 @@ const CustomerCard: React.FC<CustomerCardProps> = ({ customer, onClick, onEdit }
                 </span>
               </div>
             )}
-            
+
             <div className="flex items-start">
               <Calendar className="h-4 w-4 text-dark-text/70 mt-0.5 mr-2 flex-shrink-0" />
               <span className="text-dark-text">

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useEquipment } from '../../context/EquipmentContext';
 import { useEquipmentCategories } from '../../context/EquipmentCategoryContext';
 import EquipmentList from '../EquipmentList';
@@ -9,50 +9,76 @@ import { PlusCircle } from 'lucide-react';
 import { Equipment } from '../../types';
 
 interface EquipmentTabProps {
-  selectedEquipment: Equipment | null;
-  setSelectedEquipment: (equipment: Equipment | null) => void;
-  isEquipmentFormOpen: boolean;
-  setIsEquipmentFormOpen: (isOpen: boolean) => void;
-  editingEquipment: Equipment | null;
-  setEditingEquipment: (equipment: Equipment | null) => void;
-  handleViewMaintenanceForEquipment: (equipmentId: string) => void;
-  equipmentSearchQuery: string; // Added for search functionality
-  setEquipmentSearchQuery: (query: string) => void; // Added for search functionality
+  // This prop is for navigating away from this tab to the maintenance tab
+  onViewMaintenanceForEquipment: (equipmentId: string) => void;
 }
 
 const equipmentStatusesForFilter = ['Available', 'Rented', 'Maintenance', 'Decommissioned', 'Lost'];
 
-const EquipmentTab: React.FC<EquipmentTabProps> = ({
-  selectedEquipment,
-  setSelectedEquipment,
-  isEquipmentFormOpen,
-  setIsEquipmentFormOpen,
-  editingEquipment,
-  setEditingEquipment,
-  handleViewMaintenanceForEquipment,
-  equipmentSearchQuery, // Destructure new prop
-  setEquipmentSearchQuery, // Destructure new prop
-}) => {
+const EquipmentTab: React.FC<EquipmentTabProps> = ({ onViewMaintenanceForEquipment }) => {
   const {
-    // searchQuery: equipmentSearchQuery, // Now passed as prop
-    // setSearchQuery: setEquipmentSearchQuery, // Now passed as prop
+    searchQuery: equipmentSearchQuery,
+    setSearchQuery: setEquipmentSearchQuery,
     refreshEquipmentData,
     filters: equipmentFilters,
     setFilters: setEquipmentFilters,
   } = useEquipment();
 
-  const { categories: allEquipmentCategories, loading: eqCategoriesLoadingForFilter, error: eqCategoriesFilterError } = useEquipmentCategories();
+  const {
+    categories: allEquipmentCategories,
+    loading: eqCategoriesLoadingForFilter,
+    error: eqCategoriesFilterError,
+    getCategoryNameById,
+    refreshCategories: refreshEqCategoriesForFilter, // Added for fetching categories
+  } = useEquipmentCategories();
 
-  const handleSelectEquipmentForDetail = (equipment: Equipment) => setSelectedEquipment(equipment);
-  const handleCloseEquipmentDetail = () => setSelectedEquipment(null);
-  const handleOpenEquipmentFormForCreate = () => { setEditingEquipment(null); setIsEquipmentFormOpen(true); };
-  const handleOpenEquipmentFormForEdit = (item: Equipment) => { setEditingEquipment(item); setIsEquipmentFormOpen(true); };
-  const handleCloseEquipmentForm = () => { setIsEquipmentFormOpen(false); setEditingEquipment(null); };
-  const handleSaveEquipmentForm = () => { handleCloseEquipmentForm(); refreshEquipmentData(); };
+  // State managed within EquipmentTab
+  const [selectedEquipment, setSelectedEquipment] = useState<Equipment | null>(null);
+  const [isEquipmentFormOpen, setIsEquipmentFormOpen] = useState(false);
+  const [editingEquipment, setEditingEquipment] = useState<Equipment | null>(null);
+
+  // Fetch equipment categories for the filter dropdown when tab mounts
+  useEffect(() => {
+    if (allEquipmentCategories.length === 0 && !eqCategoriesLoadingForFilter && !eqCategoriesFilterError) {
+      refreshEqCategoriesForFilter();
+    }
+  }, [allEquipmentCategories.length, eqCategoriesLoadingForFilter, eqCategoriesFilterError, refreshEqCategoriesForFilter]);
+
+
+  const handleSelectEquipmentForDetail = (equipment: Equipment) => {
+    setSelectedEquipment(equipment);
+    setIsEquipmentFormOpen(false); // Close form if open
+    setEditingEquipment(null);
+  };
+
+  const handleCloseEquipmentDetail = () => {
+    setSelectedEquipment(null);
+  };
+
+  const handleOpenEquipmentFormForCreate = () => {
+    setEditingEquipment(null);
+    setSelectedEquipment(null); // Close detail if open
+    setIsEquipmentFormOpen(true);
+  };
+
+  const handleOpenEquipmentFormForEdit = (item: Equipment) => {
+    setEditingEquipment(item);
+    setSelectedEquipment(null); // Close detail view
+    setIsEquipmentFormOpen(true);
+  };
+
+  const handleCloseEquipmentForm = () => {
+    setIsEquipmentFormOpen(false);
+    setEditingEquipment(null);
+  };
+
+  const handleSaveEquipmentForm = () => {
+    handleCloseEquipmentForm();
+    refreshEquipmentData();
+  };
 
   return (
     <>
-      {/* ====== EQUIPMENT FILTERS UI ====== */}
       <div className="mb-6 p-4 bg-white rounded-lg shadow">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
           <div className="md:col-span-1">
@@ -69,7 +95,7 @@ const EquipmentTab: React.FC<EquipmentTabProps> = ({
               id="equipmentStatusFilter"
               name="status"
               value={equipmentFilters.status || 'all'}
-              onChange={(e) => setEquipmentFilters({ status: e.target.value === 'all' ? null : e.target.value })}
+              onChange={(e) => setEquipmentFilters({ ...equipmentFilters, status: e.target.value === 'all' ? null : e.target.value })}
               className="block w-full pl-3 pr-10 py-2 text-base border-light-gray-300 focus:outline-none focus:ring-brand-blue focus:border-brand-blue sm:text-sm rounded-md shadow-sm"
             >
               <option value="all">All Statuses</option>
@@ -84,38 +110,46 @@ const EquipmentTab: React.FC<EquipmentTabProps> = ({
               id="equipmentCategoryFilter"
               name="category_id"
               value={equipmentFilters.category_id || 'all'}
-              onChange={(e) => setEquipmentFilters({ category_id: e.target.value === 'all' ? null : e.target.value })}
+              onChange={(e) => setEquipmentFilters({ ...equipmentFilters, category_id: e.target.value === 'all' ? null : e.target.value })}
               disabled={eqCategoriesLoadingForFilter || !!eqCategoriesFilterError}
               className="block w-full pl-3 pr-10 py-2 text-base border-light-gray-300 focus:outline-none focus:ring-brand-blue focus:border-brand-blue sm:text-sm rounded-md shadow-sm"
             >
               <option value="all">{eqCategoriesLoadingForFilter ? "Loading..." : (eqCategoriesFilterError ? "Error" : "All Categories")}</option>
               {!eqCategoriesLoadingForFilter && !eqCategoriesFilterError && allEquipmentCategories.map(cat => (
-                <option key={cat.category_id} value={cat.category_id}>{cat.category_name}</option>
+                <option key={cat.category_id} value={String(cat.category_id)}>{cat.category_name}</option>
               ))}
             </select>
           </div>
         </div>
       </div>
-      {/* ====== END EQUIPMENT FILTERS UI ====== */}
 
       <div className="mb-6 flex justify-end">
         <button onClick={handleOpenEquipmentFormForCreate} className="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-brand-blue hover:bg-brand-blue/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-blue transition-colors">
           <PlusCircle className="h-5 w-5 mr-2" />Add New Equipment
         </button>
       </div>
-      <EquipmentList onEditEquipment={handleOpenEquipmentFormForEdit} onViewMaintenance={handleViewMaintenanceForEquipment} onViewDetail={handleSelectEquipmentForDetail} />
+      <EquipmentList
+        onEditEquipment={handleOpenEquipmentFormForEdit}
+        onViewMaintenance={onViewMaintenanceForEquipment} // Use the passed prop
+        onViewDetail={handleSelectEquipmentForDetail}
+      />
 
-      {isEquipmentFormOpen && <EquipmentForm equipment={editingEquipment} onSave={handleSaveEquipmentForm} onCancel={handleCloseEquipmentForm}/>}
-      {selectedEquipment && 
-        <EquipmentDetail 
-          equipment={selectedEquipment} 
-          onClose={handleCloseEquipmentDetail} 
-          onEdit={() => {
-            handleOpenEquipmentFormForEdit(selectedEquipment); 
-            setSelectedEquipment(null); // Close detail view when opening edit form
-          }} 
+      {isEquipmentFormOpen && (
+        <EquipmentForm
+          equipment={editingEquipment}
+          onSave={handleSaveEquipmentForm}
+          onCancel={handleCloseEquipmentForm}
         />
-      }
+      )}
+      {selectedEquipment && !isEquipmentFormOpen && ( // Show detail only if form is not open
+        <EquipmentDetail
+          equipment={selectedEquipment}
+          categoryName={getCategoryNameById(selectedEquipment.category_id)}
+          onClose={handleCloseEquipmentDetail}
+          onEdit={() => handleOpenEquipmentFormForEdit(selectedEquipment)}
+          onViewMaintenance={onViewMaintenanceForEquipment} // Use the passed prop
+        />
+      )}
     </>
   );
 };

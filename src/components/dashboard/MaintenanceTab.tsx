@@ -1,150 +1,238 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useMaintenanceRecords } from '../../context/MaintenanceRecordContext';
-import { useEquipmentCategories } from '../../context/EquipmentCategoryContext'; // For equipment filter dropdown
+import { useCrud } from '../../context/CrudContext';
 import MaintenanceRecordList from '../MaintenanceRecordList';
 import MaintenanceRecordForm from '../MaintenanceRecordForm';
 import SearchBox from '../ui/SearchBox';
+import ConfirmationModal from '../ui/ConfirmationModal';
 import { PlusCircle, ListChecks } from 'lucide-react';
-import { MaintenanceRecord } from '../../types';
+import { MaintenanceRecord, MaintenanceRecordFormData } from '../../types';
 
 interface MaintenanceTabProps {
-  isMaintenanceFormOpen: boolean;
-  setIsMaintenanceFormOpen: (isOpen: boolean) => void;
-  editingMaintenanceRecord: MaintenanceRecord | null;
-  setEditingMaintenanceRecord: (record: MaintenanceRecord | null) => void;
-  activeMaintenanceSubTab: string;
-  setActiveMaintenanceSubTab: (subTab: string) => void;
-  viewingMaintenanceForEquipment: string | null;
+  initialEquipmentIdFilter?: string | null; // For navigating with a pre-selected equipment
 }
 
 const maintenanceTypesForFilter = ['Routine', 'Repair', 'Inspection', 'Upgrade', 'Calibration', 'Emergency'];
 
-const MaintenanceTab: React.FC<MaintenanceTabProps> = ({
-  isMaintenanceFormOpen,
-  setIsMaintenanceFormOpen,
-  editingMaintenanceRecord,
-  setEditingMaintenanceRecord,
-  activeMaintenanceSubTab,
-  setActiveMaintenanceSubTab,
-  viewingMaintenanceForEquipment,
-}) => {
+const MaintenanceTab: React.FC<MaintenanceTabProps> = ({ initialEquipmentIdFilter }) => {
   const {
     searchQuery: maintenanceSearchQuery,
     setSearchQuery: setMaintenanceSearchQuery,
     refreshMaintenanceRecords,
     filters: maintenanceFilters,
     setFilters: setMaintenanceFilters,
+    fetchEquipmentListForFilter,
+    equipmentListForFilter,
+    loadingEquipmentList,
   } = useMaintenanceRecords();
 
-  const { loading: eqCategoriesLoadingForFilter } = useEquipmentCategories(); // Placeholder for equipment loading
+  const { createItem, updateItem, deleteItem, loading: crudLoading } = useCrud();
 
-  const maintenanceSubTabs = [
+  // Internal UI state for this tab
+  const [activeMaintenanceSubTab, setActiveMaintenanceSubTab] = useState('list');
+  const [isMaintenanceFormOpen, setIsMaintenanceFormOpen] = useState(false);
+  const [editingMaintenanceRecord, setEditingMaintenanceRecord] = useState<MaintenanceRecord | null>(null);
+  const [recordToDelete, setRecordToDelete] = useState<MaintenanceRecord | null>(null);
+  const [isConfirmDeleteModalOpen, setIsConfirmDeleteModalOpen] = useState(false);
+
+  useEffect(() => {
+    if (equipmentListForFilter.length === 0 && !loadingEquipmentList) {
+      fetchEquipmentListForFilter();
+    }
+  }, [equipmentListForFilter.length, loadingEquipmentList, fetchEquipmentListForFilter]);
+
+  // Apply initial filter if provided
+  useEffect(() => {
+    if (initialEquipmentIdFilter) {
+      setMaintenanceFilters({ equipment_id: initialEquipmentIdFilter, maintenance_type: null });
+      // Clear search query if navigating with a filter
+      setMaintenanceSearchQuery('');
+    }
+    // Note: This effect runs when initialEquipmentIdFilter changes.
+    // If the tab is re-rendered without this prop (e.g., user navigates away and back),
+    // the filter will persist from the context unless explicitly cleared.
+  }, [initialEquipmentIdFilter, setMaintenanceFilters, setMaintenanceSearchQuery]);
+
+
+  const maintenanceSubTabsData = [
     { id: 'list', label: 'Records List', icon: <ListChecks size={16} /> },
-    { id: 'form', label: 'Add New Record', icon: <PlusCircle size={16} /> },
+    // "Add New Record" is now triggered by a button, not a sub-tab itself for content display
   ];
 
-  const handleOpenMaintenanceFormForCreate = () => { setEditingMaintenanceRecord(null); setIsMaintenanceFormOpen(true); setActiveMaintenanceSubTab('form'); };
-  const handleOpenMaintenanceFormForEdit = (record: MaintenanceRecord) => { setEditingMaintenanceRecord(record); setIsMaintenanceFormOpen(true); setActiveMaintenanceSubTab('form'); };
-  const handleCloseMaintenanceForm = () => { setIsMaintenanceFormOpen(false); setEditingMaintenanceRecord(null); setActiveMaintenanceSubTab('list'); };
-  const handleSaveMaintenanceForm = () => { handleCloseMaintenanceForm(); refreshMaintenanceRecords(); };
+  const handleOpenMaintenanceFormForCreate = () => {
+    setEditingMaintenanceRecord(null);
+    setIsMaintenanceFormOpen(true);
+    // No need to change activeMaintenanceSubTab if form is a modal overlay or separate view
+  };
+
+  const handleOpenMaintenanceFormForEdit = (record: MaintenanceRecord) => {
+    setEditingMaintenanceRecord(record);
+    setIsMaintenanceFormOpen(true);
+  };
+
+  const handleCloseMaintenanceForm = () => {
+    setIsMaintenanceFormOpen(false);
+    setEditingMaintenanceRecord(null);
+    setActiveMaintenanceSubTab('list'); // Ensure list is active after closing form
+  };
+
+  const handleSaveMaintenanceForm = async (data: MaintenanceRecordFormData) => {
+    // Convert cost and equipment_id back to numbers if they are strings from the form
+    const apiData: any = {
+        ...data,
+        cost: data.cost ? parseFloat(data.cost) : null,
+        equipment_id: parseInt(String(data.equipment_id), 10),
+    };
+
+    // Remove null or empty string optional fields if API prefers them absent
+    if (apiData.maintenance_type === '') apiData.maintenance_type = null;
+    if (apiData.technician === '') apiData.technician = null;
+    if (apiData.notes === '') apiData.notes = null;
+
+
+    try {
+      if (editingMaintenanceRecord && editingMaintenanceRecord.maintenance_id) {
+        await updateItem('maintenance_records', editingMaintenanceRecord.maintenance_id, apiData);
+      } else {
+        await createItem('maintenance_records', apiData);
+      }
+      refreshMaintenanceRecords();
+      handleCloseMaintenanceForm();
+    } catch (error) {
+      console.error("Failed to save maintenance record:", error);
+      // Error state is managed by CrudContext, can be displayed globally or locally
+    }
+  };
+
+  const handleDeleteRecordClick = (record: MaintenanceRecord) => {
+    setRecordToDelete(record);
+    setIsConfirmDeleteModalOpen(true);
+  };
+
+  const confirmDeleteRecord = async () => {
+    if (recordToDelete) {
+      try {
+        await deleteItem('maintenance_records', recordToDelete.maintenance_id);
+        refreshMaintenanceRecords();
+      } catch (error) {
+        console.error("Failed to delete maintenance record:", error);
+      } finally {
+        setIsConfirmDeleteModalOpen(false);
+        setRecordToDelete(null);
+      }
+    }
+  };
 
   return (
     <>
-      {isMaintenanceFormOpen ? (
+      {/* Sub-tab navigation - simplified as form is now modal-like */}
+      <div className="mb-6 border-b border-light-gray-200">
+        <nav className="-mb-px flex space-x-4 overflow-x-auto" aria-label="Maintenance Tabs">
+          {maintenanceSubTabsData.map((subTab) => (
+            <button
+              key={subTab.id}
+              onClick={() => {
+                setActiveMaintenanceSubTab(subTab.id);
+                setIsMaintenanceFormOpen(false); // Close form if switching to list
+                setEditingMaintenanceRecord(null);
+              }}
+              className={`whitespace-nowrap pb-3 px-1 border-b-2 font-medium text-sm flex items-center
+                ${activeMaintenanceSubTab === subTab.id
+                  ? 'border-brand-blue text-brand-blue'
+                  : 'border-transparent text-dark-text/70 hover:text-dark-text hover:border-gray-300'
+                }`}
+            >
+              {subTab.icon && <span className="mr-2">{subTab.icon}</span>}
+              {subTab.label}
+            </button>
+          ))}
+        </nav>
+      </div>
+
+      {activeMaintenanceSubTab === 'list' && !isMaintenanceFormOpen && (
+        <>
+          <div className="mb-6 p-4 bg-white rounded-lg shadow">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+              <div className="md:col-span-1">
+                <label htmlFor="maintenanceSearch" className="block text-sm font-medium text-dark-text mb-1">Search Records</label>
+                <SearchBox
+                  value={maintenanceSearchQuery}
+                  onChange={setMaintenanceSearchQuery}
+                  placeholder="Search by technician, notes..."
+                />
+              </div>
+              <div>
+                <label htmlFor="maintenanceTypeFilter" className="block text-sm font-medium text-dark-text mb-1">Maintenance Type</label>
+                <select
+                  id="maintenanceTypeFilter"
+                  name="maintenance_type"
+                  value={maintenanceFilters.maintenance_type || 'all'}
+                  onChange={(e) => setMaintenanceFilters({ ...maintenanceFilters, maintenance_type: e.target.value === 'all' ? null : e.target.value })}
+                  className="block w-full pl-3 pr-10 py-2 text-base border-light-gray-300 focus:outline-none focus:ring-brand-blue focus:border-brand-blue sm:text-sm rounded-md shadow-sm"
+                >
+                  <option value="all">All Types</option>
+                  {maintenanceTypesForFilter.map(type => (
+                    <option key={type} value={type}>{type}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label htmlFor="maintenanceEquipmentFilter" className="block text-sm font-medium text-dark-text mb-1">Equipment</label>
+                <select
+                  id="maintenanceEquipmentFilter"
+                  name="equipment_id"
+                  value={maintenanceFilters.equipment_id || 'all'}
+                  onChange={(e) => setMaintenanceFilters({ ...maintenanceFilters, equipment_id: e.target.value === 'all' ? null : e.target.value })}
+                  disabled={loadingEquipmentList}
+                  className="block w-full pl-3 pr-10 py-2 text-base border-light-gray-300 focus:outline-none focus:ring-brand-blue focus:border-brand-blue sm:text-sm rounded-md shadow-sm"
+                >
+                  <option value="all">{loadingEquipmentList ? "Loading Equipment..." : "All Equipment"}</option>
+                  {!loadingEquipmentList && equipmentListForFilter.map(eq => (
+                    <option key={eq.equipment_id} value={String(eq.equipment_id)}>{eq.equipment_name} ({eq.serial_number || 'N/A'})</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div className="mb-6 flex justify-end">
+            <button onClick={handleOpenMaintenanceFormForCreate} className="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-brand-blue hover:bg-brand-blue/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-blue transition-colors">
+              <PlusCircle className="h-5 w-5 mr-2" />Add New Record
+            </button>
+          </div>
+          <MaintenanceRecordList
+            onEditRecord={handleOpenMaintenanceFormForEdit}
+            onDeleteRecord={handleDeleteRecordClick}
+            // initialFilters is now handled by the useEffect in this component
+          />
+        </>
+      )}
+
+      {isMaintenanceFormOpen && (
         <MaintenanceRecordForm
-          record={editingMaintenanceRecord ? { ...editingMaintenanceRecord, equipment_id: String(editingMaintenanceRecord.equipment_id), cost: String(editingMaintenanceRecord.cost) } : undefined}
+          record={editingMaintenanceRecord ? {
+            equipment_id: String(editingMaintenanceRecord.equipment_id),
+            maintenance_date: editingMaintenanceRecord.maintenance_date,
+            maintenance_type: editingMaintenanceRecord.maintenance_type || '',
+            technician: editingMaintenanceRecord.technician || '',
+            cost: editingMaintenanceRecord.cost !== null ? String(editingMaintenanceRecord.cost) : '',
+            notes: editingMaintenanceRecord.notes || '',
+          } : undefined}
           onSave={handleSaveMaintenanceForm}
           onCancel={handleCloseMaintenanceForm}
           isEditMode={!!editingMaintenanceRecord}
         />
-      ) : (
-        <>
-          <div className="mb-6 border-b border-light-gray-200">
-            <nav className="-mb-px flex space-x-4 overflow-x-auto" aria-label="Tabs">
-              {maintenanceSubTabs.map((subTab) => (
-                <button
-                  key={subTab.id}
-                  onClick={() => {
-                    setActiveMaintenanceSubTab(subTab.id);
-                    if (subTab.id === 'form') {
-                      handleOpenMaintenanceFormForCreate();
-                    } else {
-                      setIsMaintenanceFormOpen(false); // Ensure form closes if navigating back to list via subtab
-                    }
-                  }}
-                  className={`whitespace-nowrap pb-3 px-1 border-b-2 font-medium text-sm flex items-center
-                    ${activeMaintenanceSubTab === subTab.id
-                      ? 'border-brand-blue text-brand-blue'
-                      : 'border-transparent text-dark-text/70 hover:text-dark-text hover:border-gray-300'
-                    }`}
-                >
-                  {subTab.icon && <span className="mr-2">{subTab.icon}</span>}
-                  {subTab.label}
-                </button>
-              ))}
-            </nav>
-          </div>
-
-          {activeMaintenanceSubTab === 'list' && (
-            <>
-              {/* Maintenance Filters UI */}
-              <div className="mb-6 p-4 bg-white rounded-lg shadow">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-                  <div className="md:col-span-1">
-                    <label htmlFor="maintenanceSearch" className="block text-sm font-medium text-dark-text mb-1">Search Records</label>
-                    <SearchBox
-                      value={maintenanceSearchQuery}
-                      onChange={setMaintenanceSearchQuery}
-                      placeholder="Search by technician, notes..."
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="maintenanceTypeFilter" className="block text-sm font-medium text-dark-text mb-1">Maintenance Type</label>
-                    <select
-                      id="maintenanceTypeFilter"
-                      name="maintenance_type"
-                      value={maintenanceFilters.maintenance_type || 'all'}
-                      onChange={(e) => setMaintenanceFilters({ maintenance_type: e.target.value === 'all' ? null : e.target.value })}
-                      className="block w-full pl-3 pr-10 py-2 text-base border-light-gray-300 focus:outline-none focus:ring-brand-blue focus:border-brand-blue sm:text-sm rounded-md shadow-sm"
-                    >
-                      <option value="all">All Types</option>
-                      {maintenanceTypesForFilter.map(type => (
-                        <option key={type} value={type}>{type}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div>
-                    <label htmlFor="maintenanceEquipmentFilter" className="block text-sm font-medium text-dark-text mb-1">Equipment</label>
-                    <select
-                      id="maintenanceEquipmentFilter"
-                      name="equipment_id"
-                      value={maintenanceFilters.equipment_id || 'all'}
-                      onChange={(e) => setMaintenanceFilters({ equipment_id: e.target.value === 'all' ? null : e.target.value })}
-                      disabled={eqCategoriesLoadingForFilter} // Placeholder, ideally use a loading state for equipment list if fetched separately for filters
-                      className="block w-full pl-3 pr-10 py-2 text-base border-light-gray-300 focus:outline-none focus:ring-brand-blue focus:border-brand-blue sm:text-sm rounded-md shadow-sm"
-                    >
-                      <option value="all">All Equipment</option>
-                      {/* Populate with equipment options if available */}
-                      {/* Example: allEquipment.map(eq => (<option key={eq.id} value={eq.id}>{eq.name}</option>)) */}
-                    </select>
-                  </div>
-                </div>
-              </div>
-
-              <div className="mb-6 flex justify-end">
-                <button onClick={handleOpenMaintenanceFormForCreate} className="inline-flex items-center justify-jcenter px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-brand-blue hover:bg-brand-blue/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-blue transition-colors">
-                  <PlusCircle className="h-5 w-5 mr-2" />Add New Record
-                </button>
-              </div>
-              <MaintenanceRecordList
-                onEditRecord={handleOpenMaintenanceFormForEdit}
-                onDeleteRecord={() => { /* Implement delete logic */ }} // Placeholder for delete
-                initialFilters={viewingMaintenanceForEquipment ? { equipment_id: viewingMaintenanceForEquipment } : {}}
-              />
-            </>
-          )}
-        </>
       )}
+
+       <ConfirmationModal
+        isOpen={isConfirmDeleteModalOpen}
+        title="Delete Maintenance Record"
+        message={`Are you sure you want to delete this maintenance record? This action cannot be undone.`}
+        onConfirm={confirmDeleteRecord}
+        onCancel={() => setIsConfirmDeleteModalOpen(false)}
+        isLoading={crudLoading}
+        confirmText="Delete"
+      />
     </>
   );
 };

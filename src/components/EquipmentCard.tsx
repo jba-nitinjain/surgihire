@@ -1,52 +1,26 @@
 import React, { useState } from 'react';
 import { Equipment } from '../types';
-import { Package, Edit3, Trash2, MoreVertical, Loader2, CalendarDays, Tag, Hash, MapPin, Wrench, IndianRupee, FolderKanban, ListChecks } from 'lucide-react'; // Added FolderKanban for category
+import { Package, Edit3, Trash2, MoreVertical, Loader2, CalendarDays, Tag, Hash, MapPin, Wrench, ListChecks } from 'lucide-react'; // Removed IndianRupee, will use formatCurrency
 import { useCrud } from '../context/CrudContext';
 import ConfirmationModal from './ui/ConfirmationModal';
-import { useEquipment } from '../context/EquipmentContext'; 
+import { useEquipment } from '../context/EquipmentContext';
+import { formatDate, formatCurrency } from '../utils/formatting'; // Import utilities
 
 interface EquipmentCardProps {
   equipment: Equipment;
   onEdit: (equipment: Equipment) => void;
-  onViewMaintenance: (equipmentId: string) => void; // New prop for viewing maintenance records
-  categoryName?: string | null; // New prop for category name
+  onViewMaintenance: (equipmentId: string) => void;
+  categoryName?: string | null;
+  onViewDetail: (equipment: Equipment) => void; // Added for viewing details
 }
 
-const EquipmentCard: React.FC<EquipmentCardProps> = ({ equipment, onEdit, onViewMaintenance, categoryName }) => {
+const EquipmentCard: React.FC<EquipmentCardProps> = ({ equipment, onEdit, onViewMaintenance, categoryName, onViewDetail }) => {
   const { deleteItem, loading: crudLoading } = useCrud();
   const { refreshEquipmentData } = useEquipment();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
 
-  const formatDate = (dateString: string | null) => {
-    if (!dateString) return 'N/A';
-    try {
-      const date = new Date(dateString);
-      if (isNaN(date.getTime())) return 'Invalid Date';
-      return new Intl.DateTimeFormat('en-US', {
-        year: 'numeric', month: 'short', day: 'numeric'
-      }).format(date);
-    } catch (e) { return dateString; }
-  };
-
-  const formatCurrency = (value: number | string | null | undefined): string => {
-    let numericValue: number | null = null;
-
-    if (typeof value === 'number') {
-      numericValue = value;
-    } else if (typeof value === 'string') {
-      const parsed = parseFloat(value);
-      if (!isNaN(parsed)) {
-        numericValue = parsed;
-      }
-    }
-
-    if (numericValue !== null) {
-      return `₹${numericValue.toFixed(2)}`;
-    }
-    return 'N/A'; 
-  };
-
+  // formatDate and formatCurrency are now imported
 
   const handleEdit = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -70,12 +44,13 @@ const EquipmentCard: React.FC<EquipmentCardProps> = ({ equipment, onEdit, onView
       setIsConfirmModalOpen(false);
     }
   };
-  
+
   const handleCardClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if ((e.target as HTMLElement).closest('.equipment-card-menu-button')) {
       return;
     }
-    console.log("Equipment card clicked:", equipment.equipment_name);
+    // console.log("Equipment card clicked, opening detail:", equipment.equipment_name);
+    onViewDetail(equipment); // Call onViewDetail when card is clicked
   };
 
   const getStatusColor = (status: string | null) => {
@@ -92,8 +67,8 @@ const EquipmentCard: React.FC<EquipmentCardProps> = ({ equipment, onEdit, onView
 
   return (
     <>
-      <div 
-        className="bg-white rounded-lg shadow-sm border border-light-gray-200 overflow-hidden hover:shadow-md 
+      <div
+        className="bg-white rounded-lg shadow-sm border border-light-gray-200 overflow-hidden hover:shadow-md
                   transition-shadow duration-300 cursor-pointer relative flex flex-col justify-between h-full"
         onClick={handleCardClick}
       >
@@ -107,7 +82,7 @@ const EquipmentCard: React.FC<EquipmentCardProps> = ({ equipment, onEdit, onView
                 {equipment.equipment_name || 'Unnamed Equipment'}
               </h3>
             </div>
-            
+
             <div className="relative equipment-card-menu-button">
               <button
                 onClick={(e) => { e.stopPropagation(); setIsMenuOpen(!isMenuOpen); }}
@@ -117,8 +92,8 @@ const EquipmentCard: React.FC<EquipmentCardProps> = ({ equipment, onEdit, onView
                 <MoreVertical size={20} />
               </button>
               {isMenuOpen && (
-                <div 
-                    className="absolute right-0 mt-2 w-40 bg-white rounded-md shadow-lg z-20 border border-light-gray-200"
+                <div
+                    className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-20 border border-light-gray-200" // Increased width
                     onClick={(e) => e.stopPropagation()}
                 >
                   <button
@@ -126,7 +101,17 @@ const EquipmentCard: React.FC<EquipmentCardProps> = ({ equipment, onEdit, onView
                     disabled={crudLoading}
                     className="w-full text-left px-4 py-2 text-sm text-dark-text hover:bg-light-gray-50 flex items-center disabled:opacity-50"
                   >
-                    <Edit3 size={16} className="mr-2" /> Edit
+                    <Edit3 size={16} className="mr-2" /> Edit Equipment
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onViewMaintenance(String(equipment.equipment_id));
+                      setIsMenuOpen(false);
+                    }}
+                    className="w-full text-left px-4 py-2 text-sm text-dark-text hover:bg-light-gray-50 flex items-center"
+                  >
+                    <ListChecks size={16} className="mr-2" /> View Records
                   </button>
                   <button
                     onClick={handleDeleteClick}
@@ -134,27 +119,17 @@ const EquipmentCard: React.FC<EquipmentCardProps> = ({ equipment, onEdit, onView
                     className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center disabled:opacity-50"
                   >
                     {crudLoading && isConfirmModalOpen ? <Loader2 size={16} className="mr-2 animate-spin" /> : <Trash2 size={16} className="mr-2" />}
-                     Delete
-                  </button>
-                  <button
-                    onClick={(e) => { 
-                      e.stopPropagation(); 
-                      onViewMaintenance(String(equipment.equipment_id));
-                      setIsMenuOpen(false); 
-                    }}
-                    className="w-full text-left px-4 py-2 text-sm text-dark-text hover:bg-light-gray-50 flex items-center"
-                  >
-                    <ListChecks size={16} className="mr-2" /> View Records
+                     Delete Equipment
                   </button>
                 </div>
               )}
             </div>
           </div>
-          
+
           <div className="space-y-2.5 text-xs text-dark-text/90">
             {categoryName && (
                  <div className="flex items-center" title={`Category: ${categoryName}`}>
-                    <FolderKanban size={14} className="mr-2 text-gray-500 flex-shrink-0" />
+                    <Tag size={14} className="mr-2 text-gray-500 flex-shrink-0" /> {/* Changed icon to Tag for category consistency */}
                     <span className="truncate">{categoryName}</span>
                 </div>
             )}
@@ -172,8 +147,9 @@ const EquipmentCard: React.FC<EquipmentCardProps> = ({ equipment, onEdit, onView
             )}
             {(equipment.rental_rate !== null && equipment.rental_rate !== undefined) && (
               <div className="flex items-center" title={`Rental Rate: ${formatCurrency(equipment.rental_rate)}`}>
-                <IndianRupee size={14} className="mr-2 text-green-600 flex-shrink-0" />
-                <span className="font-medium text-green-700">{formatCurrency(equipment.rental_rate)} / day</span>
+                 {/* Using text-green-600 for currency icon as before, but formatCurrency handles the symbol */}
+                <span className={`mr-1.5 text-green-600 font-semibold`}>{formatCurrency(equipment.rental_rate).charAt(0)}</span>
+                <span className="font-medium text-green-700">{formatCurrency(equipment.rental_rate).substring(1)} / day</span>
               </div>
             )}
              {equipment.location && (
