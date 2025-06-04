@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   RentalTransaction,
   RentalTransactionFormData,
@@ -6,6 +6,8 @@ import {
   PaymentPlan as PaymentPlanType, // Renamed to avoid conflict
   Equipment as EquipmentType, // Renamed to avoid conflict
   Customer as CustomerType, // Renamed to avoid conflict
+  PincodeApiResponse,
+  PostOffice,
 } from '../../types';
 import { useCrud } from '../../context/CrudContext';
 import { useRentalTransactions } from '../../context/RentalTransactionContext';
@@ -74,6 +76,18 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
   const [numberOfDays, setNumberOfDays] = useState<number>(0);
   const [calculatedTotalAmount, setCalculatedTotalAmount] = useState<number>(0);
 
+  // Pincode lookup state for shipping
+  const [shippingPincodeDetailsLoading, setShippingPincodeDetailsLoading] = useState(false);
+  const [shippingPincodeError, setShippingPincodeError] = useState<string | null>(null);
+  const [shippingAreaOptions, setShippingAreaOptions] = useState<{ value: string; label: string }[]>([]);
+  const [shippingIsAreaSelect, setShippingIsAreaSelect] = useState(false);
+
+  // Pincode lookup state for billing
+  const [billingPincodeDetailsLoading, setBillingPincodeDetailsLoading] = useState(false);
+  const [billingPincodeError, setBillingPincodeError] = useState<string | null>(null);
+  const [billingAreaOptions, setBillingAreaOptions] = useState<{ value: string; label: string }[]>([]);
+  const [billingIsAreaSelect, setBillingIsAreaSelect] = useState(false);
+
   const isEditing = !!rental;
 
   useEffect(() => {
@@ -122,6 +136,29 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
     }
   }, [rental, availableEquipment]);
 
+  // When customer changes, populate default details if available
+  useEffect(() => {
+    if (!formData.customer_id) return;
+    const selected = customers.find(c => String(c.customer_id) === formData.customer_id);
+    if (selected) {
+      setFormData(prev => ({
+        ...prev,
+        shipping_address: prev.shipping_address || selected.shipping_address || '',
+        shipping_area: prev.shipping_area || selected.shipping_area || '',
+        shipping_city: prev.shipping_city || selected.shipping_city || '',
+        shipping_state: prev.shipping_state || selected.shipping_state || '',
+        shipping_pincode: prev.shipping_pincode || selected.shipping_pincode || '',
+        billing_address: prev.billing_address || selected.shipping_address || '',
+        billing_area: prev.billing_area || selected.shipping_area || '',
+        billing_city: prev.billing_city || selected.shipping_city || '',
+        billing_state: prev.billing_state || selected.shipping_state || '',
+        billing_pincode: prev.billing_pincode || selected.shipping_pincode || '',
+        mobile_number: prev.mobile_number || selected.mobile_number_1 || '',
+        email: prev.email || selected.email || '',
+      }));
+    }
+  }, [formData.customer_id, customers]);
+
   const calculateRentalDays = (startDateStr: string, endDateStr: string): number => {
     if (!startDateStr || !endDateStr) return 0;
     const startDate = new Date(startDateStr);
@@ -148,6 +185,24 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
 
     setCalculatedTotalAmount(days * dailyRateFromItems);
   }, [formData.rental_date, formData.expected_return_date, formData.rental_items]);
+
+  useEffect(() => {
+    if (formData.shipping_pincode && formData.shipping_pincode.length === 6) {
+      debouncedFetchPincodeDetails(formData.shipping_pincode, 'shipping');
+    } else {
+      setShippingAreaOptions([]);
+      setShippingIsAreaSelect(false);
+    }
+  }, [formData.shipping_pincode, debouncedFetchPincodeDetails]);
+
+  useEffect(() => {
+    if (formData.billing_pincode && formData.billing_pincode.length === 6) {
+      debouncedFetchPincodeDetails(formData.billing_pincode, 'billing');
+    } else {
+      setBillingAreaOptions([]);
+      setBillingIsAreaSelect(false);
+    }
+  }, [formData.billing_pincode, debouncedFetchPincodeDetails]);
 
 
   const validateForm = (): boolean => {
@@ -249,6 +304,107 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
     delete newFormErrors[`rental_items.${index}.unit_rental_rate`];
     setFormErrors(newFormErrors);
   };
+
+  // Copy helper functions
+  const copyShippingToBilling = () => {
+    setFormData(prev => ({
+      ...prev,
+      billing_address: prev.shipping_address,
+      billing_area: prev.shipping_area,
+      billing_city: prev.shipping_city,
+      billing_state: prev.shipping_state,
+      billing_pincode: prev.shipping_pincode,
+    }));
+  };
+
+  const copyBillingToShipping = () => {
+    setFormData(prev => ({
+      ...prev,
+      shipping_address: prev.billing_address,
+      shipping_area: prev.billing_area,
+      shipping_city: prev.billing_city,
+      shipping_state: prev.billing_state,
+      shipping_pincode: prev.billing_pincode,
+    }));
+  };
+
+  // Debounce utility
+  const debounce = <F extends (...args: any[]) => any>(func: F, waitFor: number) => {
+    let timeout: ReturnType<typeof setTimeout> | null = null;
+    return (...args: Parameters<F>): Promise<ReturnType<F>> =>
+      new Promise(resolve => {
+        if (timeout) {
+          clearTimeout(timeout);
+        }
+        timeout = setTimeout(() => resolve(func(...args)), waitFor);
+      });
+  };
+
+  const fetchPincodeDetails = useCallback(
+    async (pincode: string, type: 'shipping' | 'billing') => {
+      const setLoading = type === 'shipping' ? setShippingPincodeDetailsLoading : setBillingPincodeDetailsLoading;
+      const setError = type === 'shipping' ? setShippingPincodeError : setBillingPincodeError;
+      const setAreaOptionsFunc = type === 'shipping' ? setShippingAreaOptions : setBillingAreaOptions;
+      const setIsAreaSelectFunc = type === 'shipping' ? setShippingIsAreaSelect : setBillingIsAreaSelect;
+
+      if (pincode.length !== 6 || !/^\d{6}$/.test(pincode)) {
+        setError(null);
+        setFormData(prev => ({
+          ...prev,
+          [`${type}_area`]: '',
+          [`${type}_city`]: '',
+          [`${type}_state`]: '',
+        }));
+        setAreaOptionsFunc([]);
+        setIsAreaSelectFunc(false);
+        return;
+      }
+
+      setLoading(true);
+      setError(null);
+      setAreaOptionsFunc([]);
+      setIsAreaSelectFunc(false);
+
+      try {
+        const response = await fetch(`https://api.postalpincode.in/pincode/${pincode}`);
+        const data: PincodeApiResponse = await response.json();
+
+        if (data && data[0] && data[0].Status === 'Success' && data[0].PostOffice && data[0].PostOffice.length > 0) {
+          const postOffices = data[0].PostOffice as PostOffice[];
+          const firstPostOffice = postOffices[0];
+
+          setFormData(prev => ({
+            ...prev,
+            [`${type}_city`]: firstPostOffice.District || '',
+            [`${type}_state`]: firstPostOffice.State || '',
+            [`${type}_area`]: postOffices.length === 1 ? firstPostOffice.Name || '' : '',
+          }));
+
+          if (postOffices.length > 1) {
+            setAreaOptionsFunc(postOffices.map(po => ({ value: po.Name, label: po.Name })));
+            setIsAreaSelectFunc(true);
+          } else {
+            setIsAreaSelectFunc(false);
+          }
+        } else if (data && data[0] && (data[0].Status === 'Error' || data[0].Status === '404' || !data[0].PostOffice || data[0].PostOffice.length === 0)) {
+          setError(data[0].Message || 'Pincode not found or no post offices listed.');
+          setFormData(prev => ({ ...prev, [`${type}_city`]: '', [`${type}_state`]: '', [`${type}_area`]: '' }));
+        } else {
+          setError('Invalid response from pincode API.');
+          setFormData(prev => ({ ...prev, [`${type}_city`]: '', [`${type}_state`]: '', [`${type}_area`]: '' }));
+        }
+      } catch (err) {
+        console.error('Pincode API error:', err);
+        setError('Failed to fetch pincode details. Check network connection.');
+        setFormData(prev => ({ ...prev, [`${type}_city`]: '', [`${type}_state`]: '', [`${type}_area`]: '' }));
+      } finally {
+        setLoading(false);
+      }
+    },
+    []
+  );
+
+  const debouncedFetchPincodeDetails = useCallback(debounce(fetchPincodeDetails, 700), [fetchPincodeDetails]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -360,25 +516,46 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
 
       <fieldset className="grid grid-cols-1 gap-y-6 gap-x-4 md:grid-cols-2">
         <legend className="text-lg font-medium text-dark-text col-span-full mb-2">Shipping & Billing</legend>
+        <div className="col-span-full flex gap-4 text-xs">
+          <button type="button" onClick={copyShippingToBilling} className="text-brand-blue underline">Copy Shipping to Billing</button>
+          <button type="button" onClick={copyBillingToShipping} className="text-brand-blue underline">Copy Billing to Shipping</button>
+        </div>
         <div className="md:col-span-2">
           <label htmlFor="shipping_address" className={labelClass}>Shipping Address</label>
           <textarea id="shipping_address" name="shipping_address" value={formData.shipping_address || ''} onChange={handleChange} rows={2} className={inputClass}></textarea>
         </div>
         <div>
           <label htmlFor="shipping_area" className={labelClass}>Shipping Area</label>
-          <input type="text" id="shipping_area" name="shipping_area" value={formData.shipping_area || ''} onChange={handleChange} className={inputClass} />
+          {shippingIsAreaSelect ? (
+            <select id="shipping_area" name="shipping_area" value={formData.shipping_area || ''} onChange={handleChange} className={inputClass}>
+              <option value="">Select Area</option>
+              {shippingAreaOptions.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
+            </select>
+          ) : (
+            <input type="text" id="shipping_area" name="shipping_area" value={formData.shipping_area || ''} onChange={handleChange} className={inputClass} readOnly={shippingAreaOptions.length > 0 && !shippingIsAreaSelect} />
+          )}
+          {formErrors.shipping_area && <p className="text-xs text-red-500 mt-1">{formErrors.shipping_area}</p>}
         </div>
         <div>
           <label htmlFor="shipping_city" className={labelClass}>Shipping City</label>
-          <input type="text" id="shipping_city" name="shipping_city" value={formData.shipping_city || ''} onChange={handleChange} className={inputClass} />
+          <input type="text" id="shipping_city" name="shipping_city" value={formData.shipping_city || ''} onChange={handleChange} className={inputClass} readOnly />
         </div>
         <div>
           <label htmlFor="shipping_state" className={labelClass}>Shipping State</label>
-          <input type="text" id="shipping_state" name="shipping_state" value={formData.shipping_state || ''} onChange={handleChange} className={inputClass} />
+          <input type="text" id="shipping_state" name="shipping_state" value={formData.shipping_state || ''} onChange={handleChange} className={inputClass} readOnly />
         </div>
         <div>
           <label htmlFor="shipping_pincode" className={labelClass}>Shipping Pincode</label>
-          <input type="text" id="shipping_pincode" name="shipping_pincode" value={formData.shipping_pincode || ''} onChange={handleChange} className={inputClass} maxLength={6} />
+          <div className="relative">
+            <input type="text" id="shipping_pincode" name="shipping_pincode" value={formData.shipping_pincode || ''} onChange={handleChange} className={inputClass} maxLength={6} />
+            {shippingPincodeDetailsLoading && (
+              <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                <Loader2 className="h-5 w-5 text-gray-400 animate-spin" />
+              </div>
+            )}
+          </div>
+          {formErrors.shipping_pincode && <p className="text-xs text-red-500 mt-1">{formErrors.shipping_pincode}</p>}
+          {shippingPincodeError && <p className="text-xs text-red-500 mt-1">{shippingPincodeError}</p>}
         </div>
         <div className="md:col-span-2">
           <label htmlFor="billing_address" className={labelClass}>Billing Address</label>
@@ -386,19 +563,36 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
         </div>
         <div>
           <label htmlFor="billing_area" className={labelClass}>Billing Area</label>
-          <input type="text" id="billing_area" name="billing_area" value={formData.billing_area || ''} onChange={handleChange} className={inputClass} />
+          {billingIsAreaSelect ? (
+            <select id="billing_area" name="billing_area" value={formData.billing_area || ''} onChange={handleChange} className={inputClass}>
+              <option value="">Select Area</option>
+              {billingAreaOptions.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
+            </select>
+          ) : (
+            <input type="text" id="billing_area" name="billing_area" value={formData.billing_area || ''} onChange={handleChange} className={inputClass} readOnly={billingAreaOptions.length > 0 && !billingIsAreaSelect} />
+          )}
+          {formErrors.billing_area && <p className="text-xs text-red-500 mt-1">{formErrors.billing_area}</p>}
         </div>
         <div>
           <label htmlFor="billing_city" className={labelClass}>Billing City</label>
-          <input type="text" id="billing_city" name="billing_city" value={formData.billing_city || ''} onChange={handleChange} className={inputClass} />
+          <input type="text" id="billing_city" name="billing_city" value={formData.billing_city || ''} onChange={handleChange} className={inputClass} readOnly />
         </div>
         <div>
           <label htmlFor="billing_state" className={labelClass}>Billing State</label>
-          <input type="text" id="billing_state" name="billing_state" value={formData.billing_state || ''} onChange={handleChange} className={inputClass} />
+          <input type="text" id="billing_state" name="billing_state" value={formData.billing_state || ''} onChange={handleChange} className={inputClass} readOnly />
         </div>
         <div>
           <label htmlFor="billing_pincode" className={labelClass}>Billing Pincode</label>
-          <input type="text" id="billing_pincode" name="billing_pincode" value={formData.billing_pincode || ''} onChange={handleChange} className={inputClass} maxLength={6} />
+          <div className="relative">
+            <input type="text" id="billing_pincode" name="billing_pincode" value={formData.billing_pincode || ''} onChange={handleChange} className={inputClass} maxLength={6} />
+            {billingPincodeDetailsLoading && (
+              <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                <Loader2 className="h-5 w-5 text-gray-400 animate-spin" />
+              </div>
+            )}
+          </div>
+          {formErrors.billing_pincode && <p className="text-xs text-red-500 mt-1">{formErrors.billing_pincode}</p>}
+          {billingPincodeError && <p className="text-xs text-red-500 mt-1">{billingPincodeError}</p>}
         </div>
         <div>
           <label htmlFor="mobile_number" className={labelClass}>Mobile Number</label>
