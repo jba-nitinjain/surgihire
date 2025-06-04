@@ -1,3 +1,6 @@
+// src/types/index.ts
+
+// --- Existing Customer Types ---
 export interface Customer {
   customer_id: string;
   full_name: string;
@@ -26,7 +29,7 @@ export interface CustomerFormData {
   shipping_pincode?: string | null;
 }
 
-
+// --- Existing Equipment Types ---
 export interface Equipment {
   equipment_id: number;
   equipment_name: string;
@@ -36,7 +39,7 @@ export interface Equipment {
   make: string | null;
   serial_number: string | null;
   purchase_date: string | null;
-  rental_rate: number | null;
+  rental_rate: number | null; // This is the default daily rate
   status: string | null;
   last_maintenance_date: string | null;
   next_calibration_date: string | null;
@@ -46,7 +49,7 @@ export interface Equipment {
 export interface EquipmentFormData {
   equipment_name: string;
   description?: string | null;
-  category_id?: number | null;
+  category_id?: number | string | null;
   model?: string | null;
   make?: string | null;
   serial_number?: string | null;
@@ -70,6 +73,7 @@ export interface EquipmentCategoryFormData {
   description?: string | null;
 }
 
+// --- Existing Payment Plan Types ---
 export interface PaymentPlan {
   plan_id: number;
   plan_name: string;
@@ -83,53 +87,79 @@ export interface PaymentPlanFormData {
   frequency_in_days?: string | null;
 }
 
-// --- New Maintenance Record Types ---
+// --- Existing Maintenance Record Types ---
 export interface MaintenanceRecord {
   maintenance_id: number;
-  equipment_id: number; // Foreign key to Equipment
-  maintenance_date: string; // YYYY-MM-DD
-  maintenance_type: string | null; // e.g., "Routine Check", "Repair", "Calibration"
+  equipment_id: number;
+  maintenance_date: string;
+  maintenance_type: string | null;
   technician: string | null;
   cost: number | null;
   notes: string | null;
-  // Consider adding equipment_name if API can provide it for display purposes
-  equipment_name?: string; // Optional, for display in lists
+  equipment_name?: string;
 }
 
 export interface MaintenanceRecordFormData {
-  equipment_id: string | number; // Input as string from select, convert to number
-  maintenance_date: string; // YYYY-MM-DD
+  equipment_id: string | number;
+  maintenance_date: string;
   maintenance_type?: string | null;
   technician?: string | null;
-  cost?: string | null; // Input as string, convert to number
+  cost?: string | null;
   notes?: string | null;
 }
-// --- End New Maintenance Record Types ---
 
+// --- New Rental Item Types ---
+export interface RentalItem {
+  rental_detail_id: number; // From rental_details table
+  rental_id: number;
+  equipment_id: number;
+  equipment_name?: string; // For display
+  quantity: number;
+  unit_rental_rate: number; // Rate per day for this specific item in this rental
+  // Potentially other fields like discount, subtotal per item
+}
 
+export interface RentalItemFormData {
+  // Using a unique temp ID for form state before saving to DB
+  temp_id: string; // e.g., crypto.randomUUID()
+  equipment_id: string; // Selected equipment ID (from form select)
+  equipment_name?: string; // For display in the form
+  quantity: string; // Input as string
+  unit_rental_rate: string; // Input as string, specific rate for this rental item
+  // Default rate from equipment master can be pre-filled
+  default_equipment_rate?: number | null;
+}
+
+// --- Updated Rental Transaction Types ---
 export interface RentalTransaction {
   rental_id: number;
-  customer_id: number;
+  customer_id: string;
   rental_date: string;
   expected_return_date: string | null;
   actual_return_date: string | null;
-  total_amount: number | null;
+  total_amount: number | null; // This will be calculated
   deposit: number | null;
-  payment_term: string | null;
+  payment_term_id: number | null; // Changed to store ID from payment_plans
+  payment_term_name?: string; // For display
   status: string | null;
+  notes?: string | null;
+  customer_name?: string;
+  rental_items?: RentalItem[]; // Array of rented equipment items
 }
 
-export interface PaymentSchedule {
-  payment_schedule_id: number;
-  rental_id: number;
-  due_date: string;
-  amount_due: number;
-  amount_paid: number;
-  payment_status: string;
-  installment_number: number;
-  payment_mode: string | null;
+export interface RentalTransactionFormData {
+  customer_id: string;
+  rental_date: string;
+  expected_return_date?: string | null;
+  // total_amount is calculated, not directly input
+  deposit?: string | null;
+  payment_term_id?: string | null; // Selected payment plan ID
+  status?: string | null;
+  notes?: string | null;
+  rental_items: RentalItemFormData[]; // Array of items being rented
 }
 
+// --- Common API & UI Types ---
 export interface ApiResponse {
   data: any[] | any;
   success: boolean;
@@ -140,9 +170,8 @@ export interface ApiResponse {
 export interface PaginationParams {
   records: number;
   skip: number;
-  filters?: Record<string, string | number | null>;
+  filters?: Record<string, string | number | boolean | null>;
 }
-
 
 export interface TabData {
   id: string;
@@ -151,6 +180,7 @@ export interface TabData {
   icon?: React.ReactNode;
 }
 
+// --- Pincode API Types ---
 export interface PostOffice {
   Name: string;
   Description: string | null;

@@ -1,27 +1,36 @@
 import React, { useState, useEffect } from 'react';
 import { useEquipment } from '../../context/EquipmentContext';
 import { useEquipmentCategories } from '../../context/EquipmentCategoryContext';
+import { getEquipmentItem } from '../../services/api'; // Import for fetching single equipment
 import EquipmentList from '../EquipmentList';
 import EquipmentForm from '../EquipmentForm';
 import EquipmentDetail from '../EquipmentDetail';
 import SearchBox from '../ui/SearchBox';
 import { PlusCircle } from 'lucide-react';
 import { Equipment } from '../../types';
+import Spinner from '../ui/Spinner'; // For loading state
 
 interface EquipmentTabProps {
-  // This prop is for navigating away from this tab to the maintenance tab
   onViewMaintenanceForEquipment: (equipmentId: string) => void;
+  initialEquipmentIdToView: number | null; // To show specific equipment detail on load
+  clearInitialEquipmentIdToView: () => void; // To clear the ID after use
 }
 
 const equipmentStatusesForFilter = ['Available', 'Rented', 'Maintenance', 'Decommissioned', 'Lost'];
 
-const EquipmentTab: React.FC<EquipmentTabProps> = ({ onViewMaintenanceForEquipment }) => {
+const EquipmentTab: React.FC<EquipmentTabProps> = ({
+  onViewMaintenanceForEquipment,
+  initialEquipmentIdToView,
+  clearInitialEquipmentIdToView,
+}) => {
   const {
+    equipmentList, // Use the list from context
     searchQuery: equipmentSearchQuery,
     setSearchQuery: setEquipmentSearchQuery,
     refreshEquipmentData,
     filters: equipmentFilters,
     setFilters: setEquipmentFilters,
+    loading: equipmentListLoading, // Loading state for the list
   } = useEquipment();
 
   const {
@@ -29,25 +38,56 @@ const EquipmentTab: React.FC<EquipmentTabProps> = ({ onViewMaintenanceForEquipme
     loading: eqCategoriesLoadingForFilter,
     error: eqCategoriesFilterError,
     getCategoryNameById,
-    refreshCategories: refreshEqCategoriesForFilter, // Added for fetching categories
+    refreshCategories: refreshEqCategoriesForFilter,
   } = useEquipmentCategories();
 
-  // State managed within EquipmentTab
   const [selectedEquipment, setSelectedEquipment] = useState<Equipment | null>(null);
   const [isEquipmentFormOpen, setIsEquipmentFormOpen] = useState(false);
   const [editingEquipment, setEditingEquipment] = useState<Equipment | null>(null);
+  const [detailLoading, setDetailLoading] = useState(false); // Loading state for single equipment detail
 
-  // Fetch equipment categories for the filter dropdown when tab mounts
   useEffect(() => {
     if (allEquipmentCategories.length === 0 && !eqCategoriesLoadingForFilter && !eqCategoriesFilterError) {
       refreshEqCategoriesForFilter();
     }
   }, [allEquipmentCategories.length, eqCategoriesLoadingForFilter, eqCategoriesFilterError, refreshEqCategoriesForFilter]);
 
+  // Effect to load specific equipment detail if initialEquipmentIdToView is provided
+  useEffect(() => {
+    const fetchAndSetInitialEquipment = async () => {
+      if (initialEquipmentIdToView !== null) {
+        setDetailLoading(true);
+        // First, check if the equipment is already in the list
+        const existingEquipment = equipmentList.find(eq => eq.equipment_id === initialEquipmentIdToView);
+        if (existingEquipment) {
+            setSelectedEquipment(existingEquipment);
+            setDetailLoading(false);
+            clearInitialEquipmentIdToView(); // Clear the ID after loading
+        } else {
+            // If not in the list, fetch it
+            try {
+                const response = await getEquipmentItem(initialEquipmentIdToView);
+                if (response.success && response.data) {
+                    setSelectedEquipment(response.data as Equipment);
+                } else {
+                    console.error("Failed to fetch initial equipment:", response.message);
+                    // Optionally, show an error to the user
+                }
+            } catch (error) {
+                console.error("Error fetching initial equipment:", error);
+            } finally {
+                setDetailLoading(false);
+                clearInitialEquipmentIdToView(); // Clear the ID after attempting to load
+            }
+        }
+      }
+    };
+    fetchAndSetInitialEquipment();
+  }, [initialEquipmentIdToView, clearInitialEquipmentIdToView, equipmentList]); // Add equipmentList as dependency
 
   const handleSelectEquipmentForDetail = (equipment: Equipment) => {
     setSelectedEquipment(equipment);
-    setIsEquipmentFormOpen(false); // Close form if open
+    setIsEquipmentFormOpen(false);
     setEditingEquipment(null);
   };
 
@@ -57,13 +97,13 @@ const EquipmentTab: React.FC<EquipmentTabProps> = ({ onViewMaintenanceForEquipme
 
   const handleOpenEquipmentFormForCreate = () => {
     setEditingEquipment(null);
-    setSelectedEquipment(null); // Close detail if open
+    setSelectedEquipment(null);
     setIsEquipmentFormOpen(true);
   };
 
   const handleOpenEquipmentFormForEdit = (item: Equipment) => {
     setEditingEquipment(item);
-    setSelectedEquipment(null); // Close detail view
+    setSelectedEquipment(null);
     setIsEquipmentFormOpen(true);
   };
 
@@ -76,6 +116,15 @@ const EquipmentTab: React.FC<EquipmentTabProps> = ({ onViewMaintenanceForEquipme
     handleCloseEquipmentForm();
     refreshEquipmentData();
   };
+
+  if (detailLoading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <Spinner size="lg" />
+        <p className="ml-2">Loading equipment details...</p>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -130,7 +179,7 @@ const EquipmentTab: React.FC<EquipmentTabProps> = ({ onViewMaintenanceForEquipme
       </div>
       <EquipmentList
         onEditEquipment={handleOpenEquipmentFormForEdit}
-        onViewMaintenance={onViewMaintenanceForEquipment} // Use the passed prop
+        onViewMaintenance={onViewMaintenanceForEquipment}
         onViewDetail={handleSelectEquipmentForDetail}
       />
 
@@ -141,13 +190,13 @@ const EquipmentTab: React.FC<EquipmentTabProps> = ({ onViewMaintenanceForEquipme
           onCancel={handleCloseEquipmentForm}
         />
       )}
-      {selectedEquipment && !isEquipmentFormOpen && ( // Show detail only if form is not open
+      {selectedEquipment && !isEquipmentFormOpen && (
         <EquipmentDetail
           equipment={selectedEquipment}
           categoryName={getCategoryNameById(selectedEquipment.category_id)}
           onClose={handleCloseEquipmentDetail}
           onEdit={() => handleOpenEquipmentFormForEdit(selectedEquipment)}
-          onViewMaintenance={onViewMaintenanceForEquipment} // Use the passed prop
+          onViewMaintenance={onViewMaintenanceForEquipment}
         />
       )}
     </>

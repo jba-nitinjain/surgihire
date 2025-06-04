@@ -5,15 +5,11 @@ import { EquipmentProvider } from './context/EquipmentContext';
 import { EquipmentCategoryProvider } from './context/EquipmentCategoryContext';
 import { PaymentPlanProvider } from './context/PaymentPlanContext';
 import { MaintenanceRecordProvider } from './context/MaintenanceRecordContext';
+import { RentalTransactionProvider } from './context/RentalTransactionContext'; // Import new provider
 import Dashboard from './components/Dashboard';
 
 function App() {
-  // sidebarOpen state is now managed within Dashboard.tsx after refactoring
-  // If you still need to control it from App.tsx for some reason,
-  // you would re-add it here and pass it down.
-  // For now, assuming Dashboard manages its own sidebar state or it's passed differently.
   const [sidebarOpen, setSidebarOpen] = useState(true);
-
 
   return (
     <CrudProvider>
@@ -22,8 +18,9 @@ function App() {
           <EquipmentCategoryProvider>
             <PaymentPlanProvider>
               <MaintenanceRecordProvider>
-                {/* Pass sidebarOpen and setSidebarOpen if Dashboard expects them */}
-                <Dashboard sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+                <RentalTransactionProvider> {/* Add new provider */}
+                  <Dashboard sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+                </RentalTransactionProvider>
               </MaintenanceRecordProvider>
             </PaymentPlanProvider>
           </EquipmentCategoryProvider>

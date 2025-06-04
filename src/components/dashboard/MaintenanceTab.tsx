@@ -9,13 +9,18 @@ import { PlusCircle, ListChecks } from 'lucide-react';
 import { MaintenanceRecord, MaintenanceRecordFormData } from '../../types';
 
 interface MaintenanceTabProps {
-  initialEquipmentIdFilter?: string | null; // For navigating with a pre-selected equipment
+  initialEquipmentIdFilter?: string | null;
+  navigateToEquipmentDetail: (equipmentId: number) => void;
 }
 
 const maintenanceTypesForFilter = ['Routine', 'Repair', 'Inspection', 'Upgrade', 'Calibration', 'Emergency'];
 
-const MaintenanceTab: React.FC<MaintenanceTabProps> = ({ initialEquipmentIdFilter }) => {
+const MaintenanceTab: React.FC<MaintenanceTabProps> = ({
+  initialEquipmentIdFilter,
+  navigateToEquipmentDetail,
+}) => {
   const {
+    maintenanceRecords, // Get the full list of records to find the one to delete
     searchQuery: maintenanceSearchQuery,
     setSearchQuery: setMaintenanceSearchQuery,
     refreshMaintenanceRecords,
@@ -28,7 +33,6 @@ const MaintenanceTab: React.FC<MaintenanceTabProps> = ({ initialEquipmentIdFilte
 
   const { createItem, updateItem, deleteItem, loading: crudLoading } = useCrud();
 
-  // Internal UI state for this tab
   const [activeMaintenanceSubTab, setActiveMaintenanceSubTab] = useState('list');
   const [isMaintenanceFormOpen, setIsMaintenanceFormOpen] = useState(false);
   const [editingMaintenanceRecord, setEditingMaintenanceRecord] = useState<MaintenanceRecord | null>(null);
@@ -41,28 +45,20 @@ const MaintenanceTab: React.FC<MaintenanceTabProps> = ({ initialEquipmentIdFilte
     }
   }, [equipmentListForFilter.length, loadingEquipmentList, fetchEquipmentListForFilter]);
 
-  // Apply initial filter if provided
   useEffect(() => {
     if (initialEquipmentIdFilter) {
       setMaintenanceFilters({ equipment_id: initialEquipmentIdFilter, maintenance_type: null });
-      // Clear search query if navigating with a filter
       setMaintenanceSearchQuery('');
     }
-    // Note: This effect runs when initialEquipmentIdFilter changes.
-    // If the tab is re-rendered without this prop (e.g., user navigates away and back),
-    // the filter will persist from the context unless explicitly cleared.
   }, [initialEquipmentIdFilter, setMaintenanceFilters, setMaintenanceSearchQuery]);
-
 
   const maintenanceSubTabsData = [
     { id: 'list', label: 'Records List', icon: <ListChecks size={16} /> },
-    // "Add New Record" is now triggered by a button, not a sub-tab itself for content display
   ];
 
   const handleOpenMaintenanceFormForCreate = () => {
     setEditingMaintenanceRecord(null);
     setIsMaintenanceFormOpen(true);
-    // No need to change activeMaintenanceSubTab if form is a modal overlay or separate view
   };
 
   const handleOpenMaintenanceFormForEdit = (record: MaintenanceRecord) => {
@@ -73,22 +69,18 @@ const MaintenanceTab: React.FC<MaintenanceTabProps> = ({ initialEquipmentIdFilte
   const handleCloseMaintenanceForm = () => {
     setIsMaintenanceFormOpen(false);
     setEditingMaintenanceRecord(null);
-    setActiveMaintenanceSubTab('list'); // Ensure list is active after closing form
+    setActiveMaintenanceSubTab('list');
   };
 
   const handleSaveMaintenanceForm = async (data: MaintenanceRecordFormData) => {
-    // Convert cost and equipment_id back to numbers if they are strings from the form
     const apiData: any = {
-        ...data,
-        cost: data.cost ? parseFloat(data.cost) : null,
-        equipment_id: parseInt(String(data.equipment_id), 10),
+      ...data,
+      cost: data.cost ? parseFloat(data.cost) : null,
+      equipment_id: parseInt(String(data.equipment_id), 10),
     };
-
-    // Remove null or empty string optional fields if API prefers them absent
     if (apiData.maintenance_type === '') apiData.maintenance_type = null;
     if (apiData.technician === '') apiData.technician = null;
     if (apiData.notes === '') apiData.notes = null;
-
 
     try {
       if (editingMaintenanceRecord && editingMaintenanceRecord.maintenance_id) {
@@ -100,13 +92,19 @@ const MaintenanceTab: React.FC<MaintenanceTabProps> = ({ initialEquipmentIdFilte
       handleCloseMaintenanceForm();
     } catch (error) {
       console.error("Failed to save maintenance record:", error);
-      // Error state is managed by CrudContext, can be displayed globally or locally
     }
   };
 
-  const handleDeleteRecordClick = (record: MaintenanceRecord) => {
-    setRecordToDelete(record);
-    setIsConfirmDeleteModalOpen(true);
+  // Corrected handleDeleteRecordClick to accept recordId
+  const handleDeleteRecordClick = (recordId: number) => {
+    const recordToSet = maintenanceRecords.find(r => r.maintenance_id === recordId);
+    if (recordToSet) {
+      setRecordToDelete(recordToSet);
+      setIsConfirmDeleteModalOpen(true);
+    } else {
+      console.error("Maintenance record not found for deletion:", recordId);
+      // Optionally, show an error to the user if the record isn't found
+    }
   };
 
   const confirmDeleteRecord = async () => {
@@ -125,7 +123,6 @@ const MaintenanceTab: React.FC<MaintenanceTabProps> = ({ initialEquipmentIdFilte
 
   return (
     <>
-      {/* Sub-tab navigation - simplified as form is now modal-like */}
       <div className="mb-6 border-b border-light-gray-200">
         <nav className="-mb-px flex space-x-4 overflow-x-auto" aria-label="Maintenance Tabs">
           {maintenanceSubTabsData.map((subTab) => (
@@ -133,7 +130,7 @@ const MaintenanceTab: React.FC<MaintenanceTabProps> = ({ initialEquipmentIdFilte
               key={subTab.id}
               onClick={() => {
                 setActiveMaintenanceSubTab(subTab.id);
-                setIsMaintenanceFormOpen(false); // Close form if switching to list
+                setIsMaintenanceFormOpen(false);
                 setEditingMaintenanceRecord(null);
               }}
               className={`whitespace-nowrap pb-3 px-1 border-b-2 font-medium text-sm flex items-center
@@ -202,8 +199,8 @@ const MaintenanceTab: React.FC<MaintenanceTabProps> = ({ initialEquipmentIdFilte
           </div>
           <MaintenanceRecordList
             onEditRecord={handleOpenMaintenanceFormForEdit}
-            onDeleteRecord={handleDeleteRecordClick}
-            // initialFilters is now handled by the useEffect in this component
+            onDeleteRecord={handleDeleteRecordClick} // This now correctly matches the expected signature
+            onViewEquipmentDetail={navigateToEquipmentDetail}
           />
         </>
       )}
@@ -227,7 +224,7 @@ const MaintenanceTab: React.FC<MaintenanceTabProps> = ({ initialEquipmentIdFilte
        <ConfirmationModal
         isOpen={isConfirmDeleteModalOpen}
         title="Delete Maintenance Record"
-        message={`Are you sure you want to delete this maintenance record? This action cannot be undone.`}
+        message={`Are you sure you want to delete the maintenance record for "${recordToDelete?.equipment_name || `ID: ${recordToDelete?.equipment_id}`}" on ${recordToDelete?.maintenance_date}? This action cannot be undone.`}
         onConfirm={confirmDeleteRecord}
         onCancel={() => setIsConfirmDeleteModalOpen(false)}
         isLoading={crudLoading}

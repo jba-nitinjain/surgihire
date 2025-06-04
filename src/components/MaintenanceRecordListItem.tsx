@@ -1,19 +1,45 @@
 import React from 'react';
-import { MaintenanceRecord } from '../types';
-import { formatDate, formatCurrency } from '../utils/formatting'; // Import formatting utilities
-import { Edit3, Trash2 } from 'lucide-react'; // Assuming Loader2 is handled by parent during delete
+import { MaintenanceRecord, Equipment } from '../types'; // Added Equipment type
+import { formatDate, formatCurrency } from '../utils/formatting'; // Import utilities
+import { Edit3, Trash2, ExternalLink } from 'lucide-react';
 
 interface MaintenanceRecordListItemProps {
   record: MaintenanceRecord;
+  equipmentList: Equipment[]; // Pass the full equipment list for name lookup
   onEdit: (record: MaintenanceRecord) => void;
-  onDelete: (recordId: number) => void; // Changed to pass ID for consistency
+  onDelete: (recordId: number) => void;
+  onViewEquipmentDetail: (equipmentId: number) => void; // Callback to view equipment detail
 }
 
-const MaintenanceRecordListItem: React.FC<MaintenanceRecordListItemProps> = ({ record, onEdit, onDelete }) => {
+const MaintenanceRecordListItem: React.FC<MaintenanceRecordListItemProps> = ({
+  record,
+  equipmentList,
+  onEdit,
+  onDelete,
+  onViewEquipmentDetail,
+}) => {
+  // Function to find equipment name from the list
+  const getEquipmentName = (equipmentId: number): string => {
+    if (record.equipment_name) {
+      return record.equipment_name; // Use if already populated
+    }
+    const equipment = equipmentList.find(eq => eq.equipment_id === equipmentId);
+    return equipment ? equipment.equipment_name : `ID: ${equipmentId}`; // Fallback to ID if name not found
+  };
+
+  const equipmentDisplayName = getEquipmentName(record.equipment_id);
+
   return (
     <tr className="hover:bg-light-gray-50 transition-colors">
       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-        {record.equipment_name || `ID: ${record.equipment_id}`}
+        <button
+          onClick={() => onViewEquipmentDetail(record.equipment_id)}
+          className="text-brand-blue hover:text-brand-blue/80 hover:underline flex items-center"
+          title={`View details for ${equipmentDisplayName}`}
+        >
+          {equipmentDisplayName}
+          <ExternalLink size={14} className="ml-1 opacity-70" />
+        </button>
       </td>
       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
         {formatDate(record.maintenance_date)}

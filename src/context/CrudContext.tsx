@@ -39,18 +39,23 @@ export const CrudProvider: React.FC<CrudProviderProps> = ({ children }) => {
         case 'equipment':
           response = await api.createEquipment(data);
           break;
-        case 'rental_transactions': // Assuming you might add this later
+        case 'rental_transactions':
           response = await api.createRental(data);
           break;
-        case 'payment_schedules': // Assuming you might add this later
+        case 'payment_schedules':
           response = await api.createPaymentSchedule(data);
           break;
-        case 'equipment_categories': // Added case for equipment_categories
+        case 'equipment_categories':
           response = await api.createEquipmentCategory(data);
           break;
-        case 'payment_plans': // Added case for payment_plans
+        case 'payment_plans':
           response = await api.createPaymentPlan(data);
           break;
+        // --- ADDED CASE FOR MAINTENANCE RECORDS ---
+        case 'maintenance_records':
+          response = await api.createMaintenanceRecord(data);
+          break;
+        // --- END ADDED CASE ---
         default:
           console.error(`Unsupported table for create: ${table}`);
           throw new Error(`Unsupported table for create: ${table}`);
@@ -60,7 +65,7 @@ export const CrudProvider: React.FC<CrudProviderProps> = ({ children }) => {
       const errorMessage = err instanceof Error ? err.message : 'Failed to create record';
       setError(errorMessage);
       console.error(`CrudContext: Failed to create record in ${table}`, err);
-      throw err; 
+      throw err;
     } finally {
       setLoading(false);
     }
@@ -73,7 +78,7 @@ export const CrudProvider: React.FC<CrudProviderProps> = ({ children }) => {
       let response;
       switch (table) {
         case 'customers':
-          response = await api.updateCustomer(String(id), data); 
+          response = await api.updateCustomer(String(id), data);
           break;
         case 'equipment':
           response = await api.updateEquipment(Number(id), data);
@@ -84,12 +89,17 @@ export const CrudProvider: React.FC<CrudProviderProps> = ({ children }) => {
         case 'payment_schedules':
           response = await api.updatePaymentSchedule(Number(id), data);
           break;
-        case 'equipment_categories': // Added case for equipment_categories
+        case 'equipment_categories':
           response = await api.updateEquipmentCategory(Number(id), data);
           break;
-        case 'payment_plans': // Added case for payment_plans
+        case 'payment_plans':
           response = await api.updatePaymentPlan(Number(id), data);
           break;
+        // --- ADDED CASE FOR MAINTENANCE RECORDS ---
+        case 'maintenance_records':
+          response = await api.updateMaintenanceRecord(Number(id), data);
+          break;
+        // --- END ADDED CASE ---
         default:
           console.error(`Unsupported table for update: ${table}`);
           throw new Error(`Unsupported table for update: ${table}`);
@@ -123,12 +133,17 @@ export const CrudProvider: React.FC<CrudProviderProps> = ({ children }) => {
         case 'payment_schedules':
           response = await api.deletePaymentSchedule(Number(id));
           break;
-        case 'equipment_categories': // Added case for equipment_categories
+        case 'equipment_categories':
           response = await api.deleteEquipmentCategory(Number(id));
           break;
-        case 'payment_plans': // Added case for payment_plans
+        case 'payment_plans':
           response = await api.deletePaymentPlan(Number(id));
           break;
+        // --- ADDED CASE FOR MAINTENANCE RECORDS ---
+        case 'maintenance_records':
+          response = await api.deleteMaintenanceRecord(Number(id));
+          break;
+        // --- END ADDED CASE ---
         default:
           console.error(`Unsupported table for delete: ${table}`);
           throw new Error(`Unsupported table for delete: ${table}`);
