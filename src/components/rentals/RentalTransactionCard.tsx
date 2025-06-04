@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { RentalTransaction } from '../../types';
 import { CalendarCheck2, User, Edit3, Trash2, Loader2, FileText, IndianRupee, Tag, CalendarClock, CheckCircle, XCircle, Clock, AlertTriangle } from 'lucide-react';
 import { useCrud } from '../../context/CrudContext';
 import ConfirmationModal from '../ui/ConfirmationModal';
 import { useRentalTransactions } from '../../context/RentalTransactionContext';
 import { formatDate, formatCurrency } from '../../utils/formatting';
+import { fetchRentalDetailsByRentalId } from '../../services/api/rentals';
+import { useNavigate } from 'react-router-dom';
 
 interface RentalTransactionCardProps {
   rental: RentalTransaction; // This will now include customer_name and payment_term_name
@@ -16,6 +18,18 @@ const RentalTransactionCard: React.FC<RentalTransactionCardProps> = ({ rental, o
   const { deleteItem, loading: crudLoading } = useCrud();
   const { refreshRentalTransactions } = useRentalTransactions();
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+  const [items, setItems] = useState(rental.rental_items || []);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!rental.rental_items) {
+      fetchRentalDetailsByRentalId(rental.rental_id, { records: 20, skip: 0 }).then(res => {
+        if (res.success && Array.isArray(res.data)) {
+          setItems(res.data as any);
+        }
+      });
+    }
+  }, [rental]);
 
   const handleEdit = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -25,6 +39,11 @@ const RentalTransactionCard: React.FC<RentalTransactionCardProps> = ({ rental, o
   const handleDeleteClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     setIsConfirmModalOpen(true);
+  };
+
+  const handleRecordPayment = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    navigate('/payments/new', { state: { payment: { rental_id: rental.rental_id } } });
   };
 
   const confirmDelete = async () => {
@@ -136,12 +155,6 @@ const RentalTransactionCard: React.FC<RentalTransactionCardProps> = ({ rental, o
                 <span>Returned: {formatDate(rental.actual_return_date)}</span>
               </div>
             )}
-            {(rental.total_amount !== null && rental.total_amount !== undefined) && (
-              <div className="flex items-center" title={`Total Amount: ${formatCurrency(rental.total_amount)}`}>
-                <IndianRupee size={14} className="mr-2 text-green-600 flex-shrink-0" />
-                <span className="font-medium text-green-700">{formatCurrency(rental.total_amount)}</span>
-              </div>
-            )}
             {/* Corrected to use rental.payment_term_name */}
             {rental.payment_term_name && (
                  <div className="flex items-center" title={`Payment Term: ${rental.payment_term_name}`}>
@@ -149,16 +162,48 @@ const RentalTransactionCard: React.FC<RentalTransactionCardProps> = ({ rental, o
                     <span className="truncate">Term: {rental.payment_term_name}</span>
                 </div>
             )}
-             {rental.notes && (
+            {rental.notes && (
                  <div className="flex items-start" title={`Notes: ${rental.notes}`}>
                     <FileText size={14} className="mr-2 text-gray-500 flex-shrink-0 mt-0.5" />
                     <p className="text-xs text-dark-text/80 line-clamp-2">{rental.notes}</p>
                 </div>
             )}
+            {items.length > 0 && (
+                <div>
+                  <div className="font-semibold text-xs mt-2">Items:</div>
+                  <ul className="list-disc ml-5 space-y-1">
+                    {items.map(it => (
+                      <li key={it.rental_detail_id} className="text-xs">
+                        {it.equipment_name || `ID: ${it.equipment_id}`}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+            )}
+            <div className="grid grid-cols-2 gap-2 mt-2 text-xs">
+              {rental.total_amount !== null && (
+                <div>Total Due: {formatCurrency(rental.total_amount)}</div>
+              )}
+              {rental.total_receipt !== null && (
+                <div>Received: {formatCurrency(rental.total_receipt)}</div>
+              )}
+              {rental.deposit !== null && (
+                <div>Deposit: {formatCurrency(rental.deposit)}</div>
+              )}
+              {rental.balance !== null && (
+                <div>Balance: {formatCurrency(rental.balance)}</div>
+              )}
+            </div>
           </div>
         </div>
-        <div className="p-4 mt-auto border-t border-light-gray-100">
+        <div className="p-4 mt-auto border-t border-light-gray-100 flex justify-between items-center">
           {getStatusChip(rental.status)}
+          <button
+            onClick={handleRecordPayment}
+            className="text-xs text-brand-blue hover:underline rental-card-menu-button"
+          >
+            Record Payment
+          </button>
         </div>
       </div>
 
