@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   RentalTransaction,
   RentalTransactionFormData,
@@ -6,8 +6,6 @@ import {
   PaymentPlan as PaymentPlanType, // Renamed to avoid conflict
   Equipment as EquipmentType, // Renamed to avoid conflict
   Customer as CustomerType, // Renamed to avoid conflict
-  PincodeApiResponse,
-  PostOffice,
 } from '../../types';
 import { useCrud } from '../../context/CrudContext';
 import { useRentalTransactions } from '../../context/RentalTransactionContext';
@@ -30,6 +28,7 @@ import RentalCustomerSection from './RentalCustomerSection';
 import RentalStatusDates from './RentalStatusDates';
 import RentalShippingBilling from './RentalShippingBilling';
 import { formatCurrency } from '../../utils/formatting'; // Import formatCurrency
+import usePincodeLookup from '../../utils/usePincodeLookup';
 
 const RENTAL_STATUSES_FORM = ["Draft", "Pending Confirmation", "Confirmed/Booked", "Active/Rented Out", "Returned/Completed", "Overdue", "Cancelled"];
 
@@ -78,97 +77,26 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
   const [numberOfDays, setNumberOfDays] = useState<number>(0);
   const [calculatedTotalAmount, setCalculatedTotalAmount] = useState<number>(0);
 
-  // Pincode lookup state for shipping
-  const [shippingPincodeDetailsLoading, setShippingPincodeDetailsLoading] = useState(false);
-  const [shippingPincodeError, setShippingPincodeError] = useState<string | null>(null);
-  const [shippingAreaOptions, setShippingAreaOptions] = useState<{ value: string; label: string }[]>([]);
-  const [shippingIsAreaSelect, setShippingIsAreaSelect] = useState(false);
+  const {
+    loading: shippingPincodeDetailsLoading,
+    error: shippingPincodeError,
+    areaOptions: shippingAreaOptions,
+    city: shippingCity,
+    state: shippingState,
+    isAreaSelect: shippingIsAreaSelect,
+  } = usePincodeLookup(formData.shipping_pincode);
 
-  // Pincode lookup state for billing
-  const [billingPincodeDetailsLoading, setBillingPincodeDetailsLoading] = useState(false);
-  const [billingPincodeError, setBillingPincodeError] = useState<string | null>(null);
-  const [billingAreaOptions, setBillingAreaOptions] = useState<{ value: string; label: string }[]>([]);
-  const [billingIsAreaSelect, setBillingIsAreaSelect] = useState(false);
+  const {
+    loading: billingPincodeDetailsLoading,
+    error: billingPincodeError,
+    areaOptions: billingAreaOptions,
+    city: billingCity,
+    state: billingState,
+    isAreaSelect: billingIsAreaSelect,
+  } = usePincodeLookup(formData.billing_pincode);
 
   const isEditing = !!rental;
 
-  // Debounce utility
-  const debounce = <F extends (...args: any[]) => any>(func: F, waitFor: number) => {
-    let timeout: ReturnType<typeof setTimeout> | null = null;
-    return (...args: Parameters<F>): Promise<ReturnType<F>> =>
-      new Promise(resolve => {
-        if (timeout) {
-          clearTimeout(timeout);
-        }
-        timeout = setTimeout(() => resolve(func(...args)), waitFor);
-      });
-  };
-
-  const fetchPincodeDetails = useCallback(
-    async (pincode: string, type: 'shipping' | 'billing') => {
-      const setLoading = type === 'shipping' ? setShippingPincodeDetailsLoading : setBillingPincodeDetailsLoading;
-      const setError = type === 'shipping' ? setShippingPincodeError : setBillingPincodeError;
-      const setAreaOptionsFunc = type === 'shipping' ? setShippingAreaOptions : setBillingAreaOptions;
-      const setIsAreaSelectFunc = type === 'shipping' ? setShippingIsAreaSelect : setBillingIsAreaSelect;
-
-      if (pincode.length !== 6 || !/^\d{6}$/.test(pincode)) {
-        setError(null);
-        setFormData(prev => ({
-          ...prev,
-          [`${type}_area`]: '',
-          [`${type}_city`]: '',
-          [`${type}_state`]: '',
-        }));
-        setAreaOptionsFunc([]);
-        setIsAreaSelectFunc(false);
-        return;
-      }
-
-      setLoading(true);
-      setError(null);
-      setAreaOptionsFunc([]);
-      setIsAreaSelectFunc(false);
-
-      try {
-        const response = await fetch(`https://api.postalpincode.in/pincode/${pincode}`);
-        const data: PincodeApiResponse = await response.json();
-
-        if (data && data[0] && data[0].Status === 'Success' && data[0].PostOffice && data[0].PostOffice.length > 0) {
-          const postOffices = data[0].PostOffice as PostOffice[];
-          const firstPostOffice = postOffices[0];
-
-          setFormData(prev => ({
-            ...prev,
-            [`${type}_city`]: firstPostOffice.District || '',
-            [`${type}_state`]: firstPostOffice.State || '',
-            [`${type}_area`]: postOffices.length === 1 ? firstPostOffice.Name || '' : '',
-          }));
-
-          if (postOffices.length > 1) {
-            setAreaOptionsFunc(postOffices.map(po => ({ value: po.Name, label: po.Name })));
-            setIsAreaSelectFunc(true);
-          } else {
-            setIsAreaSelectFunc(false);
-          }
-        } else if (data && data[0] && (data[0].Status === 'Error' || data[0].Status === '404' || !data[0].PostOffice || data[0].PostOffice.length === 0)) {
-          setError(data[0].Message || 'Pincode not found or no post offices listed.');
-          setFormData(prev => ({ ...prev, [`${type}_city`]: '', [`${type}_state`]: '', [`${type}_area`]: '' }));
-        } else {
-          setError('Invalid response from pincode API.');
-          setFormData(prev => ({ ...prev, [`${type}_city`]: '', [`${type}_state`]: '', [`${type}_area`]: '' }));
-        }
-      } catch (err) {
-        console.error('Pincode API error:', err);
-        setError('Failed to fetch pincode details. Check network connection.');
-        setFormData(prev => ({ ...prev, [`${type}_city`]: '', [`${type}_state`]: '', [`${type}_area`]: '' }));
-      } finally {
-        setLoading(false);
-      }
-    },
-    []
-  );
-
-  const debouncedFetchPincodeDetails = useCallback(debounce(fetchPincodeDetails, 700), [fetchPincodeDetails]);
 
 
   useEffect(() => {
@@ -268,22 +196,52 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
   }, [formData.rental_date, formData.expected_return_date, formData.rental_items]);
 
   useEffect(() => {
-    if (formData.shipping_pincode && formData.shipping_pincode.length === 6) {
-      debouncedFetchPincodeDetails(formData.shipping_pincode, 'shipping');
-    } else {
-      setShippingAreaOptions([]);
-      setShippingIsAreaSelect(false);
-    }
-  }, [formData.shipping_pincode, debouncedFetchPincodeDetails]);
+    setFormData(prev => {
+      let area = prev.shipping_area;
+      if (shippingAreaOptions.length === 1 && !shippingIsAreaSelect) {
+        area = shippingAreaOptions[0].value;
+      } else if (shippingAreaOptions.length === 0) {
+        area = '';
+      }
+      if (
+        prev.shipping_city === shippingCity &&
+        prev.shipping_state === shippingState &&
+        prev.shipping_area === area
+      ) {
+        return prev;
+      }
+      return {
+        ...prev,
+        shipping_city: shippingCity,
+        shipping_state: shippingState,
+        shipping_area: area,
+      };
+    });
+  }, [shippingCity, shippingState, shippingAreaOptions, shippingIsAreaSelect]);
 
   useEffect(() => {
-    if (formData.billing_pincode && formData.billing_pincode.length === 6) {
-      debouncedFetchPincodeDetails(formData.billing_pincode, 'billing');
-    } else {
-      setBillingAreaOptions([]);
-      setBillingIsAreaSelect(false);
-    }
-  }, [formData.billing_pincode, debouncedFetchPincodeDetails]);
+    setFormData(prev => {
+      let area = prev.billing_area;
+      if (billingAreaOptions.length === 1 && !billingIsAreaSelect) {
+        area = billingAreaOptions[0].value;
+      } else if (billingAreaOptions.length === 0) {
+        area = '';
+      }
+      if (
+        prev.billing_city === billingCity &&
+        prev.billing_state === billingState &&
+        prev.billing_area === area
+      ) {
+        return prev;
+      }
+      return {
+        ...prev,
+        billing_city: billingCity,
+        billing_state: billingState,
+        billing_area: area,
+      };
+    });
+  }, [billingCity, billingState, billingAreaOptions, billingIsAreaSelect]);
 
 
   const validateForm = (): boolean => {
