@@ -132,7 +132,7 @@ const CustomerCard: React.FC<CustomerCardProps> = ({ customer, onClick, onEdit, 
             </div>
           </div>
         </div>
-        {onViewRentals && customer.has_active_rentals && (
+        {onViewRentals && Number(customer.has_active_rentals) > 0 && (
           <div className="px-6 py-3 border-t border-light-gray-100 flex justify-end">
             <button
               onClick={(e) => { e.stopPropagation(); onViewRentals(String(customer.customer_id)); }}
