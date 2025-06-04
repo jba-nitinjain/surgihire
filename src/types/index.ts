@@ -134,12 +134,24 @@ export interface RentalItemFormData {
 export interface RentalTransaction {
   rental_id: number;
   customer_id: string;
+  shipping_address: string | null;
+  shipping_area: string | null;
+  shipping_city: string | null;
+  shipping_state: string | null;
+  shipping_pincode: string | null;
+  billing_address: string | null;
+  billing_area: string | null;
+  billing_city: string | null;
+  billing_state: string | null;
+  billing_pincode: string | null;
+  mobile_number: string | null;
+  email: string | null;
   rental_date: string;
   expected_return_date: string | null;
   actual_return_date: string | null;
   total_amount: number | null; // This will be calculated
   deposit: number | null;
-  payment_term_id: number | null; // Changed to store ID from payment_plans
+  payment_term: string | null;
   payment_term_name?: string; // For display
   status: string | null;
   notes?: string | null;
@@ -149,11 +161,23 @@ export interface RentalTransaction {
 
 export interface RentalTransactionFormData {
   customer_id: string;
+  shipping_address?: string | null;
+  shipping_area?: string | null;
+  shipping_city?: string | null;
+  shipping_state?: string | null;
+  shipping_pincode?: string | null;
+  billing_address?: string | null;
+  billing_area?: string | null;
+  billing_city?: string | null;
+  billing_state?: string | null;
+  billing_pincode?: string | null;
+  mobile_number?: string | null;
+  email?: string | null;
   rental_date: string;
   expected_return_date?: string | null;
   // total_amount is calculated, not directly input
   deposit?: string | null;
-  payment_term_id?: string | null; // Selected payment plan ID
+  payment_term?: string | null; // Selected payment plan name
   status?: string | null;
   notes?: string | null;
   rental_items: RentalItemFormData[]; // Array of items being rented
