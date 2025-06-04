@@ -25,6 +25,11 @@ import {
   deleteMaintenanceRecord,
 } from '../services/api/maintenance';
 import {
+  createPayment,
+  updatePayment,
+  deletePayment,
+} from '../services/api/payments';
+import {
   createRental,
   updateRental,
   deleteRental,
@@ -77,6 +82,9 @@ export const CrudProvider: React.FC<CrudProviderProps> = ({ children }) => {
         case 'payment_schedules':
           response = await createPaymentSchedule(data);
           break;
+        case 'payments':
+          response = await createPayment(data);
+          break;
         case 'equipment_categories':
           response = await createEquipmentCategory(data);
           break;
@@ -121,6 +129,9 @@ export const CrudProvider: React.FC<CrudProviderProps> = ({ children }) => {
         case 'payment_schedules':
           response = await updatePaymentSchedule(Number(id), data);
           break;
+        case 'payments':
+          response = await updatePayment(Number(id), data);
+          break;
         case 'equipment_categories':
           response = await updateEquipmentCategory(Number(id), data);
           break;
@@ -164,6 +175,9 @@ export const CrudProvider: React.FC<CrudProviderProps> = ({ children }) => {
           break;
         case 'payment_schedules':
           response = await deletePaymentSchedule(Number(id));
+          break;
+        case 'payments':
+          response = await deletePayment(Number(id));
           break;
         case 'equipment_categories':
           response = await deleteEquipmentCategory(Number(id));
