@@ -1,10 +1,16 @@
 import React from 'react';
 import { Equipment } from '../types'; // EquipmentCategory removed as categoryName is passed
 import {
-  Package, Tag, Hash, CalendarDays, MapPin, Info, Wrench, Layers,
-  X, ArrowLeft, Edit3, ListChecks
+  Package,
+  X,
+  ArrowLeft,
+  Edit3,
+  ListChecks
 } from 'lucide-react';
-import { formatDate, formatCurrency } from '../utils/formatting'; // Import utilities
+
+import BasicInfoSection from './equipment/detail/BasicInfoSection';
+import FinancialStatusSection from './equipment/detail/FinancialStatusSection';
+import MaintenanceLocationSection from './equipment/detail/MaintenanceLocationSection';
 import Modal from './ui/Modal';
 
 interface EquipmentDetailProps {
@@ -26,7 +32,6 @@ const EquipmentDetail: React.FC<EquipmentDetailProps> = ({
     return null;
   }
 
-  // formatDate and formatCurrency are now imported
 
   const handleEditClick = () => {
     onEdit(equipment);
@@ -90,136 +95,9 @@ const EquipmentDetail: React.FC<EquipmentDetailProps> = ({
           </div>
 
           <div className="space-y-6">
-            <section>
-              <h4 className="text-sm font-medium text-dark-text uppercase tracking-wider mb-3">
-                Basic Information
-              </h4>
-              <div className="bg-white rounded-lg border border-light-gray-200 overflow-hidden shadow-sm">
-                <div className="divide-y divide-light-gray-200">
-                  {equipment.description && (
-                    <div className="flex p-4 items-start">
-                      <Info className="h-5 w-5 text-brand-blue mr-3 mt-1 flex-shrink-0" />
-                      <div>
-                        <p className="text-xs text-dark-text/60 mb-0.5">Description</p>
-                        <p className="text-sm text-dark-text break-words">{equipment.description}</p>
-                      </div>
-                    </div>
-                  )}
-                  {categoryName && ( // Use the passed categoryName
-                    <div className="flex p-4 items-start">
-                      <Layers className="h-5 w-5 text-brand-blue mr-3 mt-1 flex-shrink-0" />
-                      <div>
-                        <p className="text-xs text-dark-text/60 mb-0.5">Category</p>
-                        <p className="text-sm text-dark-text">{categoryName}</p>
-                      </div>
-                    </div>
-                  )}
-                  {equipment.model && (
-                    <div className="flex p-4 items-start">
-                      <Tag className="h-5 w-5 text-brand-blue mr-3 mt-1 flex-shrink-0" />
-                      <div>
-                        <p className="text-xs text-dark-text/60 mb-0.5">Model</p>
-                        <p className="text-sm text-dark-text">{equipment.model}</p>
-                      </div>
-                    </div>
-                  )}
-                  {equipment.make && (
-                    <div className="flex p-4 items-start">
-                      <Tag className="h-5 w-5 text-dark-text/70 mr-3 mt-1 flex-shrink-0" />
-                      <div>
-                        <p className="text-xs text-dark-text/60 mb-0.5">Make</p>
-                        <p className="text-sm text-dark-text">{equipment.make}</p>
-                      </div>
-                    </div>
-                  )}
-                  {equipment.serial_number && (
-                    <div className="flex p-4 items-start">
-                      <Hash className="h-5 w-5 text-brand-blue mr-3 mt-1 flex-shrink-0" />
-                      <div>
-                        <p className="text-xs text-dark-text/60 mb-0.5">Serial Number</p>
-                        <p className="text-sm text-dark-text">{equipment.serial_number}</p>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </section>
-
-            <section>
-              <h4 className="text-sm font-medium text-dark-text uppercase tracking-wider mb-3">
-                Financial & Status
-              </h4>
-              <div className="bg-white rounded-lg border border-light-gray-200 overflow-hidden shadow-sm">
-                <div className="divide-y divide-light-gray-200">
-                  {equipment.purchase_date && (
-                    <div className="flex p-4 items-start">
-                      <CalendarDays className="h-5 w-5 text-brand-blue mr-3 mt-1 flex-shrink-0" />
-                      <div>
-                        <p className="text-xs text-dark-text/60 mb-0.5">Purchase Date</p>
-                        <p className="text-sm text-dark-text">{formatDate(equipment.purchase_date)}</p>
-                      </div>
-                    </div>
-                  )}
-                  {(equipment.rental_rate !== null && equipment.rental_rate !== undefined) && (
-                    <div className="flex p-4 items-start">
-                      {/* Using text-green-600 for currency icon as before, but formatCurrency handles the symbol */}
-                       <span className={`h-5 w-5 mr-3 mt-1 flex-shrink-0 text-brand-blue font-semibold`}>{formatCurrency(equipment.rental_rate).charAt(0)}</span>
-                      <div>
-                        <p className="text-xs text-dark-text/60 mb-0.5">Rental Rate (per day)</p>
-                        <p className="text-sm text-dark-text">{formatCurrency(equipment.rental_rate)}</p>
-                      </div>
-                    </div>
-                  )}
-                  {equipment.status && (
-                    <div className="flex p-4 items-start">
-                      <Info className="h-5 w-5 text-brand-blue mr-3 mt-1 flex-shrink-0" />
-                      <div>
-                        <p className="text-xs text-dark-text/60 mb-0.5">Status</p>
-                        <p className="text-sm text-dark-text">{equipment.status}</p>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </section>
-
-            <section>
-              <h4 className="text-sm font-medium text-dark-text uppercase tracking-wider mb-3">
-                Maintenance & Location
-              </h4>
-              <div className="bg-white rounded-lg border border-light-gray-200 overflow-hidden shadow-sm">
-                <div className="divide-y divide-light-gray-200">
-                  {equipment.last_maintenance_date && (
-                    <div className="flex p-4 items-start">
-                      <Wrench className="h-5 w-5 text-brand-blue mr-3 mt-1 flex-shrink-0" />
-                      <div>
-                        <p className="text-xs text-dark-text/60 mb-0.5">Last Maintenance</p>
-                        <p className="text-sm text-dark-text">{formatDate(equipment.last_maintenance_date)}</p>
-                      </div>
-                    </div>
-                  )}
-                  {equipment.next_calibration_date && (
-                    <div className="flex p-4 items-start">
-                      <CalendarDays className="h-5 w-5 text-brand-blue mr-3 mt-1 flex-shrink-0" />
-                      <div>
-                        <p className="text-xs text-dark-text/60 mb-0.5">Next Calibration</p>
-                        <p className="text-sm text-dark-text">{formatDate(equipment.next_calibration_date)}</p>
-                      </div>
-                    </div>
-                  )}
-                  {equipment.location && (
-                    <div className="flex p-4 items-start">
-                      <MapPin className="h-5 w-5 text-brand-blue mr-3 mt-1 flex-shrink-0" />
-                      <div>
-                        <p className="text-xs text-dark-text/60 mb-0.5">Location</p>
-                        <p className="text-sm text-dark-text">{equipment.location}</p>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </section>
-
+            <BasicInfoSection equipment={equipment} categoryName={categoryName} />
+            <FinancialStatusSection equipment={equipment} />
+            <MaintenanceLocationSection equipment={equipment} />
           </div>
         </div>
     </Modal>
