@@ -19,16 +19,16 @@ import {
   X,
   Loader2,
   CalendarCheck2,
-  User,
   IndianRupee,
   ListChecks,
   Info,
-  ChevronDown,
   DollarSign,
-  CalendarDays,
 } from 'lucide-react';
 import Modal from '../ui/Modal';
 import RentalItemsSection from './RentalItemsSection';
+import RentalCustomerSection from './RentalCustomerSection';
+import RentalStatusDates from './RentalStatusDates';
+import RentalShippingBilling from './RentalShippingBilling';
 import { formatCurrency } from '../../utils/formatting'; // Import formatCurrency
 
 const RENTAL_STATUSES_FORM = ["Draft", "Pending Confirmation", "Confirmed/Booked", "Active/Rented Out", "Returned/Completed", "Overdue", "Cancelled"];
@@ -499,142 +499,66 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
             </div>
           )}
 
-          <fieldset className="grid grid-cols-1 gap-y-6 gap-x-4 md:grid-cols-2">
-            <legend className="text-lg font-medium text-dark-text col-span-full mb-2">Rental Information</legend>
-            <div>
-              <label htmlFor="customer_id" className={labelClass}>Customer <span className="text-red-500">*</span></label>
-              <div className="mt-1 relative rounded-md shadow-sm">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  {loadingCustomers ? <Loader2 className={`${iconClass} animate-spin`} /> : <User className={iconClass} />}
-                </div>
-                <select name="customer_id" id="customer_id" value={formData.customer_id} onChange={handleChange} className={`${inputClass} pl-10`} required disabled={loadingCustomers}>
-                  <option value="">{loadingCustomers ? "Loading..." : "Select Customer"}</option>
-                  {customers.map((c: CustomerType) => <option key={c.customer_id} value={c.customer_id}>{c.full_name}</option>)}
-                </select>
-              </div>
-              {formErrors.customer_id && <p className="text-xs text-red-500 mt-1">{formErrors.customer_id}</p>}
-            </div>
+          <RentalCustomerSection
+            customerId={formData.customer_id}
+            customers={customers}
+            loadingCustomers={loadingCustomers}
+            handleChange={handleChange}
+            error={formErrors.customer_id}
+            inputClass={inputClass}
+            labelClass={labelClass}
+            iconClass={iconClass}
+          />
 
-            <div>
-              <label htmlFor="rental_date" className={labelClass}>Rental Date <span className="text-red-500">*</span></label>
-              <input type="date" name="rental_date" id="rental_date" value={formData.rental_date} onChange={handleChange} className={inputClass} required />
-              {formErrors.rental_date && <p className="text-xs text-red-500 mt-1">{formErrors.rental_date}</p>}
-            </div>
+          <RentalStatusDates
+            data={{
+              rental_date: formData.rental_date,
+              expected_return_date: formData.expected_return_date,
+              status: formData.status,
+            }}
+            numberOfDays={numberOfDays}
+            errors={{
+              rental_date: formErrors.rental_date,
+              expected_return_date: formErrors.expected_return_date,
+              status: formErrors.status,
+            }}
+            handleChange={handleChange}
+            inputClass={inputClass}
+            labelClass={labelClass}
+            iconClass={iconClass}
+            statusOptions={RENTAL_STATUSES_FORM}
+          />
 
-            <div>
-              <label htmlFor="expected_return_date" className={labelClass}>Expected Return Date <span className="text-red-500">*</span></label>
-              <input type="date" name="expected_return_date" id="expected_return_date" value={formData.expected_return_date || ''} onChange={handleChange} className={inputClass} required />
-              {formErrors.expected_return_date && <p className="text-xs text-red-500 mt-1">{formErrors.expected_return_date}</p>}
-            </div>
-             <div>
-                <label className={labelClass}>Number of Days</label>
-                <p className="mt-1 px-3 py-2 bg-light-gray-100 border border-light-gray-300 rounded-md text-dark-text/80 sm:text-sm flex items-center">
-                   <CalendarDays size={16} className="mr-2 text-brand-blue"/> {numberOfDays > 0 ? numberOfDays : 'N/A'}
-                </p>
-            </div>
-
-
-            <div>
-              <label htmlFor="status" className={labelClass}>Status <span className="text-red-500">*</span></label>
-               <div className="mt-1 relative rounded-md shadow-sm">
-                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><ChevronDown className={iconClass} /></div>
-                <select name="status" id="status" value={formData.status || ''} onChange={handleChange} className={`${inputClass} pl-10`} required>
-                    {RENTAL_STATUSES_FORM.map(s => <option key={s} value={s}>{s}</option>)}
-                </select>
-              </div>
-          {formErrors.status && <p className="text-xs text-red-500 mt-1">{formErrors.status}</p>}
-        </div>
-      </fieldset>
-
-      <fieldset className="grid grid-cols-1 gap-y-6 gap-x-4 md:grid-cols-2">
-        <legend className="text-lg font-medium text-dark-text col-span-full mb-2">Shipping & Billing</legend>
-        <div className="col-span-full flex gap-4 text-xs">
-          <button type="button" onClick={copyShippingToBilling} className="text-brand-blue underline">Copy Shipping to Billing</button>
-          <button type="button" onClick={copyBillingToShipping} className="text-brand-blue underline">Copy Billing to Shipping</button>
-        </div>
-        <div className="md:col-span-2">
-          <label htmlFor="shipping_address" className={labelClass}>Shipping Address</label>
-          <textarea id="shipping_address" name="shipping_address" value={formData.shipping_address || ''} onChange={handleChange} rows={2} className={inputClass}></textarea>
-        </div>
-        <div>
-          <label htmlFor="shipping_area" className={labelClass}>Shipping Area</label>
-          {shippingIsAreaSelect ? (
-            <select id="shipping_area" name="shipping_area" value={formData.shipping_area || ''} onChange={handleChange} className={inputClass}>
-              <option value="">Select Area</option>
-              {shippingAreaOptions.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
-            </select>
-          ) : (
-            <input type="text" id="shipping_area" name="shipping_area" value={formData.shipping_area || ''} onChange={handleChange} className={inputClass} readOnly={shippingAreaOptions.length > 0 && !shippingIsAreaSelect} />
-          )}
-          {formErrors.shipping_area && <p className="text-xs text-red-500 mt-1">{formErrors.shipping_area}</p>}
-        </div>
-        <div>
-          <label htmlFor="shipping_city" className={labelClass}>Shipping City</label>
-          <input type="text" id="shipping_city" name="shipping_city" value={formData.shipping_city || ''} onChange={handleChange} className={inputClass} readOnly />
-        </div>
-        <div>
-          <label htmlFor="shipping_state" className={labelClass}>Shipping State</label>
-          <input type="text" id="shipping_state" name="shipping_state" value={formData.shipping_state || ''} onChange={handleChange} className={inputClass} readOnly />
-        </div>
-        <div>
-          <label htmlFor="shipping_pincode" className={labelClass}>Shipping Pincode</label>
-          <div className="relative">
-            <input type="text" id="shipping_pincode" name="shipping_pincode" value={formData.shipping_pincode || ''} onChange={handleChange} className={inputClass} maxLength={6} />
-            {shippingPincodeDetailsLoading && (
-              <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                <Loader2 className="h-5 w-5 text-gray-400 animate-spin" />
-              </div>
-            )}
-          </div>
-          {formErrors.shipping_pincode && <p className="text-xs text-red-500 mt-1">{formErrors.shipping_pincode}</p>}
-          {shippingPincodeError && <p className="text-xs text-red-500 mt-1">{shippingPincodeError}</p>}
-        </div>
-        <div className="md:col-span-2">
-          <label htmlFor="billing_address" className={labelClass}>Billing Address</label>
-          <textarea id="billing_address" name="billing_address" value={formData.billing_address || ''} onChange={handleChange} rows={2} className={inputClass}></textarea>
-        </div>
-        <div>
-          <label htmlFor="billing_area" className={labelClass}>Billing Area</label>
-          {billingIsAreaSelect ? (
-            <select id="billing_area" name="billing_area" value={formData.billing_area || ''} onChange={handleChange} className={inputClass}>
-              <option value="">Select Area</option>
-              {billingAreaOptions.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
-            </select>
-          ) : (
-            <input type="text" id="billing_area" name="billing_area" value={formData.billing_area || ''} onChange={handleChange} className={inputClass} readOnly={billingAreaOptions.length > 0 && !billingIsAreaSelect} />
-          )}
-          {formErrors.billing_area && <p className="text-xs text-red-500 mt-1">{formErrors.billing_area}</p>}
-        </div>
-        <div>
-          <label htmlFor="billing_city" className={labelClass}>Billing City</label>
-          <input type="text" id="billing_city" name="billing_city" value={formData.billing_city || ''} onChange={handleChange} className={inputClass} readOnly />
-        </div>
-        <div>
-          <label htmlFor="billing_state" className={labelClass}>Billing State</label>
-          <input type="text" id="billing_state" name="billing_state" value={formData.billing_state || ''} onChange={handleChange} className={inputClass} readOnly />
-        </div>
-        <div>
-          <label htmlFor="billing_pincode" className={labelClass}>Billing Pincode</label>
-          <div className="relative">
-            <input type="text" id="billing_pincode" name="billing_pincode" value={formData.billing_pincode || ''} onChange={handleChange} className={inputClass} maxLength={6} />
-            {billingPincodeDetailsLoading && (
-              <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                <Loader2 className="h-5 w-5 text-gray-400 animate-spin" />
-              </div>
-            )}
-          </div>
-          {formErrors.billing_pincode && <p className="text-xs text-red-500 mt-1">{formErrors.billing_pincode}</p>}
-          {billingPincodeError && <p className="text-xs text-red-500 mt-1">{billingPincodeError}</p>}
-        </div>
-        <div>
-          <label htmlFor="mobile_number" className={labelClass}>Mobile Number</label>
-          <input type="text" id="mobile_number" name="mobile_number" value={formData.mobile_number || ''} onChange={handleChange} className={inputClass} />
-        </div>
-        <div>
-          <label htmlFor="email" className={labelClass}>Email</label>
-          <input type="email" id="email" name="email" value={formData.email || ''} onChange={handleChange} className={inputClass} />
-        </div>
-      </fieldset>
+          <RentalShippingBilling
+            data={{
+              shipping_address: formData.shipping_address,
+              shipping_area: formData.shipping_area,
+              shipping_city: formData.shipping_city,
+              shipping_state: formData.shipping_state,
+              shipping_pincode: formData.shipping_pincode,
+              billing_address: formData.billing_address,
+              billing_area: formData.billing_area,
+              billing_city: formData.billing_city,
+              billing_state: formData.billing_state,
+              billing_pincode: formData.billing_pincode,
+              mobile_number: formData.mobile_number,
+              email: formData.email,
+            }}
+            errors={formErrors as Record<string, string>}
+            handleChange={handleChange}
+            shippingPincodeDetailsLoading={shippingPincodeDetailsLoading}
+            shippingPincodeError={shippingPincodeError}
+            shippingAreaOptions={shippingAreaOptions}
+            shippingIsAreaSelect={shippingIsAreaSelect}
+            billingPincodeDetailsLoading={billingPincodeDetailsLoading}
+            billingPincodeError={billingPincodeError}
+            billingAreaOptions={billingAreaOptions}
+            billingIsAreaSelect={billingIsAreaSelect}
+            copyShippingToBilling={copyShippingToBilling}
+            copyBillingToShipping={copyBillingToShipping}
+            inputClass={inputClass}
+            labelClass={labelClass}
+          />
 
           <RentalItemsSection
             items={formData.rental_items}
