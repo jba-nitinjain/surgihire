@@ -90,13 +90,6 @@ const EquipmentCard: React.FC<EquipmentCardProps> = ({ equipment, onEdit, onView
                 <Edit3 size={20} />
               </button>
               <button
-                onClick={(e) => { e.stopPropagation(); onViewMaintenance(String(equipment.equipment_id)); }}
-                className="p-1 text-green-600 hover:text-green-700 rounded-full hover:bg-light-gray-100"
-                aria-label="View Maintenance Records"
-              >
-                <ListChecks size={20} />
-              </button>
-              <button
                 onClick={handleDeleteClick}
                 disabled={crudLoading}
                 className="p-1 text-red-600 hover:text-red-700 rounded-full hover:bg-light-gray-100 disabled:opacity-50"
@@ -153,10 +146,18 @@ const EquipmentCard: React.FC<EquipmentCardProps> = ({ equipment, onEdit, onView
             )}
           </div>
         </div>
-        <div className="p-4 mt-auto border-t border-light-gray-100">
+        <div className="p-4 mt-auto border-t border-light-gray-100 flex items-center justify-between">
             <span className={`px-2.5 py-1 text-xs font-semibold rounded-full ${getStatusColor(equipment.status)}`}>
                 {equipment.status || 'Unknown'}
             </span>
+            {onViewMaintenance && equipment.maintenance_record_count && equipment.maintenance_record_count > 0 && (
+                <button
+                    onClick={(e) => { e.stopPropagation(); onViewMaintenance(String(equipment.equipment_id)); }}
+                    className="text-brand-blue border border-brand-blue text-xs px-2 py-1 rounded hover:bg-brand-blue/10 ml-2"
+                >
+                    View Maintenance
+                </button>
+            )}
         </div>
       </div>
 
