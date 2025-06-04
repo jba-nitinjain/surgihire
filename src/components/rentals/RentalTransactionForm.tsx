@@ -13,6 +13,7 @@ import { useCrud } from '../../context/CrudContext';
 import { useRentalTransactions } from '../../context/RentalTransactionContext';
 import { usePaymentPlans } from '../../context/PaymentPlanContext';
 import { useEquipment } from '../../context/EquipmentContext';
+import { createRentalDetail, updateRentalDetail } from '../../services/api';
 import {
   Save,
   X,
@@ -435,8 +436,38 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
     try {
       if (isEditing && rental && rental.rental_id) {
         await updateItem('rental_transactions', rental.rental_id, apiData);
+        await Promise.all(
+          apiData.rental_items.map((item: any) =>
+            item.rental_detail_id
+              ? updateRentalDetail(item.rental_detail_id, {
+                  rental_id: rental.rental_id,
+                  equipment_id: item.equipment_id,
+                  quantity: item.quantity,
+                  unit_rental_rate: item.unit_rental_rate,
+                })
+              : createRentalDetail({
+                  rental_id: rental.rental_id,
+                  equipment_id: item.equipment_id,
+                  quantity: item.quantity,
+                  unit_rental_rate: item.unit_rental_rate,
+                })
+          )
+        );
       } else {
-        await createItem('rental_transactions', apiData);
+        const res = await createItem('rental_transactions', apiData);
+        const newId = res?.data?.rental_id ?? res?.data?.insertId ?? null;
+        if (newId) {
+          await Promise.all(
+            apiData.rental_items.map((item: any) =>
+              createRentalDetail({
+                rental_id: Number(newId),
+                equipment_id: item.equipment_id,
+                quantity: item.quantity,
+                unit_rental_rate: item.unit_rental_rate,
+              })
+            )
+          );
+        }
       }
       onSave();
     } catch (err) {

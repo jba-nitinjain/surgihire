@@ -49,16 +49,19 @@ const RentalsTab: React.FC = () => {
         fetchRentalDetailsByRentalId(rental.rental_id, { records: 100, skip: 0 })
       ]);
 
-      if (rentalRes.success) {
-        const fullRental = rentalRes.data as RentalTransaction;
-        if (detailsRes.success && Array.isArray(detailsRes.data)) {
-          fullRental.rental_items = detailsRes.data;
-        }
-        setEditingRental(fullRental);
-      } else {
-        // Fallback to the passed rental data if the request fails
-        setEditingRental(rental);
+      let fullRental: RentalTransaction = rental;
+
+      if (rentalRes.success && rentalRes.data) {
+        fullRental = Array.isArray(rentalRes.data)
+          ? (rentalRes.data[0] as RentalTransaction)
+          : (rentalRes.data as RentalTransaction);
       }
+
+      if (detailsRes.success && Array.isArray(detailsRes.data)) {
+        fullRental = { ...fullRental, rental_items: detailsRes.data };
+      }
+
+      setEditingRental(fullRental);
     } catch (err) {
       console.error('Failed to fetch rental details', err);
       setEditingRental(rental);
