@@ -91,6 +91,28 @@ export interface PaymentPlanFormData {
   frequency_in_days?: string | null;
 }
 
+// --- Payment Types ---
+export interface Payment {
+  payment_id: number;
+  rental_id: number;
+  nature: string | null;
+  payment_date: string;
+  payment_amount: number;
+  payment_mode: string | null;
+  payment_reference: string | null;
+  notes: string | null;
+}
+
+export interface PaymentFormData {
+  rental_id: string | number;
+  nature?: string | null;
+  payment_date: string;
+  payment_amount?: string | null;
+  payment_mode?: string | null;
+  payment_reference?: string | null;
+  notes?: string | null;
+}
+
 // --- Existing Maintenance Record Types ---
 export interface MaintenanceRecord {
   maintenance_id: number;
@@ -153,6 +175,8 @@ export interface RentalTransaction {
   actual_return_date: string | null;
   total_amount: number | null; // This will be calculated
   deposit: number | null;
+  total_receipt?: number | null;
+  balance?: number | null;
   payment_term: string | null;
   payment_term_name?: string; // For display
   status: string | null;

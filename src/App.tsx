@@ -6,6 +6,7 @@ import { EquipmentCategoryProvider } from './context/EquipmentCategoryContext';
 import { PaymentPlanProvider } from './context/PaymentPlanContext';
 import { MaintenanceRecordProvider } from './context/MaintenanceRecordContext';
 import { RentalTransactionProvider } from './context/RentalTransactionContext'; // Import new provider
+import { PaymentProvider } from './context/PaymentContext';
 import Dashboard from './components/Dashboard';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import CustomerFormPage from './components/pages/CustomerFormPage';
@@ -16,6 +17,8 @@ import RentalFormPage from './components/pages/RentalFormPage';
 import MaintenanceFormPage from './components/pages/MaintenanceFormPage';
 import PaymentPlanFormPage from './components/pages/PaymentPlanFormPage';
 import EquipmentCategoryFormPage from './components/pages/EquipmentCategoryFormPage';
+import PaymentFormPage from './components/pages/PaymentFormPage';
+import PaymentDetailPage from './components/pages/PaymentDetailPage';
 import NotFound from './components/pages/NotFound';
 
 function App() {
@@ -29,7 +32,8 @@ function App() {
             <PaymentPlanProvider>
               <MaintenanceRecordProvider>
                 <RentalTransactionProvider>
-                  <Routes>
+                  <PaymentProvider>
+                    <Routes>
                     <Route path="/" element={<Dashboard sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />}>
                       <Route index element={<Navigate to="customers" replace />} />
 
@@ -47,6 +51,11 @@ function App() {
                       <Route path="rentals/new" element={<RentalFormPage />} />
                       <Route path="rentals/:id/edit" element={<RentalFormPage />} />
 
+                      <Route path="payments" element={<></>} />
+                      <Route path="payments/new" element={<PaymentFormPage />} />
+                      <Route path="payments/:id/edit" element={<PaymentFormPage />} />
+                      <Route path="payments/:id" element={<PaymentDetailPage />} />
+
                       <Route path="maintenance" element={<></>} />
                       <Route path="maintenance/new" element={<MaintenanceFormPage />} />
                       <Route path="maintenance/:id/edit" element={<MaintenanceFormPage />} />
@@ -60,6 +69,7 @@ function App() {
                     </Route>
                     <Route path="*" element={<NotFound />} />
                   </Routes>
+                  </PaymentProvider>
                 </RentalTransactionProvider>
               </MaintenanceRecordProvider>
             </PaymentPlanProvider>
