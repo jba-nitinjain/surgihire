@@ -19,7 +19,10 @@ interface PincodeLookupResult {
  * Hook to fetch Indian pincode details with debounce.
  * @param pincode 6 digit pincode string
  */
-export const usePincodeLookup = (pincode: string): PincodeLookupResult => {
+export const usePincodeLookup = (
+  pincode: string,
+  enabled = true
+): PincodeLookupResult => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [areaOptions, setAreaOptions] = useState<AreaOption[]>([]);
@@ -32,6 +35,10 @@ export const usePincodeLookup = (pincode: string): PincodeLookupResult => {
   useEffect(() => {
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
+    }
+
+    if (!enabled) {
+      return;
     }
 
     if (!pincode || pincode.length !== 6 || !/^\d{6}$/.test(pincode)) {
@@ -104,7 +111,7 @@ export const usePincodeLookup = (pincode: string): PincodeLookupResult => {
         clearTimeout(timeoutRef.current);
       }
     };
-  }, [pincode]);
+  }, [pincode, enabled]);
 
   return { loading, error, areaOptions, city, state, isAreaSelect };
 };
