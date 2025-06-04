@@ -11,9 +11,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 const RENTAL_STATUSES = ["Draft", "Pending Confirmation", "Confirmed/Booked", "Active/Rented Out", "Returned/Completed", "Overdue", "Cancelled"];
 
 
-interface RentalsTabProps {}
-
-const RentalsTab: React.FC<RentalsTabProps> = () => {
+const RentalsTab: React.FC = () => {
   const {
     searchQuery,
     setSearchQuery,
