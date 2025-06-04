@@ -2,7 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { Equipment, EquipmentFormData, EquipmentCategory } from '../types'; 
 import { useCrud } from '../context/CrudContext';
 import { useEquipmentCategories } from '../context/EquipmentCategoryContext'; 
-import { Save, X, Loader2, Package, Tag, Hash, CalendarDays, MapPin, Info, Wrench, Layers, IndianRupee } from 'lucide-react'; // Changed DollarSign to IndianRupee
+import { Save, X, Loader2, Package } from 'lucide-react';
+import EquipmentBasicInfo from './equipment/EquipmentBasicInfo';
+import EquipmentIdentification from './equipment/EquipmentIdentification';
+import EquipmentFinancial from './equipment/EquipmentFinancial';
+import EquipmentDatesLocation from './equipment/EquipmentDatesLocation';
 import Modal from './ui/Modal';
 
 interface EquipmentFormProps {
@@ -193,126 +197,47 @@ const EquipmentForm: React.FC<EquipmentFormProps> = ({ equipment, onSave, onCanc
             </div>
           )}
           
-          <fieldset className="grid grid-cols-1 gap-y-6 gap-x-4 md:grid-cols-2">
-            <legend className="text-lg font-medium text-dark-text col-span-full mb-2">Basic Information</legend>
-            <div className="md:col-span-2">
-              <label htmlFor="equipment_name" className={labelClass}>Equipment Name <span className="text-red-500">*</span></label>
-              <div className="mt-1 relative rounded-md shadow-sm">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><Package className={iconClass} /></div>
-                <input type="text" name="equipment_name" id="equipment_name" value={formData.equipment_name} onChange={handleChange} className={`${inputClass} pl-10`} required />
-              </div>
-              {formErrors.equipment_name && <p className="text-xs text-red-500 mt-1">{formErrors.equipment_name}</p>}
-            </div>
-            
-            <div className="md:col-span-2">
-              <label htmlFor="description" className={labelClass}>Description</label>
-              <div className="mt-1 relative rounded-md shadow-sm">
-                <div className="absolute inset-y-0 left-0 top-2 pl-3 flex items-start pointer-events-none"><Info className={iconClass} /></div>
-                <textarea name="description" id="description" value={formData.description || ''} onChange={handleChange} rows={3} className={`${inputClass} pl-10`}></textarea>
-              </div>
-            </div>
+          <EquipmentBasicInfo
+            formData={formData}
+            formErrors={formErrors}
+            handleChange={handleChange}
+            equipmentCategories={equipmentCategories}
+            categoriesLoading={categoriesLoading}
+            categoriesError={categoriesError}
+            inputClass={inputClass}
+            labelClass={labelClass}
+            iconClass={iconClass}
+          />
 
-            <div>
-              <label htmlFor="category_id" className={labelClass}>Category</label>
-               <div className="mt-1 relative rounded-md shadow-sm">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    {categoriesLoading ? <Loader2 className={`${iconClass} animate-spin`} /> : <Tag className={iconClass} />}
-                </div>
-                <select 
-                    name="category_id" 
-                    id="category_id" 
-                    value={formData.category_id === undefined ? '' : String(formData.category_id)} 
-                    onChange={handleChange} 
-                    className={`${inputClass} pl-10`}
-                    disabled={categoriesLoading || !!categoriesError}
-                >
-                    <option value="">{categoriesLoading ? 'Loading...' : 'Select Category'}</option>
-                    {equipmentCategories.map(cat => <option key={cat.category_id} value={String(cat.category_id)}>{cat.category_name}</option>)}
-                </select>
-              </div>
-            </div>
+          <EquipmentIdentification
+            formData={formData}
+            formErrors={formErrors}
+            handleChange={handleChange}
+            isEditing={isEditing}
+            inputClass={inputClass}
+            labelClass={labelClass}
+            iconClass={iconClass}
+          />
 
-            <div>
-              <label htmlFor="status" className={labelClass}>Status</label>
-              <div className="mt-1 relative rounded-md shadow-sm">
-                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><Tag className={iconClass} /></div>
-                <select name="status" id="status" value={formData.status || ''} onChange={handleChange} className={`${inputClass} pl-10`}>
-                    {equipmentStatuses.map(s => <option key={s} value={s}>{s}</option>)}
-                </select>
-              </div>
-            </div>
-          </fieldset>
+          <EquipmentFinancial
+            formData={formData}
+            formErrors={formErrors}
+            handleChange={handleChange}
+            isEditing={isEditing}
+            equipmentStatuses={equipmentStatuses}
+            inputClass={inputClass}
+            labelClass={labelClass}
+            iconClass={iconClass}
+          />
 
-          <fieldset className="grid grid-cols-1 gap-y-6 gap-x-4 md:grid-cols-2">
-            <legend className="text-lg font-medium text-dark-text col-span-full mb-2">Identification, Quantity & Financials</legend>
-            <div>
-              <label htmlFor="make" className={labelClass}>Make/Brand</label>
-              <input type="text" name="make" id="make" value={formData.make || ''} onChange={handleChange} className={inputClass} />
-            </div>
-            <div>
-              <label htmlFor="model" className={labelClass}>Model</label>
-              <input type="text" name="model" id="model" value={formData.model || ''} onChange={handleChange} className={inputClass} />
-            </div>
-            <div>
-              <label htmlFor="serial_number" className={labelClass}>Serial Number {isEditing ? '(Editing specific item)' : '(Base for quantity)'}</label>
-               <div className="mt-1 relative rounded-md shadow-sm">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><Hash className={iconClass} /></div>
-                <input type="text" name="serial_number" id="serial_number" value={formData.serial_number || ''} onChange={handleChange} className={`${inputClass} pl-10`} />
-              </div>
-              {formErrors.serial_number && <p className="text-xs text-red-500 mt-1">{formErrors.serial_number}</p>}
-            </div>
-            
-            {!isEditing && ( 
-                <div>
-                    <label htmlFor="quantity" className={labelClass}>Quantity</label>
-                    <div className="mt-1 relative rounded-md shadow-sm">
-                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><Layers className={iconClass}/></div>
-                        <input type="number" name="quantity" id="quantity" value={formData.quantity || '1'} onChange={handleChange} className={`${inputClass} pl-10`} min="1" />
-                    </div>
-                    {formErrors.quantity && <p className="text-xs text-red-500 mt-1">{formErrors.quantity}</p>}
-                </div>
-            )}
-
-
-            <div className={isEditing ? "md:col-span-2" : ""}> 
-              <label htmlFor="rental_rate" className={labelClass}>Rental Rate (₹ per unit/day)</label> 
-              <div className="mt-1 relative rounded-md shadow-sm">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><IndianRupee className={iconClass} /></div> {/* Changed icon */}
-                <input type="number" name="rental_rate" id="rental_rate" value={formData.rental_rate || ''} onChange={handleChange} className={`${inputClass} pl-10`} step="0.01" min="0"/>
-              </div>
-              {formErrors.rental_rate && <p className="text-xs text-red-500 mt-1">{formErrors.rental_rate}</p>}
-            </div>
-          </fieldset>
-
-          <fieldset className="grid grid-cols-1 gap-y-6 gap-x-4 md:grid-cols-2">
-            <legend className="text-lg font-medium text-dark-text col-span-full mb-2">Dates & Location</legend>
-            <div>
-              <label htmlFor="purchase_date" className={labelClass}>Purchase Date</label>
-              <input type="date" name="purchase_date" id="purchase_date" value={formData.purchase_date || ''} onChange={handleChange} className={inputClass} />
-               {formErrors.purchase_date && <p className="text-xs text-red-500 mt-1">{formErrors.purchase_date}</p>}
-            </div>
-            <div>
-              <label htmlFor="location" className={labelClass}>Current Location</label>
-              <div className="mt-1 relative rounded-md shadow-sm">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><MapPin className={iconClass} /></div>
-                <input type="text" name="location" id="location" value={formData.location || ''} onChange={handleChange} className={`${inputClass} pl-10`} />
-              </div>
-            </div>
-            <div>
-              <label htmlFor="last_maintenance_date" className={labelClass}>Last Maintenance Date</label>
-              <div className="mt-1 relative rounded-md shadow-sm">
-                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><Wrench className={iconClass} /></div>
-                <input type="date" name="last_maintenance_date" id="last_maintenance_date" value={formData.last_maintenance_date || ''} onChange={handleChange} className={`${inputClass} pl-10`} />
-              </div>
-            </div>
-            <div>
-              <label htmlFor="next_calibration_date" className={labelClass}>Next Calibration Date</label>
-              <div className="mt-1 relative rounded-md shadow-sm">
-                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><CalendarDays className={iconClass} /></div>
-                <input type="date" name="next_calibration_date" id="next_calibration_date" value={formData.next_calibration_date || ''} onChange={handleChange} className={`${inputClass} pl-10`} />
-              </div>
-            </div>
-          </fieldset>
+          <EquipmentDatesLocation
+            formData={formData}
+            formErrors={formErrors}
+            handleChange={handleChange}
+            inputClass={inputClass}
+            labelClass={labelClass}
+            iconClass={iconClass}
+          />
           
           <div className="flex justify-end items-center pt-6 border-t border-light-gray-200 mt-auto">
             <button
