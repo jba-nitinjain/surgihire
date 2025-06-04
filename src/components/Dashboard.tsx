@@ -156,7 +156,6 @@ const Dashboard: React.FC<DashboardProps> = ({ sidebarOpen, setSidebarOpen }) =>
         </header>
 
         <div className="flex-grow">
-
           {(() => {
             if (activeTab === 'customers' && isCustomersBase) {
               return (
@@ -186,7 +185,6 @@ const Dashboard: React.FC<DashboardProps> = ({ sidebarOpen, setSidebarOpen }) =>
             }
             return <Outlet />;
           })()}
-
         </div>
         <Footer />
       </div>

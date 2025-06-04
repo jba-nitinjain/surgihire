@@ -228,7 +228,7 @@ const CustomerDetail: React.FC<CustomerDetailProps> = ({ customer, onClose, onEd
         {content}
       </Modal>
     ) : (
-      <div className="w-full bg-white">{content}</div>
+      <div className="w-full">{content}</div>
     )
   );
 };

@@ -111,7 +111,7 @@ const EquipmentDetail: React.FC<EquipmentDetailProps> = ({
       {content}
     </Modal>
   ) : (
-    <div className="w-full bg-white">{content}</div>
+    <div className="w-full">{content}</div>
   );
 };
 
