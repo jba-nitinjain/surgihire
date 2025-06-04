@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { RentalTransaction } from '../../types';
-import { CalendarCheck2, User, Edit3, Trash2, MoreVertical, Loader2, FileText, IndianRupee, Tag, CalendarClock, CheckCircle, XCircle, Clock, AlertTriangle } from 'lucide-react';
+import { CalendarCheck2, User, Edit3, Trash2, Loader2, FileText, IndianRupee, Tag, CalendarClock, CheckCircle, XCircle, Clock, AlertTriangle } from 'lucide-react';
 import { useCrud } from '../../context/CrudContext';
 import ConfirmationModal from '../ui/ConfirmationModal';
 import { useRentalTransactions } from '../../context/RentalTransactionContext';
@@ -15,19 +15,16 @@ interface RentalTransactionCardProps {
 const RentalTransactionCard: React.FC<RentalTransactionCardProps> = ({ rental, onEdit /*, onClick*/ }) => {
   const { deleteItem, loading: crudLoading } = useCrud();
   const { refreshRentalTransactions } = useRentalTransactions();
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
 
   const handleEdit = (e: React.MouseEvent) => {
     e.stopPropagation();
     onEdit(rental);
-    setIsMenuOpen(false);
   };
 
   const handleDeleteClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     setIsConfirmModalOpen(true);
-    setIsMenuOpen(false);
   };
 
   const confirmDelete = async () => {
@@ -96,36 +93,23 @@ const RentalTransactionCard: React.FC<RentalTransactionCardProps> = ({ rental, o
                 Rental ID: {rental.rental_id}
               </h3>
             </div>
-            <div className="relative rental-card-menu-button">
+            <div className="flex space-x-2 rental-card-menu-button">
               <button
-                onClick={(e) => { e.stopPropagation(); setIsMenuOpen(!isMenuOpen); }}
-                className="p-1 text-dark-text/60 hover:text-dark-text rounded-full hover:bg-light-gray-100"
-                aria-label="Actions"
+                onClick={handleEdit}
+                disabled={crudLoading}
+                className="p-1 text-dark-text/60 hover:text-brand-blue rounded-full hover:bg-light-gray-100 disabled:opacity-50"
+                aria-label="Edit Rental"
               >
-                <MoreVertical size={20} />
+                <Edit3 size={20} />
               </button>
-              {isMenuOpen && (
-                <div
-                  className="absolute right-0 mt-2 w-40 bg-white rounded-md shadow-lg z-20 border border-light-gray-200"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <button
-                    onClick={handleEdit}
-                    disabled={crudLoading}
-                    className="w-full text-left px-4 py-2 text-sm text-dark-text hover:bg-light-gray-50 flex items-center disabled:opacity-50"
-                  >
-                    <Edit3 size={16} className="mr-2" /> Edit
-                  </button>
-                  <button
-                    onClick={handleDeleteClick}
-                    disabled={crudLoading}
-                    className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center disabled:opacity-50"
-                  >
-                    {crudLoading && isConfirmModalOpen ? <Loader2 size={16} className="mr-2 animate-spin" /> : <Trash2 size={16} className="mr-2" />}
-                    Delete
-                  </button>
-                </div>
-              )}
+              <button
+                onClick={handleDeleteClick}
+                disabled={crudLoading}
+                className="p-1 text-red-600 hover:text-red-700 rounded-full hover:bg-light-gray-100 disabled:opacity-50"
+                aria-label="Delete Rental"
+              >
+                {crudLoading && isConfirmModalOpen ? <Loader2 size={20} className="animate-spin" /> : <Trash2 size={20} />}
+              </button>
             </div>
           </div>
 

@@ -26,8 +26,7 @@ function App() {
                     <Route path="/" element={<Dashboard sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />} />
                     <Route path="/customers/new" element={<CustomerFormPage />} />
                     <Route path="/customers/:id/edit" element={<CustomerFormPage />} />
-                    <Route path="/equipment/new" element={<EquipmentFormPage />} />
-                    <Route path="/equipment/:id/edit" element={<EquipmentFormPage />} />
+
                   </Routes>
                 </RentalTransactionProvider>
               </MaintenanceRecordProvider>
