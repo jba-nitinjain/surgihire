@@ -77,6 +77,11 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
   const [numberOfDays, setNumberOfDays] = useState<number>(0);
   const [calculatedTotalAmount, setCalculatedTotalAmount] = useState<number>(0);
 
+  const [originalShippingPincode, setOriginalShippingPincode] = useState('');
+  const [originalBillingPincode, setOriginalBillingPincode] = useState('');
+
+  const shouldFetchShipping =
+    formData.shipping_pincode !== originalShippingPincode;
   const {
     loading: shippingPincodeDetailsLoading,
     error: shippingPincodeError,
@@ -84,8 +89,10 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
     city: shippingCity,
     state: shippingState,
     isAreaSelect: shippingIsAreaSelect,
-  } = usePincodeLookup(formData.shipping_pincode);
+  } = usePincodeLookup(formData.shipping_pincode, shouldFetchShipping);
 
+  const shouldFetchBilling =
+    formData.billing_pincode !== originalBillingPincode;
   const {
     loading: billingPincodeDetailsLoading,
     error: billingPincodeError,
@@ -93,7 +100,7 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
     city: billingCity,
     state: billingState,
     isAreaSelect: billingIsAreaSelect,
-  } = usePincodeLookup(formData.billing_pincode);
+  } = usePincodeLookup(formData.billing_pincode, shouldFetchBilling);
 
   const isEditing = !!rental;
 
@@ -139,8 +146,12 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
           default_equipment_rate: availableEquipment.find(eq => eq.equipment_id === item.equipment_id)?.rental_rate,
         })) || [],
       });
+      setOriginalShippingPincode(rental.shipping_pincode || '');
+      setOriginalBillingPincode(rental.billing_pincode || '');
     } else {
       setFormData(initialFormData);
+      setOriginalShippingPincode('');
+      setOriginalBillingPincode('');
     }
   }, [rental, availableEquipment]);
 
@@ -194,6 +205,7 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
   }, [formData.rental_date, formData.expected_return_date, formData.rental_items]);
 
   useEffect(() => {
+    if (!shouldFetchShipping) return;
     setFormData(prev => {
       let area = prev.shipping_area;
       if (shippingAreaOptions.length === 1 && !shippingIsAreaSelect) {
@@ -215,9 +227,10 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
         shipping_area: area,
       };
     });
-  }, [shippingCity, shippingState, shippingAreaOptions, shippingIsAreaSelect]);
+  }, [shippingCity, shippingState, shippingAreaOptions, shippingIsAreaSelect, shouldFetchShipping]);
 
   useEffect(() => {
+    if (!shouldFetchBilling) return;
     setFormData(prev => {
       let area = prev.billing_area;
       if (billingAreaOptions.length === 1 && !billingIsAreaSelect) {
@@ -239,7 +252,7 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
         billing_area: area,
       };
     });
-  }, [billingCity, billingState, billingAreaOptions, billingIsAreaSelect]);
+  }, [billingCity, billingState, billingAreaOptions, billingIsAreaSelect, shouldFetchBilling]);
 
 
   const validateForm = (): boolean => {
