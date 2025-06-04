@@ -1,22 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { useRentalTransactions } from '../../context/RentalTransactionContext';
 import RentalTransactionList from '../rentals/RentalTransactionList';
-import RentalTransactionForm from '../rentals/RentalTransactionForm';
 // import RentalTransactionDetail from '../rentals/RentalTransactionDetail'; // Keep commented if not yet implemented
 import SearchBox from '../ui/SearchBox';
 import { PlusCircle } from 'lucide-react'; // Unused icons like Filter, CalendarIcon removed
-import { RentalTransaction } from '../../types'; // Unused Customer type import removed
-import { getRental, fetchRentalDetailsByRentalId } from '../../services/api/rentals';
+import { RentalTransaction } from '../../types';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 // Define rental statuses for filter dropdown
 const RENTAL_STATUSES = ["Draft", "Pending Confirmation", "Confirmed/Booked", "Active/Rented Out", "Returned/Completed", "Overdue", "Cancelled"];
 
 
-interface RentalsTabProps {
-  initialCustomerIdFilter?: string | null;
-}
-
-const RentalsTab: React.FC<RentalsTabProps> = ({ initialCustomerIdFilter }) => {
+const RentalsTab: React.FC = () => {
   const {
     searchQuery,
     setSearchQuery,
@@ -28,8 +23,7 @@ const RentalsTab: React.FC<RentalsTabProps> = ({ initialCustomerIdFilter }) => {
     fetchCustomersForSelection,
   } = useRentalTransactions();
 
-  const [isRentalFormOpen, setIsRentalFormOpen] = useState(false);
-  const [editingRental, setEditingRental] = useState<RentalTransaction | null>(null);
+  const navigate = useNavigate();
   // const [selectedRental, setSelectedRental] = useState<RentalTransaction | null>(null); // For detail view
 
   useEffect(() => {
@@ -38,57 +32,23 @@ const RentalsTab: React.FC<RentalsTabProps> = ({ initialCustomerIdFilter }) => {
     }
   }, [customersForFilter.length, loadingCustomers, fetchCustomersForSelection]);
 
+  const location = useLocation() as { state?: { customerId?: string } };
+
   useEffect(() => {
-    if (initialCustomerIdFilter) {
-      setFilters({ customer_id: initialCustomerIdFilter, status: null });
+    if (location.state?.customerId) {
+      setFilters({ customer_id: location.state.customerId, status: null });
       setSearchQuery('');
+      navigate('/rentals', { replace: true });
     }
-  }, [initialCustomerIdFilter, setFilters, setSearchQuery]);
+  }, [location.state, setFilters, setSearchQuery, navigate]);
 
 
   const handleOpenRentalFormForCreate = () => {
-    setEditingRental(null);
-    // setSelectedRental(null); // If using detail view
-    setIsRentalFormOpen(true);
+    navigate('/rentals/new');
   };
 
-  const handleOpenRentalFormForEdit = async (rental: RentalTransaction) => {
-    try {
-      // Fetch the full rental record including its rental_items
-      const [rentalRes, detailsRes] = await Promise.all([
-        getRental(rental.rental_id),
-        fetchRentalDetailsByRentalId(rental.rental_id, { records: 100, skip: 0 })
-      ]);
-
-      let fullRental: RentalTransaction = rental;
-
-      if (rentalRes.success && rentalRes.data) {
-        fullRental = Array.isArray(rentalRes.data)
-          ? (rentalRes.data[0] as RentalTransaction)
-          : (rentalRes.data as RentalTransaction);
-      }
-
-      if (detailsRes.success && Array.isArray(detailsRes.data)) {
-        fullRental = { ...fullRental, rental_items: detailsRes.data };
-      }
-
-      setEditingRental(fullRental);
-    } catch (err) {
-      console.error('Failed to fetch rental details', err);
-      setEditingRental(rental);
-    }
-    // setSelectedRental(null); // If using detail view
-    setIsRentalFormOpen(true);
-  };
-
-  const handleCloseRentalForm = () => {
-    setIsRentalFormOpen(false);
-    setEditingRental(null);
-  };
-
-  const handleSaveRentalForm = () => {
-    handleCloseRentalForm();
-    refreshRentalTransactions(); // Refresh the list after save
+  const handleOpenRentalFormForEdit = (rental: RentalTransaction) => {
+    navigate(`/rentals/${rental.rental_id}/edit`, { state: { rental } });
   };
 
   // const handleSelectRentalForDetail = (rental: RentalTransaction) => {
@@ -173,25 +133,7 @@ const RentalsTab: React.FC<RentalsTabProps> = ({ initialCustomerIdFilter }) => {
         // onViewRentalDetail={handleSelectRentalForDetail} // If you implement a detail view
       />
 
-      {/* RentalTransactionForm is rendered conditionally (e.g., as a modal) */}
-      {isRentalFormOpen && (
-        <RentalTransactionForm
-          rental={editingRental}
-          onSave={handleSaveRentalForm}
-          onCancel={handleCloseRentalForm}
-        />
-      )}
-
-      {/*
-      // If you implement a detail view, it would be rendered conditionally here as well.
-      {selectedRental && !isRentalFormOpen && (
-        <RentalTransactionDetail
-          rental={selectedRental}
-          onClose={handleCloseRentalDetail}
-          onEdit={() => handleOpenRentalFormForEdit(selectedRental)}
-        />
-      )}
-      */}
+      {/* Detail view component can be added here if needed */}
     </>
   );
 };

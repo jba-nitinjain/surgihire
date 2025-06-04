@@ -2,12 +2,11 @@ import React, { useState } from 'react';
 import { useEquipmentCategories } from '../../context/EquipmentCategoryContext';
 import { usePaymentPlans } from '../../context/PaymentPlanContext';
 import EquipmentCategoryList from '../masters/EquipmentCategoryList';
-import EquipmentCategoryForm from '../masters/EquipmentCategoryForm';
 import PaymentPlanList from '../masters/PaymentPlanList';
-import PaymentPlanForm from '../masters/PaymentPlanForm';
 import SearchBox from '../ui/SearchBox';
 import { PlusCircle, Tag, ListChecks } from 'lucide-react';
 import { EquipmentCategory, PaymentPlan } from '../../types';
+import { useNavigate } from 'react-router-dom';
 
 const masterSubTabsData = [
   { id: 'equipment_categories', label: 'Equipment Categories', icon: <Tag size={16} /> },
@@ -19,24 +18,24 @@ const MastersTab: React.FC = () => {
 
   // Equipment Category States
   const { searchQuery: eqCategorySearchQuery, setSearchQuery: setEqCategorySearchQuery, refreshCategories: refreshEqCategories } = useEquipmentCategories();
-  const [isEqCategoryFormOpen, setIsEqCategoryFormOpen] = useState(false);
-  const [editingEqCategory, setEditingEqCategory] = useState<EquipmentCategory | null>(null);
+  const navigate = useNavigate();
 
   // Payment Plan States
   const { searchQuery: ppSearchQuery, setSearchQuery: setPpSearchQuery, refreshPaymentPlans } = usePaymentPlans();
-  const [isPpFormOpen, setIsPpFormOpen] = useState(false);
-  const [editingPp, setEditingPp] = useState<PaymentPlan | null>(null);
 
 
-  const handleOpenEqCategoryFormForCreate = () => { setEditingEqCategory(null); setIsEqCategoryFormOpen(true); };
-  const handleOpenEqCategoryFormForEdit = (item: EquipmentCategory) => { setEditingEqCategory(item); setIsEqCategoryFormOpen(true); };
-  const handleCloseEqCategoryForm = () => { setIsEqCategoryFormOpen(false); setEditingEqCategory(null); };
-  const handleSaveEqCategoryForm = () => { handleCloseEqCategoryForm(); refreshEqCategories(); };
-
-  const handleOpenPpFormForCreate = () => { setEditingPp(null); setIsPpFormOpen(true); };
-  const handleOpenPpFormForEdit = (item: PaymentPlan) => { setEditingPp(item); setIsPpFormOpen(true); };
-  const handleClosePpForm = () => { setIsPpFormOpen(false); setEditingPp(null); };
-  const handleSavePpForm = () => { handleClosePpForm(); refreshPaymentPlans(); };
+  const handleOpenEqCategoryFormForCreate = () => {
+    navigate('/masters/equipment-categories/new');
+  };
+  const handleOpenEqCategoryFormForEdit = (item: EquipmentCategory) => {
+    navigate(`/masters/equipment-categories/${item.category_id}/edit`, { state: { category: item } });
+  };
+  const handleOpenPpFormForCreate = () => {
+    navigate('/masters/payment-plans/new');
+  };
+  const handleOpenPpFormForEdit = (item: PaymentPlan) => {
+    navigate(`/masters/payment-plans/${item.plan_id}/edit`, { state: { plan: item } });
+  };
 
   return (
     <>
@@ -73,13 +72,6 @@ const MastersTab: React.FC = () => {
             </button>
           </div>
           <EquipmentCategoryList onEditCategory={handleOpenEqCategoryFormForEdit} />
-          {isEqCategoryFormOpen && (
-            <EquipmentCategoryForm
-              category={editingEqCategory}
-              onSave={handleSaveEqCategoryForm}
-              onCancel={handleCloseEqCategoryForm}
-            />
-          )}
         </>
       )}
       {activeMasterSubTab === 'payment_plans' && (
@@ -96,13 +88,6 @@ const MastersTab: React.FC = () => {
             </button>
           </div>
           <PaymentPlanList onEditPlan={handleOpenPpFormForEdit} />
-          {isPpFormOpen && (
-            <PaymentPlanForm
-              plan={editingPp}
-              onSave={handleSavePpForm}
-              onCancel={handleClosePpForm}
-            />
-          )}
         </>
       )}
     </>

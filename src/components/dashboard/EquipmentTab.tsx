@@ -10,15 +10,11 @@ import { Equipment } from '../../types';
 
 interface EquipmentTabProps {
   onViewMaintenanceForEquipment: (equipmentId: string) => void;
-  initialEquipmentIdToView: number | null; // To show specific equipment detail on load
-  clearInitialEquipmentIdToView: () => void; // To clear the ID after use
 }
 
 
 const EquipmentTab: React.FC<EquipmentTabProps> = ({
   onViewMaintenanceForEquipment,
-  initialEquipmentIdToView,
-  clearInitialEquipmentIdToView,
 }) => {
   const {
     equipmentList, // Use the list from context
@@ -45,13 +41,6 @@ const EquipmentTab: React.FC<EquipmentTabProps> = ({
     }
   }, [allEquipmentCategories.length, eqCategoriesLoadingForFilter, eqCategoriesFilterError, refreshEqCategoriesForFilter]);
 
-  // Effect to load specific equipment detail if initialEquipmentIdToView is provided
-  useEffect(() => {
-    if (initialEquipmentIdToView !== null) {
-      navigate(`/equipment/${initialEquipmentIdToView}`);
-      clearInitialEquipmentIdToView();
-    }
-  }, [initialEquipmentIdToView, clearInitialEquipmentIdToView, navigate]);
 
   const handleSelectEquipmentForDetail = (equipment: Equipment) => {
     navigate(`/equipment/${equipment.equipment_id}`, { state: { equipment } });

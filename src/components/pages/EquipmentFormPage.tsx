@@ -29,7 +29,7 @@ const EquipmentFormPage: React.FC = () => {
     <div className="p-4">
       <EquipmentForm
         equipment={equipment}
-        onSave={() => navigate('/')}
+        onSave={() => navigate('/equipment')}
         onCancel={() => navigate(-1)}
       />
     </div>
