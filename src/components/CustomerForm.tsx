@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Customer, CustomerFormData, PincodeApiResponse, PostOffice } from '../types';
 import { useCrud } from '../context/CrudContext';
-import { Save, X, Loader2, Search } from 'lucide-react';
+import { Save, X, Loader2 } from 'lucide-react';
+import CustomerPersonalInfoSection from './customers/CustomerPersonalInfoSection';
+import CustomerShippingInfoSection from './customers/CustomerShippingInfoSection';
 
 interface CustomerFormProps {
   customer?: Customer | null; // For editing, null/undefined for creating
@@ -235,84 +237,25 @@ const CustomerForm: React.FC<CustomerFormProps> = ({ customer, onSave, onCancel 
             </div>
           )}
           
-          <fieldset className="grid grid-cols-1 gap-6 md:grid-cols-2">
-            <legend className="text-lg font-medium text-dark-text col-span-full">Personal Information</legend>
-            <div>
-              <label htmlFor="full_name" className={labelClass}>Full Name <span className="text-red-500">*</span></label>
-              <input type="text" name="full_name" id="full_name" value={formData.full_name} onChange={handleChange} className={inputClass} required />
-              {formErrors.full_name && <p className="text-xs text-red-500 mt-1">{formErrors.full_name}</p>}
-            </div>
-            <div>
-              <label htmlFor="email" className={labelClass}>Email</label>
-              <input type="email" name="email" id="email" value={formData.email || ''} onChange={handleChange} className={inputClass} />
-              {formErrors.email && <p className="text-xs text-red-500 mt-1">{formErrors.email}</p>}
-            </div>
-            <div>
-              <label htmlFor="mobile_number_1" className={labelClass}>Mobile Number 1</label>
-              <input type="tel" name="mobile_number_1" id="mobile_number_1" value={formData.mobile_number_1 || ''} onChange={handleChange} className={inputClass} />
-               {formErrors.mobile_number_1 && <p className="text-xs text-red-500 mt-1">{formErrors.mobile_number_1}</p>}
-            </div>
-            <div>
-              <label htmlFor="mobile_number_2" className={labelClass}>Mobile Number 2</label>
-              <input type="tel" name="mobile_number_2" id="mobile_number_2" value={formData.mobile_number_2 || ''} onChange={handleChange} className={inputClass} />
-            </div>
-             <div>
-              <label htmlFor="mobile_number_3" className={labelClass}>Mobile Number 3</label>
-              <input type="tel" name="mobile_number_3" id="mobile_number_3" value={formData.mobile_number_3 || ''} onChange={handleChange} className={inputClass} />
-            </div>
-          </fieldset>
+          <CustomerPersonalInfoSection
+            formData={formData}
+            formErrors={formErrors}
+            handleChange={handleChange}
+            inputClass={inputClass}
+            labelClass={labelClass}
+          />
 
-          <fieldset className="grid grid-cols-1 gap-6 md:grid-cols-2">
-            <legend className="text-lg font-medium text-dark-text col-span-full">Shipping Information</legend>
-            <div className="md:col-span-2">
-              <label htmlFor="shipping_address" className={labelClass}>Address Line</label>
-              <textarea name="shipping_address" id="shipping_address" value={formData.shipping_address || ''} onChange={handleChange} rows={2} className={inputClass}></textarea>
-            </div>
-            
-            <div>
-              <label htmlFor="shipping_pincode" className={labelClass}>Pincode</label>
-              <div className="relative">
-                <input 
-                    type="text" 
-                    name="shipping_pincode" 
-                    id="shipping_pincode" 
-                    value={formData.shipping_pincode || ''} 
-                    onChange={handleChange} 
-                    className={inputClass} 
-                    maxLength={6}
-                />
-                {pincodeDetailsLoading && (
-                    <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                        <Loader2 className="h-5 w-5 text-gray-400 animate-spin" />
-                    </div>
-                )}
-              </div>
-              {formErrors.shipping_pincode && <p className="text-xs text-red-500 mt-1">{formErrors.shipping_pincode}</p>}
-              {pincodeError && <p className="text-xs text-red-500 mt-1">{pincodeError}</p>}
-            </div>
-
-            <div>
-              <label htmlFor="shipping_area" className={labelClass}>Area</label>
-              {isAreaSelect ? (
-                <select name="shipping_area" id="shipping_area" value={formData.shipping_area || ''} onChange={handleChange} className={inputClass}>
-                  <option value="">Select Area</option>
-                  {areaOptions.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
-                </select>
-              ) : (
-                <input type="text" name="shipping_area" id="shipping_area" value={formData.shipping_area || ''} onChange={handleChange} className={inputClass} readOnly={areaOptions.length > 0 && !isAreaSelect} />
-              )}
-              {formErrors.shipping_area && <p className="text-xs text-red-500 mt-1">{formErrors.shipping_area}</p>}
-            </div>
-
-            <div>
-              <label htmlFor="shipping_city" className={labelClass}>City</label>
-              <input type="text" name="shipping_city" id="shipping_city" value={formData.shipping_city || ''} onChange={handleChange} className={inputClass} readOnly />
-            </div>
-            <div>
-              <label htmlFor="shipping_state" className={labelClass}>State</label>
-              <input type="text" name="shipping_state" id="shipping_state" value={formData.shipping_state || ''} onChange={handleChange} className={inputClass} readOnly />
-            </div>
-          </fieldset>
+          <CustomerShippingInfoSection
+            formData={formData}
+            formErrors={formErrors}
+            handleChange={handleChange}
+            pincodeDetailsLoading={pincodeDetailsLoading}
+            pincodeError={pincodeError}
+            areaOptions={areaOptions}
+            isAreaSelect={isAreaSelect}
+            inputClass={inputClass}
+            labelClass={labelClass}
+          />
           
           <div className="flex justify-end items-center pt-4 border-t border-light-gray-200 mt-auto">
             <button
