@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { Box, Button, Typography } from '@mui/material';
+import { Box, Button, Typography, Alert } from '@mui/material';
 import OutlinedTextField from '../ui/OutlinedTextField';
 import { requestOtp, validateOtp } from '../../services/auth';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import logo from '../../assets/logo.svg';
 
 const LoginPage: React.FC = () => {
   const { login } = useAuth();
@@ -56,50 +57,49 @@ const LoginPage: React.FC = () => {
   };
 
   return (
-    <Box p={4} maxWidth={400} mx="auto">
-      <Typography variant="h5" gutterBottom>
-        Login
-      </Typography>
-      <OutlinedTextField
-        label="Mobile Number"
-        value={mobile}
-        onChange={e => setMobile(e.target.value)}
-        inputProps={{ maxLength: 10 }}
-      />
-      <Button
-        variant="contained"
-        color="primary"
-        onClick={handleRequestOtp}
-        className="mt-4"
-        disabled={loading}
-      >
-        Request OTP
-      </Button>
-      {otpRequested && (
-        <>
-          <OutlinedTextField
-            label="OTP"
-            value={otp}
-            onChange={e => setOtp(e.target.value)}
-            inputProps={{ maxLength: 6 }}
-            className="mt-4"
-          />
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={handleValidateOtp}
-            className="mt-4"
-            disabled={loading}
-          >
-            Login
-          </Button>
-        </>
-      )}
-      {message && (
-        <Typography color="error" className="mt-2">
-          {message}
+    <Box className="min-h-screen flex items-center justify-center bg-light-gray-50 p-4">
+      <Box className="w-full max-w-md bg-white rounded shadow-md p-6 space-y-4">
+        <img src={logo} alt="SurgiHire logo" className="h-12 mx-auto" />
+        <Typography variant="h5" align="center">
+          Login
         </Typography>
-      )}
+        <OutlinedTextField
+          label="Mobile Number"
+          value={mobile}
+          onChange={e => setMobile(e.target.value)}
+          inputProps={{ maxLength: 10 }}
+        />
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={handleRequestOtp}
+          className="mt-2"
+          disabled={loading}
+        >
+          Request OTP
+        </Button>
+        {otpRequested && (
+          <>
+            <OutlinedTextField
+              label="OTP"
+              value={otp}
+              onChange={e => setOtp(e.target.value)}
+              inputProps={{ maxLength: 6 }}
+              className="mt-4"
+            />
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleValidateOtp}
+              className="mt-2"
+              disabled={loading}
+            >
+              Login
+            </Button>
+          </>
+        )}
+        {message && <Alert severity="info">{message}</Alert>}
+      </Box>
     </Box>
   );
 };
