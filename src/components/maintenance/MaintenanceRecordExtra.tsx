@@ -1,6 +1,8 @@
 import React from 'react';
 import { MaintenanceRecordFormData } from '../../types';
 import { User, IndianRupee, Info } from 'lucide-react';
+import OutlinedTextField from '../ui/OutlinedTextField';
+import InputAdornment from '@mui/material/InputAdornment';
 
 interface Props {
   formData: MaintenanceRecordFormData;
@@ -26,7 +28,7 @@ const MaintenanceRecordExtra: React.FC<Props> = ({
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
             <User className={iconClass} />
           </div>
-          <input
+          <OutlinedTextField
             type="text"
             id="technician"
             name="technician"
@@ -43,16 +45,22 @@ const MaintenanceRecordExtra: React.FC<Props> = ({
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
             <IndianRupee className={iconClass} />
           </div>
-          <input
+          <OutlinedTextField
             type="number"
             id="cost"
             name="cost"
             value={formData.cost || ''}
             onChange={handleChange}
-            step="0.01"
-            min="0"
-            placeholder="0.00"
             className={`${inputClass} pl-10`}
+            inputProps={{ step: '0.01', min: '0' }}
+            placeholder="0.00"
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <IndianRupee className={iconClass} />
+                </InputAdornment>
+              ),
+            }}
           />
         </div>
         {formErrors.cost && <p className="text-xs text-red-500 mt-1">{formErrors.cost}</p>}
@@ -64,14 +72,22 @@ const MaintenanceRecordExtra: React.FC<Props> = ({
           <div className="absolute inset-y-0 left-0 top-2 pl-3 flex items-start pointer-events-none">
             <Info className={iconClass} />
           </div>
-          <textarea
+          <OutlinedTextField
             id="notes"
             name="notes"
             value={formData.notes || ''}
             onChange={handleChange}
+            multiline
             rows={3}
             className={`${inputClass} pl-10`}
-          ></textarea>
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Info className={iconClass} />
+                </InputAdornment>
+              ),
+            }}
+          />
         </div>
       </div>
     </fieldset>

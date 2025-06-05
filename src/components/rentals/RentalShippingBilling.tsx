@@ -1,6 +1,9 @@
 import React from 'react';
 import { RentalTransactionFormData } from '../../types';
 import { Loader2 } from 'lucide-react';
+import OutlinedTextField from '../ui/OutlinedTextField';
+import AutocompleteField from '../ui/AutocompleteField';
+import InputAdornment from '@mui/material/InputAdornment';
 
 interface Props {
   data: Pick<
@@ -20,7 +23,7 @@ interface Props {
   >;
   errors: Record<string, string>;
   handleChange: (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => void;
   shippingPincodeDetailsLoading: boolean;
   shippingPincodeError: string | null;
@@ -75,33 +78,34 @@ const RentalShippingBilling: React.FC<Props> = ({
       <div className="space-y-4">
         <div>
           <label htmlFor="shipping_address" className={labelClass}>Shipping Address</label>
-          <textarea
+          <OutlinedTextField
             id="shipping_address"
             name="shipping_address"
             value={data.shipping_address || ''}
             onChange={handleChange}
+            multiline
             rows={2}
             className={inputClass}
           />
         </div>
         <div>
           <label htmlFor="shipping_pincode" className={labelClass}>Shipping Pincode</label>
-          <div className="relative">
-            <input
-              type="text"
-              id="shipping_pincode"
-              name="shipping_pincode"
-              value={data.shipping_pincode || ''}
-              onChange={handleChange}
-              className={inputClass}
-              maxLength={6}
-            />
-            {shippingPincodeDetailsLoading && (
-              <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                <Loader2 className="h-5 w-5 text-gray-400 animate-spin" />
-              </div>
-            )}
-          </div>
+          <OutlinedTextField
+            type="text"
+            id="shipping_pincode"
+            name="shipping_pincode"
+            value={data.shipping_pincode || ''}
+            onChange={handleChange}
+            className={inputClass}
+            inputProps={{ maxLength: 6 }}
+            InputProps={{
+              endAdornment: shippingPincodeDetailsLoading ? (
+                <InputAdornment position="end">
+                  <Loader2 className="h-5 w-5 text-gray-400 animate-spin" />
+                </InputAdornment>
+              ) : undefined,
+            }}
+          />
           {errors.shipping_pincode && (
             <p className="text-xs text-red-500 mt-1">{errors.shipping_pincode}</p>
           )}
@@ -112,29 +116,23 @@ const RentalShippingBilling: React.FC<Props> = ({
         <div>
           <label htmlFor="shipping_area" className={labelClass}>Shipping Area</label>
           {shippingIsAreaSelect ? (
-            <select
+            <AutocompleteField
               id="shipping_area"
               name="shipping_area"
               value={data.shipping_area || ''}
               onChange={handleChange}
-              className={inputClass}
-            >
-              <option value="">Select Area</option>
-              {shippingAreaOptions.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
+              options={shippingAreaOptions}
+              placeholder="Select Area"
+            />
           ) : (
-            <input
+            <OutlinedTextField
               type="text"
               id="shipping_area"
               name="shipping_area"
               value={data.shipping_area || ''}
               onChange={handleChange}
               className={inputClass}
-              readOnly={shippingAreaOptions.length > 0 && !shippingIsAreaSelect}
+              InputProps={{ readOnly: shippingAreaOptions.length > 0 && !shippingIsAreaSelect }}
             />
           )}
           {errors.shipping_area && (
@@ -143,59 +141,60 @@ const RentalShippingBilling: React.FC<Props> = ({
         </div>
         <div>
           <label htmlFor="shipping_city" className={labelClass}>Shipping City</label>
-          <input
+          <OutlinedTextField
             type="text"
             id="shipping_city"
             name="shipping_city"
             value={data.shipping_city || ''}
             onChange={handleChange}
             className={inputClass}
-            readOnly
+            InputProps={{ readOnly: true }}
           />
         </div>
         <div>
           <label htmlFor="shipping_state" className={labelClass}>Shipping State</label>
-          <input
+          <OutlinedTextField
             type="text"
             id="shipping_state"
             name="shipping_state"
             value={data.shipping_state || ''}
             onChange={handleChange}
             className={inputClass}
-            readOnly
+            InputProps={{ readOnly: true }}
           />
         </div>
       </div>
       <div className="space-y-4">
         <div>
           <label htmlFor="billing_address" className={labelClass}>Billing Address</label>
-          <textarea
+          <OutlinedTextField
             id="billing_address"
             name="billing_address"
             value={data.billing_address || ''}
             onChange={handleChange}
+            multiline
             rows={2}
             className={inputClass}
           />
         </div>
         <div>
           <label htmlFor="billing_pincode" className={labelClass}>Billing Pincode</label>
-          <div className="relative">
-            <input
-              type="text"
-              id="billing_pincode"
-              name="billing_pincode"
-              value={data.billing_pincode || ''}
-              onChange={handleChange}
-              className={inputClass}
-              maxLength={6}
-            />
-            {billingPincodeDetailsLoading && (
-              <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                <Loader2 className="h-5 w-5 text-gray-400 animate-spin" />
-              </div>
-            )}
-          </div>
+          <OutlinedTextField
+            type="text"
+            id="billing_pincode"
+            name="billing_pincode"
+            value={data.billing_pincode || ''}
+            onChange={handleChange}
+            className={inputClass}
+            inputProps={{ maxLength: 6 }}
+            InputProps={{
+              endAdornment: billingPincodeDetailsLoading ? (
+                <InputAdornment position="end">
+                  <Loader2 className="h-5 w-5 text-gray-400 animate-spin" />
+                </InputAdornment>
+              ) : undefined,
+            }}
+          />
           {errors.billing_pincode && (
             <p className="text-xs text-red-500 mt-1">{errors.billing_pincode}</p>
           )}
@@ -206,29 +205,23 @@ const RentalShippingBilling: React.FC<Props> = ({
         <div>
           <label htmlFor="billing_area" className={labelClass}>Billing Area</label>
           {billingIsAreaSelect ? (
-            <select
+            <AutocompleteField
               id="billing_area"
               name="billing_area"
               value={data.billing_area || ''}
               onChange={handleChange}
-              className={inputClass}
-            >
-              <option value="">Select Area</option>
-              {billingAreaOptions.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
+              options={billingAreaOptions}
+              placeholder="Select Area"
+            />
           ) : (
-            <input
+            <OutlinedTextField
               type="text"
               id="billing_area"
               name="billing_area"
               value={data.billing_area || ''}
               onChange={handleChange}
               className={inputClass}
-              readOnly={billingAreaOptions.length > 0 && !billingIsAreaSelect}
+              InputProps={{ readOnly: billingAreaOptions.length > 0 && !billingIsAreaSelect }}
             />
           )}
           {errors.billing_area && (
@@ -237,26 +230,26 @@ const RentalShippingBilling: React.FC<Props> = ({
         </div>
         <div>
           <label htmlFor="billing_city" className={labelClass}>Billing City</label>
-          <input
+          <OutlinedTextField
             type="text"
             id="billing_city"
             name="billing_city"
             value={data.billing_city || ''}
             onChange={handleChange}
             className={inputClass}
-            readOnly
+            InputProps={{ readOnly: true }}
           />
         </div>
         <div>
           <label htmlFor="billing_state" className={labelClass}>Billing State</label>
-          <input
+          <OutlinedTextField
             type="text"
             id="billing_state"
             name="billing_state"
             value={data.billing_state || ''}
             onChange={handleChange}
             className={inputClass}
-            readOnly
+            InputProps={{ readOnly: true }}
           />
         </div>
       </div>
@@ -266,7 +259,7 @@ const RentalShippingBilling: React.FC<Props> = ({
         <label htmlFor="mobile_number" className={labelClass}>
           Mobile Number
         </label>
-        <input
+        <OutlinedTextField
           type="text"
           id="mobile_number"
           name="mobile_number"
@@ -279,7 +272,7 @@ const RentalShippingBilling: React.FC<Props> = ({
         <label htmlFor="email" className={labelClass}>
           Email
         </label>
-        <input
+        <OutlinedTextField
           type="email"
           id="email"
           name="email"

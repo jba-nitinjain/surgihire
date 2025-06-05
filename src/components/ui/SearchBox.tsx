@@ -1,5 +1,5 @@
 import React from 'react';
-import TextField from '@mui/material/TextField';
+import OutlinedTextField from './OutlinedTextField';
 import InputAdornment from '@mui/material/InputAdornment';
 import SearchIcon from '@mui/icons-material/Search';
 
@@ -15,9 +15,8 @@ const SearchBox: React.FC<SearchBoxProps> = ({
   placeholder = 'Search customers...'
 }) => {
   return (
-    <TextField
+    <OutlinedTextField
       fullWidth
-      variant="outlined"
       placeholder={placeholder}
       value={value}
       onChange={(e) => onChange(e.target.value)}

@@ -1,6 +1,6 @@
 import React from 'react';
 import Autocomplete from '@mui/material/Autocomplete';
-import TextField from '@mui/material/TextField';
+import OutlinedTextField from './OutlinedTextField';
 import CircularProgress from '@mui/material/CircularProgress';
 
 export interface AutocompleteOption {
@@ -51,7 +51,7 @@ const AutocompleteField: React.FC<AutocompleteFieldProps> = ({
       loading={loading}
       disabled={disabled}
       renderInput={(params) => (
-        <TextField
+        <OutlinedTextField
           {...params}
           name={name}
           id={id}

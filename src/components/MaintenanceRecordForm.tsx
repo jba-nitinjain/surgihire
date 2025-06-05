@@ -7,6 +7,7 @@ import { useMaintenanceRecords } from '../context/MaintenanceRecordContext'; // 
 import { useCrud } from '../context/CrudContext'; // To get loading state from CRUD operations
 import { Save, X, Loader2, Wrench, ChevronDown } from 'lucide-react';
 import AutocompleteField, { AutocompleteOption } from './ui/AutocompleteField';
+import OutlinedTextField from './ui/OutlinedTextField';
 import MaintenanceRecordInfo from './maintenance/MaintenanceRecordInfo';
 import MaintenanceRecordExtra from './maintenance/MaintenanceRecordExtra';
 import dayjs from 'dayjs';
@@ -221,12 +222,12 @@ const MaintenanceRecordForm: React.FC<MaintenanceRecordFormProps> = ({
               {selectedDropdownMaintenanceType === CUSTOM_MAINTENANCE_TYPE_KEY && (
                 <div className="mt-2">
                   <label htmlFor="custom_maintenance_type" className={`${labelClass} text-xs`}>Specify Other Type:</label>
-                  <input
+                  <OutlinedTextField
                     type="text"
                     id="custom_maintenance_type"
                     name="custom_maintenance_type"
                     value={customMaintenanceTypeValue}
-                    onChange={handleCustomInputChange} // Specific handler
+                    onChange={handleCustomInputChange as React.ChangeEventHandler<HTMLInputElement>}
                     placeholder="Enter custom maintenance type"
                     className={`${inputClass} pl-3`}
                   />
