@@ -3,9 +3,11 @@ import { Box, Button, Typography } from '@mui/material';
 import OutlinedTextField from '../ui/OutlinedTextField';
 import { requestOtp, validateOtp } from '../../services/auth';
 import { useAuth } from '../../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 const LoginPage: React.FC = () => {
   const { login } = useAuth();
+  const navigate = useNavigate();
   const [mobile, setMobile] = useState('');
   const [otp, setOtp] = useState('');
   const [otpRequested, setOtpRequested] = useState(false);
@@ -44,6 +46,7 @@ const LoginPage: React.FC = () => {
       setMessage(res.message);
       if (res.status_code === 200 && res.user?.apikey) {
         login(mobile, res.user.apikey);
+        navigate('/', { replace: true });
       }
     } catch (err) {
       setMessage('Failed to validate OTP.');
