@@ -46,3 +46,18 @@ export const searchEquipment = (queryValue: string, paginationParams?: Paginatio
   }
   return fetchFromApi('GET', params);
 };
+
+export const fetchEquipmentByIds = (ids: number[]): Promise<ApiResponse> => {
+  if (ids.length === 0) {
+    return Promise.resolve({ success: true, data: [] } as ApiResponse);
+  }
+  const qString = ids.map(id => `(equipment_id~equals~${id})`).join('');
+  const params: Record<string, any> = {
+    action: 'list',
+    table: TABLE,
+    q: qString,
+    records: ids.length,
+    skip: 0,
+  };
+  return fetchFromApi('GET', params);
+};

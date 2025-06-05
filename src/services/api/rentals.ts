@@ -1,5 +1,6 @@
 import { ApiResponse, PaginationParams } from '../../types';
 import { createRecordGeneric, updateRecordGeneric, deleteRecord, listRecords, getRecord, fetchFromApi } from './core';
+import { fetchEquipmentByIds } from './equipment';
 
 const RENTAL_TRANSACTIONS_TABLE = 'rental_transactions';
 const RENTAL_DETAILS_TABLE = 'rental_details';
@@ -16,7 +17,10 @@ export const getRental = (id: number): Promise<ApiResponse> => {
   });
 };
 
-export const fetchRentalDetailsByRentalId = (rentalId: number, paginationParams?: PaginationParams): Promise<ApiResponse> => {
+export const fetchRentalDetailsByRentalId = async (
+  rentalId: number,
+  paginationParams?: PaginationParams
+): Promise<ApiResponse> => {
   const apiParams: Record<string, any> = {
     action: 'list',
     table: RENTAL_DETAILS_TABLE,
@@ -37,7 +41,30 @@ export const fetchRentalDetailsByRentalId = (rentalId: number, paginationParams?
     if (qString) apiParams.q = qString;
   }
 
-  return fetchFromApi('GET', apiParams);
+  const res = await fetchFromApi('GET', apiParams);
+
+  if (res.success && Array.isArray(res.data)) {
+    const missingIds = res.data
+      .filter((rd: any) => !rd.equipment_name)
+      .map((rd: any) => rd.equipment_id);
+    if (missingIds.length > 0) {
+      const eqRes = await fetchEquipmentByIds(missingIds);
+      if (eqRes.success && Array.isArray(eqRes.data)) {
+        const idMap: Record<number, string> = {};
+        (eqRes.data as any[]).forEach(eq => {
+          if (eq && eq.equipment_id !== undefined) {
+            idMap[Number(eq.equipment_id)] = eq.equipment_name;
+          }
+        });
+        res.data = res.data.map((rd: any) => ({
+          ...rd,
+          equipment_name: rd.equipment_name || idMap[rd.equipment_id],
+        }));
+      }
+    }
+  }
+
+  return res;
 };
 export const createRentalDetail = (data: Record<string, any>): Promise<ApiResponse> => createRecordGeneric(RENTAL_DETAILS_TABLE, data);
 export const updateRentalDetail = (id: number, data: Record<string, any>): Promise<ApiResponse> => updateRecordGeneric(RENTAL_DETAILS_TABLE, id, data);
