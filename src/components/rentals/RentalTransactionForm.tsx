@@ -40,6 +40,7 @@ interface RentalTransactionFormProps {
   rental?: RentalTransaction | null;
   onSave: () => void;
   onCancel: () => void;
+  defaultCustomerId?: string;
 }
 
 const initialFormData: RentalTransactionFormData = {
@@ -68,6 +69,7 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
   rental,
   onSave,
   onCancel,
+  defaultCustomerId,
 }) => {
   const [formData, setFormData] = useState<RentalTransactionFormData>(initialFormData);
   const [formErrors, setFormErrors] = useState<Partial<Record<keyof RentalTransactionFormData | `rental_items.${number}.equipment_id` | `rental_items.${number}.rental_rate`, string>>>({});
@@ -131,6 +133,15 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
     paymentPlans.length, loadingPaymentPlans, refreshPaymentPlans,
     availableEquipment.length, loadingEquipment, refreshAvailableEquipment
   ]);
+
+  useEffect(() => {
+    if (!isEditing && defaultCustomerId && customers.length > 0) {
+      const exists = customers.find(c => String(c.customer_id) === defaultCustomerId);
+      if (exists) {
+        setFormData(prev => ({ ...prev, customer_id: defaultCustomerId }));
+      }
+    }
+  }, [defaultCustomerId, isEditing, customers]);
 
   useEffect(() => {
     if (rental) {
@@ -524,7 +535,7 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
             inputClass={inputClass}
             labelClass={labelClass}
             iconClass={iconClass}
-            onAddCustomer={() => navigate('/customers/new')}
+            onAddCustomer={() => navigate('/customers/new', { state: { returnToRental: true } })}
           />
 
           <RentalStatusDates

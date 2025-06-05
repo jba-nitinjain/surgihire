@@ -32,7 +32,10 @@ const AutocompleteField: React.FC<AutocompleteFieldProps> = ({
   freeSolo = false,
 }) => {
   const selectedOption =
-    options.find((opt) => String(opt.value) === String(value)) || null;
+    options.find((opt) => String(opt.value) === String(value)) ||
+    (freeSolo && value
+      ? { label: String(value), value: String(value) }
+      : null);
 
   const handleChange = (_: any, newValue: AutocompleteOption | null) => {
     const syntheticEvent = {
@@ -44,13 +47,27 @@ const AutocompleteField: React.FC<AutocompleteFieldProps> = ({
     onChange(syntheticEvent);
   };
 
+  const handleInputChange = (_: any, newInputValue: string) => {
+    if (freeSolo) {
+      const syntheticEvent = {
+        target: {
+          name,
+          value: newInputValue,
+        },
+      } as unknown as React.ChangeEvent<HTMLInputElement>;
+      onChange(syntheticEvent);
+    }
+  };
+
   return (
     <Autocomplete
       freeSolo={freeSolo}
       options={options}
       getOptionLabel={(option) => option.label}
       value={selectedOption}
+      inputValue={typeof value === 'string' ? value : selectedOption?.label || ''}
       onChange={handleChange}
+      onInputChange={handleInputChange}
       loading={loading}
       disabled={disabled}
       renderInput={(params) => (
