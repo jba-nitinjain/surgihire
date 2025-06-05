@@ -2,7 +2,8 @@ import React from 'react';
 import { MaintenanceRecordFormData, Equipment } from '../../types';
 import { Loader2, Package, CalendarDays } from 'lucide-react';
 
-import DatePickerField from "../ui/DatePickerField";
+import DatePickerField from '../ui/DatePickerField';
+import AutocompleteField, { AutocompleteOption } from '../ui/AutocompleteField';
 
 interface Props {
   formData: MaintenanceRecordFormData;
@@ -38,23 +39,20 @@ const MaintenanceRecordInfo: React.FC<Props> = ({
               <Package className={iconClass} />
             )}
           </div>
-          <select
-            id="equipment_id"
-            name="equipment_id"
-            value={formData.equipment_id}
-            onChange={handleChange}
-            required
-            disabled={loadingEquipment}
-            className={`${inputClass} pl-10`}
-          >
-            <option value="">{loadingEquipment ? 'Loading Equipment...' : 'Select Equipment'}</option>
-            {!loadingEquipment &&
-              equipmentList.map((equipment) => (
-                <option key={equipment.equipment_id} value={String(equipment.equipment_id)}>
-                  {equipment.equipment_name} ({equipment.serial_number || 'N/A'})
-                </option>
-              ))}
-          </select>
+          <div className="pl-10">
+            <AutocompleteField
+              name="equipment_id"
+              value={formData.equipment_id}
+              onChange={handleChange}
+              options={equipmentList.map((equipment) => ({
+                label: `${equipment.equipment_name} (${equipment.serial_number || 'N/A'})`,
+                value: String(equipment.equipment_id),
+              }))}
+              loading={loadingEquipment}
+              disabled={loadingEquipment}
+              placeholder={loadingEquipment ? 'Loading Equipment...' : 'Select Equipment'}
+            />
+          </div>
         </div>
         {formErrors.equipment_id && <p className="text-xs text-red-500 mt-1">{formErrors.equipment_id}</p>}
       </div>
