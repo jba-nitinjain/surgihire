@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useRentalTransactions } from '../../context/RentalTransactionContext';
 import RentalTransactionList from '../rentals/RentalTransactionList';
 // import RentalTransactionDetail from '../rentals/RentalTransactionDetail'; // Keep commented if not yet implemented
-import SearchBox from '../ui/SearchBox';
 import { PlusCircle, ArrowLeft } from 'lucide-react'; // Unused icons like Filter, CalendarIcon removed
 import Button from '@mui/material/Button';
+import AutocompleteField from '../ui/AutocompleteField';
+import DatePickerField from '../ui/DatePickerField';
 import { RentalTransaction } from '../../types';
 import { useNavigate, useLocation } from 'react-router-dom';
 
@@ -14,7 +15,6 @@ const RENTAL_STATUSES = ["Draft", "Pending Confirmation", "Confirmed/Booked", "A
 
 const RentalsTab: React.FC = () => {
   const {
-    searchQuery,
     setSearchQuery,
     refreshRentalTransactions,
     filters,
@@ -76,53 +76,54 @@ const RentalsTab: React.FC = () => {
       )}
       {/* Filter UI */}
       <div className="mb-6 p-4 bg-white rounded-lg shadow">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-          <div className="md:col-span-1">
-            <label htmlFor="rentalSearch" className="block text-sm font-medium text-dark-text mb-1">
-              Search Rentals
-            </label>
-            <SearchBox
-              value={searchQuery}
-              onChange={setSearchQuery}
-              placeholder="Search by notes, customer..."
-            />
-          </div>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
           <div>
             <label htmlFor="rentalStatusFilter" className="block text-sm font-medium text-dark-text mb-1">
               Status
             </label>
-            <select
+            <AutocompleteField
               id="rentalStatusFilter"
               name="status"
               value={filters.status || 'all'}
               onChange={(e) => setFilters({ ...filters, status: e.target.value === 'all' ? null : e.target.value })}
-              className="block w-full pl-3 pr-10 py-2 text-base border-light-gray-300 focus:outline-none focus:ring-brand-blue focus:border-brand-blue sm:text-sm rounded-md shadow-sm"
-            >
-              <option value="all">All Statuses</option>
-              {RENTAL_STATUSES.map(status => (
-                <option key={status} value={status}>{status}</option>
-              ))}
-            </select>
+              options={[{ label: 'All Statuses', value: 'all' }, ...RENTAL_STATUSES.map(s => ({ label: s, value: s }))]}
+            />
           </div>
           <div>
             <label htmlFor="rentalCustomerFilter" className="block text-sm font-medium text-dark-text mb-1">
               Customer
             </label>
-            <select
+            <AutocompleteField
               id="rentalCustomerFilter"
               name="customer_id"
               value={filters.customer_id || 'all'}
               onChange={(e) => setFilters({ ...filters, customer_id: e.target.value === 'all' ? null : e.target.value })}
               disabled={loadingCustomers}
-              className="block w-full pl-3 pr-10 py-2 text-base border-light-gray-300 focus:outline-none focus:ring-brand-blue focus:border-brand-blue sm:text-sm rounded-md shadow-sm"
-            >
-              <option value="all">{loadingCustomers ? "Loading Customers..." : "All Customers"}</option>
-              {!loadingCustomers && customersForFilter.map(customer => (
-                <option key={customer.customer_id} value={customer.customer_id}>
-                  {customer.full_name} (ID: {customer.customer_id})
-                </option>
-              ))}
-            </select>
+              options={[
+                { label: loadingCustomers ? 'Loading Customers...' : 'All Customers', value: 'all' },
+                ...(!loadingCustomers ? customersForFilter.map(c => ({ label: `${c.full_name} (ID: ${c.customer_id})`, value: c.customer_id })) : [])
+              ]}
+            />
+          </div>
+          <div>
+            <label htmlFor="rentalDateFilter" className="block text-sm font-medium text-dark-text mb-1">
+              Rented Date
+            </label>
+            <DatePickerField
+              name="rental_date"
+              value={filters.rental_date || ''}
+              onChange={(e) => setFilters({ ...filters, rental_date: e.target.value || null })}
+            />
+          </div>
+          <div>
+            <label htmlFor="returnDateFilter" className="block text-sm font-medium text-dark-text mb-1">
+              Return Date
+            </label>
+            <DatePickerField
+              name="return_date"
+              value={filters.return_date || ''}
+              onChange={(e) => setFilters({ ...filters, return_date: e.target.value || null })}
+            />
           </div>
         </div>
       </div>
