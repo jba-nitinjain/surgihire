@@ -1,6 +1,7 @@
 import React from 'react';
 import { RentalTransactionFormData } from '../../types';
 import { Loader2 } from 'lucide-react';
+import Button from '@mui/material/Button';
 import OutlinedTextField from '../ui/OutlinedTextField';
 import AutocompleteField from '../ui/AutocompleteField';
 import InputAdornment from '@mui/material/InputAdornment';
@@ -59,20 +60,10 @@ const RentalShippingBilling: React.FC<Props> = ({
   <fieldset className="space-y-6">
     <legend className="text-lg font-medium text-dark-text mb-2">Shipping &amp; Billing</legend>
     <div className="flex gap-4 text-xs">
-      <button
-        type="button"
-        onClick={copyShippingToBilling}
-        className="text-brand-blue underline"
-      >
-        Copy Shipping to Billing
-      </button>
-      <button
-        type="button"
-        onClick={copyBillingToShipping}
-        className="text-brand-blue underline"
-      >
-        Copy Billing to Shipping
-      </button>
+      <Button variant="outlined" size="small" onClick={copyShippingToBilling}
+        >Copy Shipping to Billing</Button>
+      <Button variant="outlined" size="small" onClick={copyBillingToShipping}
+        >Copy Billing to Shipping</Button>
     </div>
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div className="space-y-4">
@@ -115,53 +106,44 @@ const RentalShippingBilling: React.FC<Props> = ({
         </div>
         <div>
           <label htmlFor="shipping_area" className={labelClass}>Shipping Area</label>
-          {shippingIsAreaSelect ? (
-            <AutocompleteField
-              id="shipping_area"
-              name="shipping_area"
-              value={data.shipping_area || ''}
-              onChange={handleChange}
-              options={shippingAreaOptions}
-              placeholder="Select Area"
-            />
-          ) : (
-            <OutlinedTextField
-              type="text"
-              id="shipping_area"
-              name="shipping_area"
-              value={data.shipping_area || ''}
-              onChange={handleChange}
-              className={inputClass}
-              InputProps={{ readOnly: shippingAreaOptions.length > 0 && !shippingIsAreaSelect }}
-            />
-          )}
+          <AutocompleteField
+            id="shipping_area"
+            name="shipping_area"
+            value={data.shipping_area || ''}
+            onChange={handleChange}
+            options={shippingAreaOptions}
+            placeholder="Select Area"
+            freeSolo
+          />
           {errors.shipping_area && (
             <p className="text-xs text-red-500 mt-1">{errors.shipping_area}</p>
           )}
         </div>
-        <div>
-          <label htmlFor="shipping_city" className={labelClass}>Shipping City</label>
-          <OutlinedTextField
-            type="text"
-            id="shipping_city"
-            name="shipping_city"
-            value={data.shipping_city || ''}
-            onChange={handleChange}
-            className={inputClass}
-            InputProps={{ readOnly: true }}
-          />
-        </div>
-        <div>
-          <label htmlFor="shipping_state" className={labelClass}>Shipping State</label>
-          <OutlinedTextField
-            type="text"
-            id="shipping_state"
-            name="shipping_state"
-            value={data.shipping_state || ''}
-            onChange={handleChange}
-            className={inputClass}
-            InputProps={{ readOnly: true }}
-          />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div>
+            <label htmlFor="shipping_city" className={labelClass}>Shipping City</label>
+            <OutlinedTextField
+              type="text"
+              id="shipping_city"
+              name="shipping_city"
+              value={data.shipping_city || ''}
+              onChange={handleChange}
+              className={inputClass}
+              InputProps={{ readOnly: true }}
+            />
+          </div>
+          <div>
+            <label htmlFor="shipping_state" className={labelClass}>Shipping State</label>
+            <OutlinedTextField
+              type="text"
+              id="shipping_state"
+              name="shipping_state"
+              value={data.shipping_state || ''}
+              onChange={handleChange}
+              className={inputClass}
+              InputProps={{ readOnly: true }}
+            />
+          </div>
         </div>
       </div>
       <div className="space-y-4">
@@ -204,53 +186,44 @@ const RentalShippingBilling: React.FC<Props> = ({
         </div>
         <div>
           <label htmlFor="billing_area" className={labelClass}>Billing Area</label>
-          {billingIsAreaSelect ? (
-            <AutocompleteField
-              id="billing_area"
-              name="billing_area"
-              value={data.billing_area || ''}
-              onChange={handleChange}
-              options={billingAreaOptions}
-              placeholder="Select Area"
-            />
-          ) : (
-            <OutlinedTextField
-              type="text"
-              id="billing_area"
-              name="billing_area"
-              value={data.billing_area || ''}
-              onChange={handleChange}
-              className={inputClass}
-              InputProps={{ readOnly: billingAreaOptions.length > 0 && !billingIsAreaSelect }}
-            />
-          )}
+          <AutocompleteField
+            id="billing_area"
+            name="billing_area"
+            value={data.billing_area || ''}
+            onChange={handleChange}
+            options={billingAreaOptions}
+            placeholder="Select Area"
+            freeSolo
+          />
           {errors.billing_area && (
             <p className="text-xs text-red-500 mt-1">{errors.billing_area}</p>
           )}
         </div>
-        <div>
-          <label htmlFor="billing_city" className={labelClass}>Billing City</label>
-          <OutlinedTextField
-            type="text"
-            id="billing_city"
-            name="billing_city"
-            value={data.billing_city || ''}
-            onChange={handleChange}
-            className={inputClass}
-            InputProps={{ readOnly: true }}
-          />
-        </div>
-        <div>
-          <label htmlFor="billing_state" className={labelClass}>Billing State</label>
-          <OutlinedTextField
-            type="text"
-            id="billing_state"
-            name="billing_state"
-            value={data.billing_state || ''}
-            onChange={handleChange}
-            className={inputClass}
-            InputProps={{ readOnly: true }}
-          />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div>
+            <label htmlFor="billing_city" className={labelClass}>Billing City</label>
+            <OutlinedTextField
+              type="text"
+              id="billing_city"
+              name="billing_city"
+              value={data.billing_city || ''}
+              onChange={handleChange}
+              className={inputClass}
+              InputProps={{ readOnly: true }}
+            />
+          </div>
+          <div>
+            <label htmlFor="billing_state" className={labelClass}>Billing State</label>
+            <OutlinedTextField
+              type="text"
+              id="billing_state"
+              name="billing_state"
+              value={data.billing_state || ''}
+              onChange={handleChange}
+              className={inputClass}
+              InputProps={{ readOnly: true }}
+            />
+          </div>
         </div>
       </div>
     </div>

@@ -21,6 +21,8 @@ import {
   ListChecks,
   Info,
 } from 'lucide-react';
+import Button from '@mui/material/Button';
+import AutocompleteField from '../ui/AutocompleteField';
 import RentalItemsSection from './RentalItemsSection';
 import RentalCustomerSection from './RentalCustomerSection';
 import RentalStatusDates from './RentalStatusDates';
@@ -531,13 +533,14 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
           />
 
           <div>
-            <button
-              type="button"
+            <Button
+              variant="outlined"
+              size="small"
               onClick={() => setShowAddressSection(s => !s)}
-              className="text-brand-blue underline mb-2 text-sm"
+              className="mb-2"
             >
               {showAddressSection ? 'Hide Shipping & Billing' : 'Show Shipping & Billing'}
-            </button>
+            </Button>
             {showAddressSection && (
               <RentalShippingBilling
                 data={{
@@ -597,6 +600,7 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
             addItem={addItem}
             inputClass={inputClass}
             labelClass={labelClass}
+            isEditing={isEditing}
           />
 
           <fieldset className="grid grid-cols-1 gap-y-6 gap-x-4 md:grid-cols-2">
@@ -604,21 +608,30 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
             <div>
               <label htmlFor="payment_term" className={labelClass}>Payment Term</label>
               <div className="mt-1 relative rounded-md shadow-sm">
-                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    {loadingPaymentPlans ? <Loader2 className={`${iconClass} animate-spin`} /> : <ListChecks className={iconClass} />}
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  {loadingPaymentPlans ? <Loader2 className={`${iconClass} animate-spin`} /> : <ListChecks className={iconClass} />}
                 </div>
-                <select name="payment_term" id="payment_term" value={formData.payment_term || ''} onChange={handleChange} className={`${inputClass} pl-10`} disabled={loadingPaymentPlans}>
-                  <option value="">{loadingPaymentPlans ? "Loading..." : "Select Payment Term"}</option>
-                  {paymentPlans.map((pt: PaymentPlanType) => <option key={pt.plan_id} value={pt.plan_name}>{pt.plan_name}</option>)}
-                </select>
+                <div className="pl-10">
+                  <AutocompleteField
+                    name="payment_term"
+                    id="payment_term"
+                    value={formData.payment_term || ''}
+                    onChange={handleChange}
+                    options={paymentPlans.map(pt => ({ label: pt.plan_name, value: pt.plan_name }))}
+                    loading={loadingPaymentPlans}
+                    disabled={loadingPaymentPlans}
+                    placeholder={loadingPaymentPlans ? 'Loading...' : 'Select Payment Term'}
+                    freeSolo
+                  />
+                </div>
               </div>
             </div>
 
-            <div className="md:col-span-2">
-                <label className={labelClass}>Calculated Total Rental Amount</label>
-                <p className="mt-1 px-3 py-2 bg-light-gray-100 border border-light-gray-300 rounded-md text-dark-text/80 sm:text-sm flex items-center font-semibold text-green-700">
-                   <IndianRupee size={18} className="mr-2"/> {formatCurrency(calculatedTotalAmount)}
-                </p>
+            <div>
+              <label className={labelClass}>Calculated Total Rental Amount</label>
+              <p className="mt-1 px-3 py-2 bg-light-gray-100 border border-light-gray-300 rounded-md text-dark-text/80 sm:text-sm flex items-center font-semibold text-green-700">
+                 <IndianRupee size={18} className="mr-2"/> {formatCurrency(calculatedTotalAmount)}
+              </p>
             </div>
 
             <div className="md:col-span-2">
