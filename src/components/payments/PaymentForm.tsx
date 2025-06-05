@@ -137,6 +137,7 @@ const PaymentForm: React.FC<PaymentFormProps> = ({ payment, onSave, onCancel }) 
               name="rental_id"
               value={formData.rental_id}
               onChange={handleChange}
+              InputProps={payment?.rental_id ? { readOnly: true } : undefined}
               className={inputClass}
             />
             {formErrors.rental_id && <p className="text-red-600 text-sm mt-1">{formErrors.rental_id}</p>}
