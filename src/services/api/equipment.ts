@@ -61,3 +61,11 @@ export const fetchEquipmentByIds = (ids: number[]): Promise<ApiResponse> => {
   };
   return fetchFromApi('GET', params);
 };
+
+export const updateEquipmentStatus = (id: number, status: string): Promise<ApiResponse> =>
+  updateEquipment(id, { status });
+
+export const bulkUpdateEquipmentStatus = async (
+  ids: number[],
+  status: string
+): Promise<ApiResponse[]> => Promise.all(ids.map(id => updateEquipmentStatus(id, status)));

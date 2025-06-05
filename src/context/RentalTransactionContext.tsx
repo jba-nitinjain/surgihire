@@ -1,7 +1,8 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import dayjs from 'dayjs';
 import { RentalTransaction, PaginationParams, ApiResponse, Customer } from '../types';
-import { fetchRentals } from '../services/api/rentals';
+import { fetchRentals, returnRental as returnRentalApi } from '../services/api/rentals';
+import { useEquipment } from './EquipmentContext';
 import { fetchCustomers } from '../services/api/customers';
 import { searchRecords } from '../services/api/core';
 
@@ -33,6 +34,7 @@ interface RentalTransactionContextType {
   statusCounts: Record<string, number>;
   loadingStatusCounts: boolean;
   fetchStatusCounts: () => void;
+  returnRental: (rentalId: number, itemIds?: number[]) => Promise<void>;
 }
 
 const RentalTransactionContext = createContext<RentalTransactionContextType | undefined>(undefined);
@@ -114,6 +116,22 @@ export const RentalTransactionProvider: React.FC<RentalTransactionProviderProps>
       setLoadingStatusCounts(false);
     }
   }, []);
+
+  const { refreshEquipmentData } = useEquipment();
+
+  const returnRental = async (rentalId: number, itemIds?: number[]) => {
+    try {
+      const res = await returnRentalApi(rentalId, itemIds);
+      if (!res.success) {
+        throw new Error(res.message || 'Failed to return rental');
+      }
+      refreshRentalTransactions();
+      refreshEquipmentData();
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to return rental';
+      setError(message);
+    }
+  };
 
   const processApiResponse = useCallback((response: ApiResponse, page: number, currentSkip: number) => {
     if (response.success && Array.isArray(response.data)) {
@@ -272,6 +290,7 @@ export const RentalTransactionProvider: React.FC<RentalTransactionProviderProps>
     statusCounts,
     loadingStatusCounts,
     fetchStatusCounts,
+    returnRental,
   };
 
   return (

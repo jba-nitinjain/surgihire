@@ -1,13 +1,6 @@
 import { ApiResponse, PaginationParams } from '../../types';
-import {
-  createRecordGeneric,
-  updateRecordGeneric,
-  deleteRecord,
-  listRecords,
-  getRecord,
-  fetchFromApi,
-} from './core';
-import { fetchEquipmentByIds, updateEquipment } from './equipment';
+import { createRecordGeneric, updateRecordGeneric, deleteRecord, listRecords, getRecord, fetchFromApi } from './core';
+import { fetchEquipmentByIds, bulkUpdateEquipmentStatus } from './equipment';
 import dayjs from 'dayjs';
 
 const RENTAL_TRANSACTIONS_TABLE = 'rental_transactions';
@@ -90,52 +83,27 @@ export const updatePaymentSchedule = (id: number, data: Record<string, any>): Pr
 export const deletePaymentSchedule = (id: number): Promise<ApiResponse> => deleteRecord('payment_schedules', id);
 export const getPaymentSchedule = (id: number): Promise<ApiResponse> => getRecord('payment_schedules', id);
 
-export const getRentalDetail = (id: number): Promise<ApiResponse> =>
-  getRecord(RENTAL_DETAILS_TABLE, id);
-
-export const processReturn = async (
-  rentalId: number,
-  itemIds?: number[]
+export const updateRentalStatus = (
+  id: number,
+  status: string,
+  actualReturnDate?: string
 ): Promise<ApiResponse> => {
-  const today = dayjs().format('YYYY-MM-DD');
-  const rentalRes = await updateRental(rentalId, {
-    actual_return_date: today,
-    status: 'Returned/Completed',
-  });
+  const data: Record<string, any> = { status };
+  if (actualReturnDate) data.actual_return_date = actualReturnDate;
+  return updateRental(id, data);
+};
 
-  if (!rentalRes.success) return rentalRes;
-
-  const equipmentIds: number[] = [];
-
-  if (itemIds && itemIds.length > 0) {
-    for (const id of itemIds) {
-      await updateRentalDetail(id, { returned: 1 });
-      const detailRes = await getRentalDetail(id);
-      if (detailRes.success) {
-        const detail = Array.isArray(detailRes.data)
-          ? detailRes.data[0]
-          : detailRes.data;
-        if (detail && detail.equipment_id !== undefined) {
-          equipmentIds.push(Number(detail.equipment_id));
-        }
-      }
-    }
-  } else {
-    const detailsRes = await fetchRentalDetailsByRentalId(rentalId, {
-      records: 100,
-      skip: 0,
-    });
-    if (detailsRes.success && Array.isArray(detailsRes.data)) {
-      for (const detail of detailsRes.data as any[]) {
-        await updateRentalDetail(detail.rental_detail_id, { returned: 1 });
-        equipmentIds.push(Number(detail.equipment_id));
-      }
-    }
-  }
-
-  await Promise.all(
-    equipmentIds.map(eid => updateEquipment(eid, { status: 'Available' }))
+export const returnRental = async (
+  rentalId: number,
+  itemEquipmentIds?: number[]
+): Promise<ApiResponse> => {
+  const res = await updateRentalStatus(
+    rentalId,
+    'Returned/Completed',
+    dayjs().format('YYYY-MM-DD')
   );
-
-  return rentalRes;
+  if (res.success && itemEquipmentIds && itemEquipmentIds.length > 0) {
+    await bulkUpdateEquipmentStatus(itemEquipmentIds, 'Available');
+  }
+  return res;
 };
