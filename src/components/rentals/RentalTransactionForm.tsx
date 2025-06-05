@@ -180,18 +180,18 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
     if (selected) {
       setFormData(prev => ({
         ...prev,
-        shipping_address: prev.shipping_address || selected.shipping_address || '',
-        shipping_area: prev.shipping_area || selected.shipping_area || '',
-        shipping_city: prev.shipping_city || selected.shipping_city || '',
-        shipping_state: prev.shipping_state || selected.shipping_state || '',
-        shipping_pincode: prev.shipping_pincode || selected.shipping_pincode || '',
-        billing_address: prev.billing_address || selected.shipping_address || '',
-        billing_area: prev.billing_area || selected.shipping_area || '',
-        billing_city: prev.billing_city || selected.shipping_city || '',
-        billing_state: prev.billing_state || selected.shipping_state || '',
-        billing_pincode: prev.billing_pincode || selected.shipping_pincode || '',
-        mobile_number: prev.mobile_number || selected.mobile_number_1 || '',
-        email: prev.email || selected.email || '',
+        shipping_address: selected.shipping_address || '',
+        shipping_area: selected.shipping_area || '',
+        shipping_city: selected.shipping_city || '',
+        shipping_state: selected.shipping_state || '',
+        shipping_pincode: selected.shipping_pincode || '',
+        billing_address: selected.shipping_address || '',
+        billing_area: selected.shipping_area || '',
+        billing_city: selected.shipping_city || '',
+        billing_state: selected.shipping_state || '',
+        billing_pincode: selected.shipping_pincode || '',
+        mobile_number: selected.mobile_number_1 || '',
+        email: selected.email || '',
       }));
       setOriginalShippingPincode(selected.shipping_pincode || '');
       setOriginalBillingPincode(selected.shipping_pincode || '');
@@ -516,30 +516,31 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
             customerId={formData.customer_id}
             customers={customers}
             loadingCustomers={loadingCustomers}
+            status={formData.status}
+            statusOptions={RENTAL_STATUSES_FORM}
             handleChange={handleChange}
             error={formErrors.customer_id}
+            statusError={formErrors.status}
             inputClass={inputClass}
             labelClass={labelClass}
             iconClass={iconClass}
+            onAddCustomer={() => navigate('/customers/new')}
           />
 
           <RentalStatusDates
             data={{
               rental_date: formData.rental_date,
               expected_return_date: formData.expected_return_date,
-              status: formData.status,
             }}
             numberOfDays={numberOfDays}
             errors={{
               rental_date: formErrors.rental_date,
               expected_return_date: formErrors.expected_return_date,
-              status: formErrors.status,
             }}
             handleChange={handleChange}
             inputClass={inputClass}
             labelClass={labelClass}
             iconClass={iconClass}
-            statusOptions={RENTAL_STATUSES_FORM}
           />
 
           <div>
