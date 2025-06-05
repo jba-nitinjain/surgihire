@@ -400,6 +400,7 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
       total_amount: calculatedTotalAmount, // Add calculated total amount
       rental_items: formData.rental_items.map(item => ({
         equipment_id: parseInt(item.equipment_id, 10),
+        unit_rental_rate: parseFloat(item.unit_rental_rate) || 0,
         ...(isEditing &&
           rental?.rental_items?.find(ri => String(ri.equipment_id) === item.equipment_id)?.rental_detail_id
             ? { rental_detail_id: rental.rental_items.find(ri => String(ri.equipment_id) === item.equipment_id)!.rental_detail_id }
@@ -424,10 +425,12 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
               ? updateRentalDetail(item.rental_detail_id, {
                   rental_id: rental.rental_id,
                   equipment_id: item.equipment_id,
+                  unit_rental_rate: item.unit_rental_rate,
                 })
               : createRentalDetail({
                   rental_id: rental.rental_id,
                   equipment_id: item.equipment_id,
+                  unit_rental_rate: item.unit_rental_rate,
                 })
           )
         );
@@ -440,6 +443,7 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
               createRentalDetail({
                 rental_id: Number(newId),
                 equipment_id: item.equipment_id,
+                unit_rental_rate: item.unit_rental_rate,
               })
             )
           );
