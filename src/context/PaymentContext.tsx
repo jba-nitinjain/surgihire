@@ -54,29 +54,34 @@ export const PaymentProvider: React.FC<PaymentProviderProps> = ({
   const [initialLoadDone, setInitialLoadDone] = useState(false);
   const [filters, setFiltersState] = useState<PaymentFilters>({ rental_id: null, payment_mode: null, nature: null });
 
-  const processApiResponse = (response: ApiResponse, page: number, currentSkip: number) => {
-    if (response.success && Array.isArray(response.data)) {
-      setPayments(response.data as Payment[]);
-      const apiTotal = response.totalRecords;
-      if (typeof apiTotal === 'number') {
-        setTotalPayments(apiTotal);
-      } else {
-        const newTotal = currentSkip + response.data.length + (response.data.length < recordsPerPage ? 0 : recordsPerPage);
-        setTotalPayments(prev => Math.max(prev, newTotal, response.data.length));
-      }
-      setCurrentPage(page);
-    } else if (response.success && !Array.isArray(response.data)) {
-      setError('Unexpected data format for payments list.');
-      setPayments([]);
-      setTotalPayments(0);
-    } else {
-      setError(response.message || 'Unable to fetch payments.');
-      if (payments.length === 0) {
+  const processApiResponse = useCallback(
+    (response: ApiResponse, page: number, currentSkip: number) => {
+      if (response.success && Array.isArray(response.data)) {
+        setPayments(response.data as Payment[]);
+        const apiTotal = response.totalRecords;
+        if (typeof apiTotal === 'number') {
+          setTotalPayments(apiTotal);
+        } else {
+          const newTotal =
+            currentSkip + response.data.length +
+            (response.data.length < recordsPerPage ? 0 : recordsPerPage);
+          setTotalPayments(prev => Math.max(prev, newTotal, response.data.length));
+        }
+        setCurrentPage(page);
+      } else if (response.success && !Array.isArray(response.data)) {
+        setError('Unexpected data format for payments list.');
         setPayments([]);
         setTotalPayments(0);
+      } else {
+        setError(response.message || 'Unable to fetch payments.');
+        if (payments.length === 0) {
+          setPayments([]);
+          setTotalPayments(0);
+        }
       }
-    }
-  };
+    },
+    [payments.length, recordsPerPage]
+  );
 
   const fetchPaymentsData = useCallback(
     async (page: number, query: string, currentFilters: PaymentFilters) => {
@@ -117,7 +122,7 @@ export const PaymentProvider: React.FC<PaymentProviderProps> = ({
         }
       }
     },
-    [recordsPerPage, payments.length, processApiResponse]
+    [recordsPerPage, processApiResponse, payments.length]
   );
 
   const setSearchQuery = (query: string) => {
@@ -170,19 +175,28 @@ export const PaymentProvider: React.FC<PaymentProviderProps> = ({
   const depositTotal = useMemo(() => {
     const now = dayjs();
     return payments
-      .filter(p => dayjs(p.payment_date).isSame(now, 'month') && p.nature && p.nature.toLowerCase().includes('deposit'))
-      .reduce((sum, p) => sum + (p.payment_amount || 0), 0);
+      .filter(
+        p =>
+          dayjs(p.payment_date).isSame(now, 'month') &&
+          p.nature &&
+          p.nature.toLowerCase().includes('deposit')
+      )
+      .reduce((sum, p) => sum + Number(p.payment_amount || 0), 0);
   }, [payments]);
 
   const rentalTotal = useMemo(() => {
     const now = dayjs();
     return payments
-      .filter(p => dayjs(p.payment_date).isSame(now, 'month') && (!p.nature || !p.nature.toLowerCase().includes('deposit')))
-      .reduce((sum, p) => sum + (p.payment_amount || 0), 0);
+      .filter(
+        p =>
+          dayjs(p.payment_date).isSame(now, 'month') &&
+          (!p.nature || !p.nature.toLowerCase().includes('deposit'))
+      )
+      .reduce((sum, p) => sum + Number(p.payment_amount || 0), 0);
   }, [payments]);
 
   const totalAmount = useMemo(() => {
-    return payments.reduce((sum, p) => sum + (p.payment_amount || 0), 0);
+    return payments.reduce((sum, p) => sum + Number(p.payment_amount || 0), 0);
   }, [payments]);
 
   const value = {
