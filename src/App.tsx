@@ -11,6 +11,7 @@ import { PaymentPlanProvider } from './context/PaymentPlanContext';
 import { MaintenanceRecordProvider } from './context/MaintenanceRecordContext';
 import { RentalTransactionProvider } from './context/RentalTransactionContext'; // Import new provider
 import { PaymentProvider } from './context/PaymentContext';
+import { AuthProvider } from './context/AuthContext';
 import Dashboard from './components/Dashboard';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import CustomerFormPage from './components/pages/CustomerFormPage';
@@ -24,6 +25,7 @@ import EquipmentCategoryFormPage from './components/pages/EquipmentCategoryFormP
 import PaymentFormPage from './components/pages/PaymentFormPage';
 import PaymentDetailPage from './components/pages/PaymentDetailPage';
 import NotFound from './components/pages/NotFound';
+import LoginPage from './components/pages/LoginPage';
 
 function App() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -42,6 +44,7 @@ function App() {
     <ThemeProvider theme={theme}>
       <LocalizationProvider dateAdapter={AdapterDayjs}>
         <CssBaseline />
+        <AuthProvider>
         <CrudProvider>
       <CustomerProvider>
         <EquipmentProvider>
@@ -84,6 +87,7 @@ function App() {
                       <Route path="masters/payment-plans/new" element={<PaymentPlanFormPage />} />
                       <Route path="masters/payment-plans/:id/edit" element={<PaymentPlanFormPage />} />
                     </Route>
+                    <Route path="/login" element={<LoginPage />} />
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                   </PaymentProvider>
@@ -94,6 +98,7 @@ function App() {
         </EquipmentProvider>
       </CustomerProvider>
     </CrudProvider>
+        </AuthProvider>
       </LocalizationProvider>
     </ThemeProvider>
   );

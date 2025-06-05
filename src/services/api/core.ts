@@ -1,16 +1,24 @@
 import { ApiResponse, PaginationParams } from '../../types';
 
 // Use environment variables for API URL and Key
-const API_URL = import.meta.env.VITE_API_URL || 'https://surgihire.kodequick.com/api/v1.php';
-const API_KEY = import.meta.env.VITE_API_KEY || '';
+const API_URL =
+  import.meta.env.VITE_API_URL ||
+  'https://surgihire.kodequick.com/api/v1.php';
 
-if (!API_KEY) {
-  console.warn('API_KEY is not set in environment variables. Please create a .env file with VITE_API_KEY.');
+const DEFAULT_API_KEY = import.meta.env.VITE_API_KEY || '';
+
+if (!DEFAULT_API_KEY && !localStorage.getItem('apiKey')) {
+  console.warn(
+    'API_KEY is not set in environment variables. Please create a .env file with VITE_API_KEY.'
+  );
 }
 
-const baseHeaders = {
-  'X-Auth-Token': API_KEY,
-};
+const getApiKey = () =>
+  localStorage.getItem('apiKey') || DEFAULT_API_KEY;
+
+const getBaseHeaders = () => ({
+  'X-Auth-Token': getApiKey(),
+});
 
 const MAX_RETRIES = 3;
 const RETRY_DELAY = 1000;
@@ -35,7 +43,7 @@ export const fetchFromApi = async (
 
     const fetchOptions: RequestInit = {
       method,
-      headers: { ...baseHeaders },
+      headers: { ...getBaseHeaders() },
     };
 
     if (method === 'POST') {
