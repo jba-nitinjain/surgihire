@@ -8,8 +8,8 @@ import { usePayments } from '../../context/PaymentContext';
 const PaymentFormPage: React.FC = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id?: string }>();
-  const location = useLocation() as { state?: { payment?: Payment } };
-  const [payment, setPayment] = useState<Payment | null>(location.state?.payment || null);
+  const location = useLocation() as { state?: { payment?: Partial<Payment> } };
+  const [payment, setPayment] = useState<Partial<Payment> | null>(location.state?.payment || null);
   const [loading, setLoading] = useState<boolean>(!!id && !payment);
   const { refreshPayments } = usePayments();
 

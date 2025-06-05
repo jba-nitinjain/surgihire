@@ -9,7 +9,7 @@ import InputAdornment from '@mui/material/InputAdornment';
 import DatePickerField from "../ui/DatePickerField";
 import dayjs from 'dayjs';
 interface PaymentFormProps {
-  payment?: Payment | null;
+  payment?: Partial<Payment> | null;
   onSave: () => void;
   onCancel: () => void;
 }
@@ -112,8 +112,8 @@ const PaymentForm: React.FC<PaymentFormProps> = ({ payment, onSave, onCancel }) 
       payment_reference: formData.payment_reference || null,
       notes: formData.notes || null,
     };
-    if (payment) {
-      await updateItem('payments', payment.payment_id, payload);
+    if (payment && 'payment_id' in payment && payment.payment_id !== undefined) {
+      await updateItem('payments', (payment as Payment).payment_id, payload);
     } else {
       await createItem('payments', payload);
     }
