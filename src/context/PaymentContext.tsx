@@ -1,6 +1,17 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback, useMemo } from 'react';
+import dayjs from 'dayjs';
 import { Payment, PaginationParams, ApiResponse } from '../types';
 import { fetchPayments, searchPayments } from '../services/api/payments';
+
+export interface PaymentFilters {
+  rental_id: string | null;
+  payment_mode: string | null;
+  nature: string | null;
+  start_date: string | null;
+  end_date: string | null;
+  amount_op: string | null;
+  amount: string | null;
+}
 
 interface PaymentContextType {
   payments: Payment[];
@@ -9,7 +20,12 @@ interface PaymentContextType {
   totalPayments: number;
   currentPage: number;
   searchQuery: string;
+  filters: PaymentFilters;
+  depositTotal: number;
+  rentalTotal: number;
+  totalAmount: number;
   setSearchQuery: (query: string) => void;
+  setFilters: (update: Partial<PaymentFilters>) => void;
   fetchPaymentsPage: (page: number) => void;
   refreshPayments: () => void;
 }
@@ -40,58 +56,107 @@ export const PaymentProvider: React.FC<PaymentProviderProps> = ({
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQueryState] = useState('');
   const [initialLoadDone, setInitialLoadDone] = useState(false);
+  const [filters, setFiltersState] = useState<PaymentFilters>({
+    rental_id: null,
+    payment_mode: null,
+    nature: null,
+    start_date: null,
+    end_date: null,
+    amount_op: null,
+    amount: null,
+  });
 
-  const processApiResponse = (response: ApiResponse, page: number, currentSkip: number) => {
-    if (response.success && Array.isArray(response.data)) {
-      setPayments(response.data as Payment[]);
-      const apiTotal = response.totalRecords;
-      if (typeof apiTotal === 'number') {
-        setTotalPayments(apiTotal);
-      } else {
-        const newTotal = currentSkip + response.data.length + (response.data.length < recordsPerPage ? 0 : recordsPerPage);
-        setTotalPayments(prev => Math.max(prev, newTotal, response.data.length));
-      }
-      setCurrentPage(page);
-    } else if (response.success && !Array.isArray(response.data)) {
-      setError('Unexpected data format for payments list.');
-      setPayments([]);
-      setTotalPayments(0);
-    } else {
-      setError(response.message || 'Unable to fetch payments.');
-      if (payments.length === 0) {
+  const processApiResponse = useCallback(
+    (response: ApiResponse, page: number, currentSkip: number) => {
+      if (response.success && Array.isArray(response.data)) {
+        setPayments(response.data as Payment[]);
+        const apiTotal = response.totalRecords;
+        if (typeof apiTotal === 'number') {
+          setTotalPayments(apiTotal);
+        } else {
+          const newTotal =
+            currentSkip + response.data.length +
+            (response.data.length < recordsPerPage ? 0 : recordsPerPage);
+          setTotalPayments(prev => Math.max(prev, newTotal, response.data.length));
+        }
+        setCurrentPage(page);
+      } else if (response.success && !Array.isArray(response.data)) {
+        setError('Unexpected data format for payments list.');
         setPayments([]);
         setTotalPayments(0);
-      }
-    }
-  };
-
-  const fetchPaymentsPage = useCallback(async (page: number, query: string) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const skip = (page - 1) * recordsPerPage;
-      let response: ApiResponse;
-      const paginationParams: PaginationParams = { records: recordsPerPage, skip };
-      if (query.trim()) {
-        response = await searchPayments(query.trim(), paginationParams);
       } else {
-        response = await fetchPayments(paginationParams);
+        setError(response.message || 'Unable to fetch payments.');
+        if (payments.length === 0) {
+          setPayments([]);
+          setTotalPayments(0);
+        }
       }
-      processApiResponse(response, page, skip);
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'An unexpected error occurred';
-      setError(message);
-      if (payments.length === 0) {
-        setPayments([]);
-        setTotalPayments(0);
+    },
+    [payments.length, recordsPerPage]
+  );
+
+  const fetchPaymentsData = useCallback(
+    async (page: number, query: string, currentFilters: PaymentFilters) => {
+      setLoading(true);
+      setError(null);
+      try {
+        const skip = (page - 1) * recordsPerPage;
+        let response: ApiResponse;
+        const activeFilters: Record<string, string | number> = {};
+        if (currentFilters.rental_id) activeFilters.rental_id = currentFilters.rental_id;
+        if (currentFilters.payment_mode) activeFilters.payment_mode = currentFilters.payment_mode;
+        if (currentFilters.nature) activeFilters.nature = currentFilters.nature;
+
+        const paginationParams: PaginationParams = {
+          records: recordsPerPage,
+          skip,
+          filters: Object.keys(activeFilters).length > 0 ? activeFilters : undefined,
+        };
+
+        const qParts: string[] = [];
+        if (currentFilters.start_date && currentFilters.end_date) {
+          qParts.push(`(payment_date~between~${currentFilters.start_date}~date2~${currentFilters.end_date})`);
+        } else if (currentFilters.start_date) {
+          qParts.push(`(payment_date~equals~${currentFilters.start_date})`);
+        } else if (currentFilters.end_date) {
+          qParts.push(`(payment_date~equals~${currentFilters.end_date})`);
+        }
+        if (currentFilters.amount && currentFilters.amount_op) {
+          qParts.push(`(payment_amount~${currentFilters.amount_op}~${currentFilters.amount})`);
+        }
+        if (qParts.length > 0) {
+          paginationParams.q = qParts.join('');
+        }
+
+        if (query.trim()) {
+          response = await searchPayments(query.trim(), paginationParams);
+        } else {
+          response = await fetchPayments(paginationParams);
+        }
+        processApiResponse(response, page, skip);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'An unexpected error occurred';
+        setError(message);
+        if (payments.length === 0) {
+          setPayments([]);
+          setTotalPayments(0);
+        }
+      } finally {
+        setLoading(false);
+        const noFilters =
+          !currentFilters.rental_id &&
+          !currentFilters.payment_mode &&
+          !currentFilters.nature &&
+          !currentFilters.start_date &&
+          !currentFilters.end_date &&
+          !currentFilters.amount;
+        if (page === 1 && !query.trim() && noFilters) {
+          setInitialLoadDone(true);
+        }
       }
-    } finally {
-      setLoading(false);
-      if (page === 1 && !query.trim()) {
-        setInitialLoadDone(true);
-      }
-    }
-  }, [recordsPerPage, payments.length]);
+    },
+    [recordsPerPage, processApiResponse, payments.length]
+  );
 
   const setSearchQuery = (query: string) => {
     setSearchQueryState(query);
@@ -99,27 +164,107 @@ export const PaymentProvider: React.FC<PaymentProviderProps> = ({
     setInitialLoadDone(false);
   };
 
+  const setFilters = useCallback((update: Partial<PaymentFilters>) => {
+    setFiltersState(prev => {
+      const newFilters = { ...prev, ...update };
+      if (newFilters.start_date && newFilters.end_date) {
+        const start = dayjs(newFilters.start_date, 'DD/MM/YYYY');
+        const end = dayjs(newFilters.end_date, 'DD/MM/YYYY');
+        if (start.isAfter(end)) {
+          if (update.start_date) {
+            newFilters.end_date = newFilters.start_date;
+          } else if (update.end_date) {
+            newFilters.start_date = newFilters.end_date;
+          }
+        }
+      }
+      if (
+        newFilters.rental_id !== prev.rental_id ||
+        newFilters.payment_mode !== prev.payment_mode ||
+        newFilters.nature !== prev.nature ||
+        newFilters.start_date !== prev.start_date ||
+        newFilters.end_date !== prev.end_date ||
+        newFilters.amount !== prev.amount ||
+        newFilters.amount_op !== prev.amount_op
+      ) {
+        setCurrentPage(1);
+        setInitialLoadDone(false);
+        return newFilters;
+      }
+      return prev;
+    });
+  }, []);
+
   useEffect(() => {
-    if (!searchQuery.trim() && !initialLoadDone && !loading) {
-      fetchPaymentsPage(1, '');
+    const noFilters =
+      !filters.rental_id &&
+      !filters.payment_mode &&
+      !filters.nature &&
+      !filters.start_date &&
+      !filters.end_date &&
+      !filters.amount;
+    if (!searchQuery.trim() && noFilters && !initialLoadDone && !loading) {
+      fetchPaymentsData(1, '', filters);
     }
-  }, [searchQuery, initialLoadDone, loading, fetchPaymentsPage]);
+  }, [searchQuery, filters, initialLoadDone, loading, fetchPaymentsData]);
 
   useEffect(() => {
     const handler = setTimeout(() => {
-      if (searchQuery.trim()) {
-        fetchPaymentsPage(1, searchQuery.trim());
+      const shouldFetch =
+        searchQuery.trim() ||
+        filters.rental_id ||
+        filters.payment_mode ||
+        filters.nature ||
+        filters.start_date ||
+        filters.end_date ||
+        filters.amount;
+      if (shouldFetch) {
+        fetchPaymentsData(1, searchQuery.trim(), filters);
       }
     }, 700);
     return () => clearTimeout(handler);
-  }, [searchQuery, fetchPaymentsPage]);
+  }, [searchQuery, filters, fetchPaymentsData]);
 
   const refreshPayments = () => {
-    if (currentPage === 1 && !searchQuery.trim()) {
+    const noFilters =
+      !filters.rental_id &&
+      !filters.payment_mode &&
+      !filters.nature &&
+      !filters.start_date &&
+      !filters.end_date &&
+      !filters.amount;
+    if (currentPage === 1 && !searchQuery.trim() && noFilters) {
       setInitialLoadDone(false);
     }
-    fetchPaymentsPage(currentPage, searchQuery);
+    fetchPaymentsData(currentPage, searchQuery, filters);
   };
+
+  const depositTotal = useMemo(() => {
+    const now = dayjs();
+    return payments
+      .filter(
+        p =>
+          dayjs(p.payment_date).isSame(now, 'month') &&
+          p.nature &&
+          p.nature.toLowerCase().includes('deposit')
+      )
+      .reduce((sum, p) => sum + Number(p.payment_amount || 0), 0);
+  }, [payments]);
+
+  const rentalTotal = useMemo(() => {
+    const now = dayjs();
+    return payments
+      .filter(
+        p =>
+          dayjs(p.payment_date).isSame(now, 'month') &&
+          (!p.nature || !p.nature.toLowerCase().includes('deposit'))
+      )
+      .reduce((sum, p) => sum + Number(p.payment_amount || 0), 0);
+  }, [payments]);
+
+  const totalAmount = useMemo(() => {
+    return payments.reduce((sum, p) => sum + Number(p.payment_amount || 0), 0);
+  }, [payments]);
 
   const value = {
     payments,
@@ -128,8 +273,13 @@ export const PaymentProvider: React.FC<PaymentProviderProps> = ({
     totalPayments,
     currentPage,
     searchQuery,
+    filters,
+    depositTotal,
+    rentalTotal,
+    totalAmount,
     setSearchQuery,
-    fetchPaymentsPage: (page: number) => fetchPaymentsPage(page, searchQuery),
+    setFilters,
+    fetchPaymentsPage: (page: number) => fetchPaymentsData(page, searchQuery, filters),
     refreshPayments,
   };
 

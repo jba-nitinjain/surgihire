@@ -8,7 +8,7 @@ import ConfirmationModal from '../ui/ConfirmationModal';
 import { useRentalTransactions } from '../../context/RentalTransactionContext';
 import { formatDate, formatCurrency } from '../../utils/formatting';
 import { fetchRentalDetailsByRentalId } from '../../services/api/rentals';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 interface RentalTransactionCardProps {
   rental: RentalTransaction; // This will now include customer_name and payment_term_name
@@ -22,6 +22,7 @@ const RentalTransactionCard: React.FC<RentalTransactionCardProps> = ({ rental, o
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [items, setItems] = useState(rental.rental_items || []);
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     if (!rental.rental_items || rental.rental_items.some(it => !('equipment_name' in it))) {
@@ -47,7 +48,9 @@ const RentalTransactionCard: React.FC<RentalTransactionCardProps> = ({ rental, o
 
   const handleRecordPayment = (e: React.MouseEvent) => {
     e.stopPropagation();
-    navigate('/payments/new', { state: { payment: { rental_id: rental.rental_id } } });
+    navigate('/payments/new', {
+      state: { payment: { rental_id: rental.rental_id }, from: location.pathname },
+    });
   };
 
   const confirmDelete = async () => {

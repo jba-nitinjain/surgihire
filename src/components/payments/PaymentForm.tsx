@@ -1,15 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { Payment, PaymentFormData } from '../../types';
 import { useCrud } from '../../context/CrudContext';
-import { Save, X, Loader2, CalendarCheck2, IndianRupee } from 'lucide-react';
+import { Save, X, Loader2, IndianRupee } from 'lucide-react';
+import Button from '@mui/material/Button';
 import OutlinedTextField from '../ui/OutlinedTextField';
+import NumberField from '../ui/NumberField';
 import AutocompleteField from '../ui/AutocompleteField';
 import InputAdornment from '@mui/material/InputAdornment';
 
 import DatePickerField from "../ui/DatePickerField";
 import dayjs from 'dayjs';
 interface PaymentFormProps {
-  payment?: Payment | null;
+  payment?: Partial<Payment> | null;
   onSave: () => void;
   onCancel: () => void;
 }
@@ -106,14 +108,14 @@ const PaymentForm: React.FC<PaymentFormProps> = ({ payment, onSave, onCancel }) 
     const payload = {
       rental_id: formData.rental_id,
       nature: formData.nature || null,
-      payment_date: formData.payment_date,
+      payment_date: dayjs(formData.payment_date, 'DD/MM/YYYY').format('YYYY-MM-DD'),
       payment_amount: formData.payment_amount ? Number(formData.payment_amount) : 0,
       payment_mode: formData.payment_mode || null,
       payment_reference: formData.payment_reference || null,
       notes: formData.notes || null,
     };
-    if (payment) {
-      await updateItem('payments', payment.payment_id, payload);
+    if (payment && 'payment_id' in payment && payment.payment_id !== undefined) {
+      await updateItem('payments', (payment as Payment).payment_id, payload);
     } else {
       await createItem('payments', payload);
     }
@@ -125,108 +127,108 @@ const PaymentForm: React.FC<PaymentFormProps> = ({ payment, onSave, onCancel }) 
   return (
     <div className="bg-white p-6 rounded-md shadow">
       <form onSubmit={handleSubmit} className="space-y-6">
-        <div>
-          <label htmlFor="rental_id" className="block text-sm font-medium text-dark-text mb-1">
-            Rental ID
-          </label>
-          <OutlinedTextField
-            type="text"
-            id="rental_id"
-            name="rental_id"
-            value={formData.rental_id}
-            onChange={handleChange}
-            className={inputClass}
-          />
-          {formErrors.rental_id && <p className="text-red-600 text-sm mt-1">{formErrors.rental_id}</p>}
-        </div>
-        <div>
-          <span className="block text-sm font-medium text-dark-text mb-1">Nature</span>
-          <div className="flex space-x-4">
-            <label className="inline-flex items-center">
-              <input
-                type="radio"
-                name="nature"
-                value="rental"
-                checked={formData.nature === 'rental'}
-                onChange={handleChange}
-                className="text-brand-blue focus:ring-brand-blue"
-              />
-              <span className="ml-2">Rental Receipt</span>
+        <div className="grid md:grid-cols-3 gap-4">
+          <div>
+            <label htmlFor="rental_id" className="block text-sm font-medium text-dark-text mb-1">
+              Rental ID
             </label>
-            <label className="inline-flex items-center">
-              <input
-                type="radio"
-                name="nature"
-                value="deposit"
-                checked={formData.nature === 'deposit'}
-                onChange={handleChange}
-                className="text-brand-blue focus:ring-brand-blue"
-              />
-              <span className="ml-2">Deposit</span>
+            <OutlinedTextField
+              type="text"
+              id="rental_id"
+              name="rental_id"
+              value={formData.rental_id}
+              onChange={handleChange}
+              InputProps={payment?.rental_id ? { readOnly: true } : undefined}
+              className={inputClass}
+            />
+            {formErrors.rental_id && <p className="text-red-600 text-sm mt-1">{formErrors.rental_id}</p>}
+          </div>
+          <div>
+            <span className="block text-sm font-medium text-dark-text mb-1">Nature</span>
+            <div className="flex space-x-4">
+              <label className="inline-flex items-center">
+                <input
+                  type="radio"
+                  name="nature"
+                  value="rental"
+                  checked={formData.nature === 'rental'}
+                  onChange={handleChange}
+                  className="text-brand-blue focus:ring-brand-blue"
+                />
+                <span className="ml-2">Rental Receipt</span>
+              </label>
+              <label className="inline-flex items-center">
+                <input
+                  type="radio"
+                  name="nature"
+                  value="deposit"
+                  checked={formData.nature === 'deposit'}
+                  onChange={handleChange}
+                  className="text-brand-blue focus:ring-brand-blue"
+                />
+                <span className="ml-2">Deposit</span>
+              </label>
+            </div>
+          </div>
+          <div>
+            <label htmlFor="payment_date" className="block text-sm font-medium text-dark-text mb-1">
+              Date
             </label>
+            <DatePickerField
+              name="payment_date"
+              value={formData.payment_date}
+              onChange={handleChange}
+            />
+            {formErrors.payment_date && <p className="text-red-600 text-sm mt-1">{formErrors.payment_date}</p>}
           </div>
         </div>
-        <div>
-          <label htmlFor="payment_date" className="block text-sm font-medium text-dark-text mb-1">
-            Date
-          </label>
-          <DatePickerField
-            name="payment_date"
-            value={formData.payment_date}
-            onChange={handleChange}
-          />
-          {formErrors.payment_date && <p className="text-red-600 text-sm mt-1">{formErrors.payment_date}</p>}
-        </div>
-        <div>
-          <label htmlFor="payment_amount" className="block text-sm font-medium text-dark-text mb-1">
-            Amount
-          </label>
-          <OutlinedTextField
-            type="number"
-            id="payment_amount"
-            name="payment_amount"
-            value={formData.payment_amount || ''}
-            onChange={handleChange}
-            InputProps={{
-              startAdornment: (
+        <div className="grid md:grid-cols-3 gap-4 items-end">
+          <div>
+            <label htmlFor="payment_amount" className="block text-sm font-medium text-dark-text mb-1">
+              Amount
+            </label>
+            <NumberField
+              id="payment_amount"
+              name="payment_amount"
+              value={formData.payment_amount || ''}
+              onChange={handleChange}
+              startAdornment={
                 <InputAdornment position="start">
                   <IndianRupee size={16} />
                 </InputAdornment>
-              ),
-            }}
-            className={inputClass}
-          />
-        </div>
-        <div>
-          <label htmlFor="payment_mode_select" className="block text-sm font-medium text-dark-text mb-1">
-            Mode
-          </label>
-          <div className="flex items-center space-x-2">
-            <div className="flex-1">
-              <AutocompleteField
-                id="payment_mode_select"
-                name="payment_mode_select"
-                value={modeSelect}
-                onChange={handleModeSelectChange as React.ChangeEventHandler<HTMLInputElement>}
-                options={[
-                  { label: 'Select', value: '' },
-                  ...KNOWN_MODES.map(m => ({ label: m, value: m })),
-                  { label: 'Others', value: 'Others' },
-                ]}
-              />
-            </div>
-            <button
-              type="button"
+              }
+              className={inputClass}
+            />
+          </div>
+          <div>
+            <label htmlFor="payment_mode_select" className="block text-sm font-medium text-dark-text mb-1">
+              Mode
+            </label>
+            <AutocompleteField
+              id="payment_mode_select"
+              name="payment_mode_select"
+              value={modeSelect}
+              onChange={handleModeSelectChange as React.ChangeEventHandler<HTMLInputElement>}
+              options={[
+                { label: 'Select', value: '' },
+                ...KNOWN_MODES.map(m => ({ label: m, value: m })),
+                { label: 'Others', value: 'Others' },
+              ]}
+            />
+          </div>
+          <div className="flex items-end">
+            <Button
+              variant="outlined"
+              size="small"
               onClick={() => {
                 const mode = modeSelect === 'Others' ? otherMode : modeSelect;
                 if (mode) {
                   localStorage.setItem(DEFAULT_MODE_KEY, mode);
                 }
               }}
-              className="px-2 py-1 text-xs border rounded text-gray-600 hover:bg-light-gray-50"
             >
               Set Default
-            </button>
+            </Button>
           </div>
         </div>
         {modeSelect === 'Others' && (
@@ -243,19 +245,21 @@ const PaymentForm: React.FC<PaymentFormProps> = ({ payment, onSave, onCancel }) 
             />
           </div>
         )}
-        <div>
-          <label htmlFor="payment_reference" className="block text-sm font-medium text-dark-text mb-1">
-            Reference
-          </label>
-          <OutlinedTextField
-            type="text"
-            id="payment_reference"
-            name="payment_reference"
-            value={formData.payment_reference || ''}
-            onChange={handleChange}
-            className={inputClass}
-          />
-        </div>
+        {formData.payment_mode !== 'Cash' && (
+          <div>
+            <label htmlFor="payment_reference" className="block text-sm font-medium text-dark-text mb-1">
+              Reference
+            </label>
+            <OutlinedTextField
+              type="text"
+              id="payment_reference"
+              name="payment_reference"
+              value={formData.payment_reference || ''}
+              onChange={handleChange}
+              className={inputClass}
+            />
+          </div>
+        )}
         <div>
           <label htmlFor="notes" className="block text-sm font-medium text-dark-text mb-1">
             Notes
@@ -266,8 +270,6 @@ const PaymentForm: React.FC<PaymentFormProps> = ({ payment, onSave, onCancel }) 
             value={formData.notes || ''}
             onChange={handleChange}
             className={inputClass}
-            multiline
-            rows={3}
           />
         </div>
         <div className="flex justify-end space-x-2">

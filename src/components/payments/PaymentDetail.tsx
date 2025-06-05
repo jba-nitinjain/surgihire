@@ -22,7 +22,14 @@ const PaymentDetail: React.FC<PaymentDetailProps> = ({ payment, onClose, isModal
         </button>
       </div>
       <div className="space-y-2">
-        <div className="text-sm text-dark-text">Rental ID: {payment.rental_id}</div>
+        <div className="text-sm text-dark-text">
+          Customer: {payment.customer_name || `Rental #${payment.rental_id}`}
+        </div>
+        {payment.rented_from && (
+          <div className="text-sm text-dark-text">
+            Rented From: {formatDate(payment.rented_from)}
+          </div>
+        )}
         <div className="text-sm text-dark-text">Nature: {payment.nature || 'rental'}</div>
         <div className="text-sm text-dark-text">Date: {formatDate(payment.payment_date)}</div>
         <div className="text-sm text-dark-text flex items-center">

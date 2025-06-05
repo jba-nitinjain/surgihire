@@ -1,18 +1,15 @@
 import React from 'react';
 import { usePayments } from '../../context/PaymentContext';
 import PaymentList from '../payments/PaymentList';
-import SearchBox from '../ui/SearchBox';
-import { PlusCircle } from 'lucide-react';
+import PaymentFilterBar from './PaymentFilterBar';
 import { Payment } from '../../types';
 import { useNavigate } from 'react-router-dom';
+import { formatCurrency } from '../../utils/formatting';
 
 const PaymentsTab: React.FC = () => {
-  const { searchQuery, setSearchQuery } = usePayments();
+  const { filters, setFilters, depositTotal, rentalTotal } = usePayments();
   const navigate = useNavigate();
 
-  const handleOpenPaymentFormForCreate = () => {
-    navigate('/payments/new');
-  };
 
   const handleOpenPaymentFormForEdit = (item: Payment) => {
     navigate(`/payments/${item.payment_id}/edit`, { state: { payment: item } });
@@ -24,16 +21,16 @@ const PaymentsTab: React.FC = () => {
 
   return (
     <>
-      <div className="mb-6 md:flex md:items-center md:justify-between">
-        <div className="w-full md:max-w-xs mb-4 md:mb-0">
-          <SearchBox value={searchQuery} onChange={setSearchQuery} placeholder="Search payments..." />
+      <PaymentFilterBar filters={filters} onFiltersChange={setFilters} />
+      <div className="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="p-4 bg-white rounded shadow">
+          <div className="text-sm text-dark-text">Deposits This Month</div>
+          <div className="text-lg font-semibold">{formatCurrency(depositTotal)}</div>
         </div>
-        <button
-          onClick={handleOpenPaymentFormForCreate}
-          className="w-full md:w-auto inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-brand-blue hover:bg-brand-blue/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-blue transition-colors"
-        >
-          <PlusCircle className="h-5 w-5 mr-2" />Record Payment
-        </button>
+        <div className="p-4 bg-white rounded shadow">
+          <div className="text-sm text-dark-text">Rentals This Month</div>
+          <div className="text-lg font-semibold">{formatCurrency(rentalTotal)}</div>
+        </div>
       </div>
       <PaymentList onEditPayment={handleOpenPaymentFormForEdit} onViewPayment={handleViewPayment} />
     </>

@@ -29,7 +29,7 @@ import RentalStatusDates from './RentalStatusDates';
 import RentalShippingBilling from './RentalShippingBilling';
 import { formatCurrency } from '../../utils/formatting'; // Import formatCurrency
 import usePincodeLookup from '../../utils/usePincodeLookup';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import dayjs from 'dayjs';
 
 const EQUIPMENT_RENTAL_STATUSES = ['Confirmed/Booked', 'Active/Rented Out'];
@@ -85,6 +85,7 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
   const { equipmentList: availableEquipment, loading: loadingEquipment, refreshEquipmentData: refreshAvailableEquipment } = useEquipment();
 
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [numberOfDays, setNumberOfDays] = useState<number>(0);
   const [calculatedTotalAmount, setCalculatedTotalAmount] = useState<number>(0);
@@ -493,7 +494,9 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
 
       if (recordPay && newId) {
         refreshRentalTransactions();
-        navigate('/payments/new', { state: { payment: { rental_id: newId } } });
+        navigate('/payments/new', {
+          state: { payment: { rental_id: newId }, from: location.pathname },
+        });
       } else {
         onSave();
       }

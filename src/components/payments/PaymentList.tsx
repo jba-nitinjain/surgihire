@@ -7,6 +7,7 @@ import EmptyState from '../ui/EmptyState';
 import ErrorDisplay from '../ui/ErrorDisplay';
 import { Payment } from '../../types';
 import { IndianRupee } from 'lucide-react';
+import { formatCurrency } from '../../utils/formatting';
 
 interface PaymentListProps {
   onEditPayment: (payment: Payment) => void;
@@ -14,7 +15,7 @@ interface PaymentListProps {
 }
 
 const PaymentList: React.FC<PaymentListProps> = ({ onEditPayment, onViewPayment }) => {
-  const {
+  const { 
     payments,
     loading,
     error,
@@ -22,13 +23,13 @@ const PaymentList: React.FC<PaymentListProps> = ({ onEditPayment, onViewPayment 
     currentPage,
     fetchPaymentsPage,
     refreshPayments,
-    searchQuery,
+    totalAmount,
   } = usePayments();
 
   const recordsPerPage = 10; // Should match context
   const totalPages = Math.ceil(totalPayments / recordsPerPage);
 
-  if (loading && payments.length === 0 && !searchQuery) {
+  if (loading && payments.length === 0) {
     return <div className="flex justify-center items-center h-64"><Spinner size="lg" /></div>;
   }
 
@@ -39,8 +40,8 @@ const PaymentList: React.FC<PaymentListProps> = ({ onEditPayment, onViewPayment 
   if (payments.length === 0) {
     return (
       <EmptyState
-        title={searchQuery ? 'No payments match your search' : 'No Payments Found'}
-        message={searchQuery ? 'Try a different search term.' : 'Get started by recording a payment.'}
+        title="No Payments Found"
+        message="No payments available."
         icon={<IndianRupee className="w-16 h-16 text-gray-400" />}
       />
     );
@@ -53,7 +54,7 @@ const PaymentList: React.FC<PaymentListProps> = ({ onEditPayment, onViewPayment 
           <thead className="bg-light-gray-50">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-dark-text uppercase tracking-wider">ID</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-dark-text uppercase tracking-wider">Rental ID</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-dark-text uppercase tracking-wider">Customer</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-dark-text uppercase tracking-wider">Nature</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-dark-text uppercase tracking-wider">Date</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-dark-text uppercase tracking-wider">Amount</th>
@@ -71,6 +72,13 @@ const PaymentList: React.FC<PaymentListProps> = ({ onEditPayment, onViewPayment 
               />
             ))}
           </tbody>
+          <tfoot>
+            <tr className="bg-light-gray-50 font-medium">
+              <td colSpan={4} className="px-6 py-3 text-right">Total</td>
+              <td className="px-6 py-3">{formatCurrency(totalAmount)}</td>
+              <td colSpan={2}></td>
+            </tr>
+          </tfoot>
         </table>
       </div>
       {loading && payments.length > 0 && (

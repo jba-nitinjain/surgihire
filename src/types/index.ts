@@ -101,6 +101,9 @@ export interface Payment {
   payment_mode: string | null;
   payment_reference: string | null;
   notes: string | null;
+  customer_name?: string;
+  rented_from?: string;
+  customer_id?: string;
 }
 
 export interface PaymentFormData {
@@ -221,6 +224,7 @@ export interface PaginationParams {
   records: number;
   skip: number;
   filters?: Record<string, string | number | boolean | null>;
+  q?: string;
 }
 
 export interface TabData {
