@@ -11,11 +11,14 @@ const RentalFormPage: React.FC = () => {
   const location = useLocation() as { state?: { rental?: RentalTransaction } };
 
   const [rental, setRental] = useState<RentalTransaction | null>(location.state?.rental || null);
-  const [loading, setLoading] = useState<boolean>(!!id && !rental);
+  const [loading, setLoading] = useState<boolean>(!!id && !location.state?.rental);
   const { refreshRentalTransactions } = useRentalTransactions();
 
   useEffect(() => {
-    if (id && !rental) {
+    if (!id) return;
+
+    if (!rental || !rental.rental_items) {
+      setLoading(true);
       Promise.all([
         getRental(Number(id)),
         fetchRentalDetailsByRentalId(Number(id), { records: 100, skip: 0 }),
