@@ -1,5 +1,6 @@
 import React from 'react';
 import { CustomerFormData } from '../../types';
+import OutlinedTextField from '../ui/OutlinedTextField';
 
 interface Props {
   formData: CustomerFormData;
@@ -13,9 +14,16 @@ const CustomerPersonalInfoSection: React.FC<Props> = ({ formData, formErrors, ha
   <fieldset className="grid grid-cols-1 gap-6 md:grid-cols-2">
     <legend className="text-lg font-medium text-dark-text col-span-full">Personal Information</legend>
     <div>
-      <label htmlFor="full_name" className={labelClass}>Full Name <span className="text-red-500">*</span></label>
-      <input type="text" name="full_name" id="full_name" value={formData.full_name} onChange={handleChange} className={inputClass} required />
-      {formErrors.full_name && <p className="text-xs text-red-500 mt-1">{formErrors.full_name}</p>}
+      <OutlinedTextField
+        label="Full Name"
+        name="full_name"
+        id="full_name"
+        value={formData.full_name}
+        onChange={handleChange}
+        required
+        error={!!formErrors.full_name}
+        helperText={formErrors.full_name}
+      />
     </div>
     <div>
       <label htmlFor="email" className={labelClass}>Email</label>
