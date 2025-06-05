@@ -29,7 +29,8 @@ const AMOUNT_OPERATORS = [
 
 const PaymentFilterBar: React.FC<PaymentFilterBarProps> = ({ filters, onFiltersChange }) => (
   <div className="mb-6 p-4 bg-white rounded-lg shadow">
-    <div className="grid grid-cols-1 md:grid-cols-6 gap-4 items-end">
+    {/* arrange filters in two lines on medium screens */}
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
       <div>
         <label htmlFor="paymentRentalFilter" className="block text-sm font-medium text-dark-text mb-1">
           Rental ID
