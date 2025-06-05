@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { RentalTransaction } from '../../types';
 import { CalendarCheck2, User, Edit3, Trash2, Loader2, FileText, IndianRupee, Tag, CalendarClock, CheckCircle, XCircle, Clock, AlertTriangle } from 'lucide-react';
+import IconButton from '@mui/material/IconButton';
+import Button from '@mui/material/Button';
 import { useCrud } from '../../context/CrudContext';
 import ConfirmationModal from '../ui/ConfirmationModal';
 import { useRentalTransactions } from '../../context/RentalTransactionContext';
@@ -112,23 +114,13 @@ const RentalTransactionCard: React.FC<RentalTransactionCardProps> = ({ rental, o
                 Rental ID: {rental.rental_id}
               </h3>
             </div>
-            <div className="flex space-x-2 rental-card-menu-button">
-              <button
-                onClick={handleEdit}
-                disabled={crudLoading}
-                className="p-1 text-dark-text/60 hover:text-brand-blue rounded-full hover:bg-light-gray-100 disabled:opacity-50"
-                aria-label="Edit Rental"
-              >
+            <div className="flex space-x-1 rental-card-menu-button">
+              <IconButton onClick={handleEdit} disabled={crudLoading} size="small" color="primary">
                 <Edit3 size={20} />
-              </button>
-              <button
-                onClick={handleDeleteClick}
-                disabled={crudLoading}
-                className="p-1 text-red-600 hover:text-red-700 rounded-full hover:bg-light-gray-100 disabled:opacity-50"
-                aria-label="Delete Rental"
-              >
+              </IconButton>
+              <IconButton onClick={handleDeleteClick} disabled={crudLoading} size="small" color="error">
                 {crudLoading && isConfirmModalOpen ? <Loader2 size={20} className="animate-spin" /> : <Trash2 size={20} />}
-              </button>
+              </IconButton>
             </div>
           </div>
 
@@ -175,6 +167,9 @@ const RentalTransactionCard: React.FC<RentalTransactionCardProps> = ({ rental, o
                     {items.map(it => (
                       <li key={it.rental_detail_id} className="text-xs">
                         {it.equipment_name || `ID: ${it.equipment_id}`}
+                        {it.unit_rental_rate !== undefined && it.unit_rental_rate !== null && (
+                          <> - {formatCurrency(it.unit_rental_rate)}/day</>
+                        )}
                       </li>
                     ))}
                   </ul>
@@ -198,12 +193,9 @@ const RentalTransactionCard: React.FC<RentalTransactionCardProps> = ({ rental, o
         </div>
         <div className="p-4 mt-auto border-t border-light-gray-100 flex justify-between items-center">
           {getStatusChip(rental.status)}
-          <button
-            onClick={handleRecordPayment}
-            className="text-xs text-brand-blue hover:underline rental-card-menu-button"
-          >
+          <Button onClick={handleRecordPayment} size="small" color="primary" className="rental-card-menu-button" sx={{ textTransform: 'none' }}>
             Record Payment
-          </button>
+          </Button>
         </div>
       </div>
 

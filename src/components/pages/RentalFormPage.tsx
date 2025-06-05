@@ -17,7 +17,7 @@ const RentalFormPage: React.FC = () => {
   useEffect(() => {
     if (!id) return;
 
-    if (!rental || !rental.rental_items) {
+    if (!rental || !Array.isArray(rental.rental_items) || rental.rental_items.length === 0) {
       setLoading(true);
       Promise.all([
         getRental(Number(id)),
