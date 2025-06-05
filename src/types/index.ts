@@ -144,6 +144,7 @@ export interface RentalItem {
   equipment_id: number;
   equipment_name?: string; // For display
   rental_rate: number; // Rate per day for this specific item in this rental
+  returned?: boolean | number;
   // Potentially other fields like discount, subtotal per item
 }
 
