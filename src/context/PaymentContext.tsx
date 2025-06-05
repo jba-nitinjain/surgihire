@@ -9,6 +9,8 @@ export interface PaymentFilters {
   nature: string | null;
   start_date: string | null;
   end_date: string | null;
+  amount_op: string | null;
+  amount: string | null;
 }
 
 interface PaymentContextType {
@@ -60,6 +62,8 @@ export const PaymentProvider: React.FC<PaymentProviderProps> = ({
     nature: null,
     start_date: null,
     end_date: null,
+    amount_op: null,
+    amount: null,
   });
 
   const processApiResponse = useCallback(
@@ -109,12 +113,19 @@ export const PaymentProvider: React.FC<PaymentProviderProps> = ({
           filters: Object.keys(activeFilters).length > 0 ? activeFilters : undefined,
         };
 
+        const qParts: string[] = [];
         if (currentFilters.start_date && currentFilters.end_date) {
-          paginationParams.q = `(payment_date~between~${currentFilters.start_date}~date2~${currentFilters.end_date})`;
+          qParts.push(`(payment_date~between~${currentFilters.start_date}~date2~${currentFilters.end_date})`);
         } else if (currentFilters.start_date) {
-          paginationParams.q = `(payment_date~equals~${currentFilters.start_date})`;
+          qParts.push(`(payment_date~equals~${currentFilters.start_date})`);
         } else if (currentFilters.end_date) {
-          paginationParams.q = `(payment_date~equals~${currentFilters.end_date})`;
+          qParts.push(`(payment_date~equals~${currentFilters.end_date})`);
+        }
+        if (currentFilters.amount && currentFilters.amount_op) {
+          qParts.push(`(payment_amount~${currentFilters.amount_op}~${currentFilters.amount})`);
+        }
+        if (qParts.length > 0) {
+          paginationParams.q = qParts.join('');
         }
 
         if (query.trim()) {
@@ -137,7 +148,8 @@ export const PaymentProvider: React.FC<PaymentProviderProps> = ({
           !currentFilters.payment_mode &&
           !currentFilters.nature &&
           !currentFilters.start_date &&
-          !currentFilters.end_date;
+          !currentFilters.end_date &&
+          !currentFilters.amount;
         if (page === 1 && !query.trim() && noFilters) {
           setInitialLoadDone(true);
         }
@@ -171,7 +183,9 @@ export const PaymentProvider: React.FC<PaymentProviderProps> = ({
         newFilters.payment_mode !== prev.payment_mode ||
         newFilters.nature !== prev.nature ||
         newFilters.start_date !== prev.start_date ||
-        newFilters.end_date !== prev.end_date
+        newFilters.end_date !== prev.end_date ||
+        newFilters.amount !== prev.amount ||
+        newFilters.amount_op !== prev.amount_op
       ) {
         setCurrentPage(1);
         setInitialLoadDone(false);
@@ -187,7 +201,8 @@ export const PaymentProvider: React.FC<PaymentProviderProps> = ({
       !filters.payment_mode &&
       !filters.nature &&
       !filters.start_date &&
-      !filters.end_date;
+      !filters.end_date &&
+      !filters.amount;
     if (!searchQuery.trim() && noFilters && !initialLoadDone && !loading) {
       fetchPaymentsData(1, '', filters);
     }
@@ -201,7 +216,8 @@ export const PaymentProvider: React.FC<PaymentProviderProps> = ({
         filters.payment_mode ||
         filters.nature ||
         filters.start_date ||
-        filters.end_date;
+        filters.end_date ||
+        filters.amount;
       if (shouldFetch) {
         fetchPaymentsData(1, searchQuery.trim(), filters);
       }
@@ -215,7 +231,8 @@ export const PaymentProvider: React.FC<PaymentProviderProps> = ({
       !filters.payment_mode &&
       !filters.nature &&
       !filters.start_date &&
-      !filters.end_date;
+      !filters.end_date &&
+      !filters.amount;
     if (currentPage === 1 && !searchQuery.trim() && noFilters) {
       setInitialLoadDone(false);
     }

@@ -1,13 +1,11 @@
 import React from 'react';
-import SearchBox from '../ui/SearchBox';
 import OutlinedTextField from '../ui/OutlinedTextField';
 import AutocompleteField from '../ui/AutocompleteField';
 import DatePickerField from '../ui/DatePickerField';
+import NumberField from '../ui/NumberField';
 import { PaymentFilters } from '../../context/PaymentContext';
 
 interface PaymentFilterBarProps {
-  searchQuery: string;
-  onSearchChange: (value: string) => void;
   filters: PaymentFilters;
   onFiltersChange: (update: Partial<PaymentFilters>) => void;
 }
@@ -21,20 +19,17 @@ const PAYMENT_MODES = [
   'Others',
 ];
 
-const PaymentFilterBar: React.FC<PaymentFilterBarProps> = ({
-  searchQuery,
-  onSearchChange,
-  filters,
-  onFiltersChange,
-}) => (
+const AMOUNT_OPERATORS = [
+  { label: 'Equals', value: 'equals' },
+  { label: '>', value: 'gt' },
+  { label: '>=', value: 'gte' },
+  { label: '<', value: 'lt' },
+  { label: '<=', value: 'lte' },
+];
+
+const PaymentFilterBar: React.FC<PaymentFilterBarProps> = ({ filters, onFiltersChange }) => (
   <div className="mb-6 p-4 bg-white rounded-lg shadow">
     <div className="grid grid-cols-1 md:grid-cols-6 gap-4 items-end">
-      <div className="md:col-span-1">
-        <label htmlFor="paymentSearch" className="block text-sm font-medium text-dark-text mb-1">
-          Search Payments
-        </label>
-        <SearchBox value={searchQuery} onChange={onSearchChange} placeholder="Search payments..." />
-      </div>
       <div>
         <label htmlFor="paymentRentalFilter" className="block text-sm font-medium text-dark-text mb-1">
           Rental ID
@@ -73,6 +68,27 @@ const PaymentFilterBar: React.FC<PaymentFilterBarProps> = ({
             { label: 'Deposit', value: 'deposit' },
           ]}
         />
+      </div>
+      <div>
+        <label htmlFor="paymentAmountFilter" className="block text-sm font-medium text-dark-text mb-1">
+          Amount
+        </label>
+        <div className="flex space-x-2">
+          <AutocompleteField
+            id="paymentAmountOp"
+            name="amount_op"
+            value={filters.amount_op || ''}
+            onChange={e => onFiltersChange({ amount_op: e.target.value || null })}
+            options={AMOUNT_OPERATORS}
+          />
+          <NumberField
+            id="paymentAmount"
+            name="amount"
+            value={filters.amount || ''}
+            onChange={e => onFiltersChange({ amount: e.target.value || null })}
+            className="w-28"
+          />
+        </div>
       </div>
       <div>
         <label htmlFor="paymentStartDate" className="block text-sm font-medium text-dark-text mb-1">

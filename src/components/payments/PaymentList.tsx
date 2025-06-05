@@ -23,14 +23,13 @@ const PaymentList: React.FC<PaymentListProps> = ({ onEditPayment, onViewPayment 
     currentPage,
     fetchPaymentsPage,
     refreshPayments,
-    searchQuery,
     totalAmount,
   } = usePayments();
 
   const recordsPerPage = 10; // Should match context
   const totalPages = Math.ceil(totalPayments / recordsPerPage);
 
-  if (loading && payments.length === 0 && !searchQuery) {
+  if (loading && payments.length === 0) {
     return <div className="flex justify-center items-center h-64"><Spinner size="lg" /></div>;
   }
 
@@ -41,8 +40,8 @@ const PaymentList: React.FC<PaymentListProps> = ({ onEditPayment, onViewPayment 
   if (payments.length === 0) {
     return (
       <EmptyState
-        title={searchQuery ? 'No payments match your search' : 'No Payments Found'}
-        message={searchQuery ? 'Try a different search term.' : 'No payments available.'}
+        title="No Payments Found"
+        message="No payments available."
         icon={<IndianRupee className="w-16 h-16 text-gray-400" />}
       />
     );

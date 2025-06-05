@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import { formatCurrency } from '../../utils/formatting';
 
 const PaymentsTab: React.FC = () => {
-  const { searchQuery, setSearchQuery, filters, setFilters, depositTotal, rentalTotal } = usePayments();
+  const { filters, setFilters, depositTotal, rentalTotal } = usePayments();
   const navigate = useNavigate();
 
 
@@ -21,12 +21,7 @@ const PaymentsTab: React.FC = () => {
 
   return (
     <>
-      <PaymentFilterBar
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-        filters={filters}
-        onFiltersChange={setFilters}
-      />
+      <PaymentFilterBar filters={filters} onFiltersChange={setFilters} />
       <div className="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="p-4 bg-white rounded shadow">
           <div className="text-sm text-dark-text">Deposits This Month</div>
