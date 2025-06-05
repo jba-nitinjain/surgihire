@@ -28,6 +28,7 @@ import RentalShippingBilling from './RentalShippingBilling';
 import { formatCurrency } from '../../utils/formatting'; // Import formatCurrency
 import usePincodeLookup from '../../utils/usePincodeLookup';
 import { useNavigate } from 'react-router-dom';
+import dayjs from 'dayjs';
 
 const EQUIPMENT_RENTAL_STATUSES = ['Confirmed/Booked', 'Active/Rented Out'];
 
@@ -53,7 +54,7 @@ const initialFormData: RentalTransactionFormData = {
   billing_pincode: '',
   mobile_number: '',
   email: '',
-  rental_date: new Date().toISOString().split('T')[0],
+  rental_date: dayjs().format('DD/MM/YYYY'),
   expected_return_date: '',
   payment_term: '',
   status: 'Draft',
@@ -143,8 +144,8 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
         billing_pincode: rental.billing_pincode || '',
         mobile_number: rental.mobile_number || '',
         email: rental.email || '',
-        rental_date: rental.rental_date ? new Date(rental.rental_date).toISOString().split('T')[0] : '',
-        expected_return_date: rental.expected_return_date ? new Date(rental.expected_return_date).toISOString().split('T')[0] : '',
+        rental_date: rental.rental_date ? dayjs(rental.rental_date).format('DD/MM/YYYY') : '',
+        expected_return_date: rental.expected_return_date ? dayjs(rental.expected_return_date).format('DD/MM/YYYY') : '',
         payment_term: rental.payment_term || '',
         status: rental.status || 'Draft',
         notes: rental.notes || '',
@@ -190,16 +191,12 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
 
   const calculateRentalDays = (startDateStr: string, endDateStr: string): number => {
     if (!startDateStr || !endDateStr) return 0;
-    const startDate = new Date(startDateStr);
-    const endDate = new Date(endDateStr);
-    if (isNaN(startDate.getTime()) || isNaN(endDate.getTime()) || endDate < startDate) {
+    const startDate = dayjs(startDateStr, 'DD/MM/YYYY');
+    const endDate = dayjs(endDateStr, 'DD/MM/YYYY');
+    if (!startDate.isValid() || !endDate.isValid() || endDate.isBefore(startDate)) {
       return 0;
     }
-    // Calculate the difference in time
-    const timeDiff = endDate.getTime() - startDate.getTime();
-    // Convert time difference from milliseconds to days, add 1 to include both start and end day
-    const dayDiff = Math.ceil(timeDiff / (1000 * 3600 * 24)) +1;
-    return dayDiff > 0 ? dayDiff : 0;
+    return endDate.diff(startDate, 'day') + 1;
   };
 
   useEffect(() => {
@@ -271,7 +268,10 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
     if (!formData.rental_date) errors.rental_date = 'Rental date is required.';
     if (!formData.expected_return_date) {
       errors.expected_return_date = 'Expected return date is required.';
-    } else if (formData.rental_date && new Date(formData.expected_return_date) < new Date(formData.rental_date)) {
+    } else if (
+      formData.rental_date &&
+      dayjs(formData.expected_return_date, 'DD/MM/YYYY').isBefore(dayjs(formData.rental_date, 'DD/MM/YYYY'))
+    ) {
       errors.expected_return_date = 'Return date cannot be before rental date.';
     }
 

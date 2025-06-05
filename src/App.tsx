@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
+import { LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { CustomerProvider } from './context/CustomerContext';
 import { CrudProvider } from './context/CrudContext';
 import { EquipmentProvider } from './context/EquipmentContext';
@@ -29,8 +31,9 @@ function App() {
 
   return (
     <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <CrudProvider>
+      <LocalizationProvider dateAdapter={AdapterDayjs}>
+        <CssBaseline />
+        <CrudProvider>
       <CustomerProvider>
         <EquipmentProvider>
           <EquipmentCategoryProvider>
@@ -82,6 +85,7 @@ function App() {
         </EquipmentProvider>
       </CustomerProvider>
     </CrudProvider>
+      </LocalizationProvider>
     </ThemeProvider>
   );
 }

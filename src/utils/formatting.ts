@@ -10,19 +10,19 @@ export const formatDate = (
   ): string => {
     if (!dateString) return 'N/A';
     try {
-      const date = new Date(dateString);
-      if (isNaN(date.getTime())) return 'Invalid Date'; // Check for invalid date
-  
+      const date = new Date(dateString.includes('/') ? dateString.split('/').reverse().join('-') : dateString);
+      if (isNaN(date.getTime())) return 'Invalid Date';
+
       const defaultOptions: Intl.DateTimeFormatOptions = {
         year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-        ...options, // User-provided options will override defaults
+        month: '2-digit',
+        day: '2-digit',
+        ...options,
       };
-      return new Intl.DateTimeFormat('en-US', defaultOptions).format(date);
+      return new Intl.DateTimeFormat('en-GB', defaultOptions).format(date);
     } catch (e) {
-      console.error("Error formatting date:", e);
-      return dateString; // Return original string if formatting fails
+      console.error('Error formatting date:', e);
+      return dateString;
     }
   };
   
