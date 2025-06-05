@@ -6,6 +6,7 @@ import { MaintenanceRecordFormData } from '../types';
 import { useMaintenanceRecords } from '../context/MaintenanceRecordContext'; // To get equipment list
 import { useCrud } from '../context/CrudContext'; // To get loading state from CRUD operations
 import { Save, X, Loader2, Wrench, ChevronDown } from 'lucide-react';
+import AutocompleteField, { AutocompleteOption } from './ui/AutocompleteField';
 import MaintenanceRecordInfo from './maintenance/MaintenanceRecordInfo';
 import MaintenanceRecordExtra from './maintenance/MaintenanceRecordExtra';
 import dayjs from 'dayjs';
@@ -122,7 +123,7 @@ const MaintenanceRecordForm: React.FC<MaintenanceRecordFormProps> = ({
     return Object.keys(errors).length === 0;
   };
 
-  const handleDropdownChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleDropdownChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const value = e.target.value;
     setSelectedDropdownMaintenanceType(value);
     if (value !== CUSTOM_MAINTENANCE_TYPE_KEY) {
@@ -198,21 +199,20 @@ const MaintenanceRecordForm: React.FC<MaintenanceRecordFormProps> = ({
               <label htmlFor="maintenance_type_dropdown" className={labelClass}>Maintenance Type</label>
               <div className="mt-1 relative rounded-md shadow-sm">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><Wrench className={iconClass} /></div>
-                <select
-                  id="maintenance_type_dropdown"
-                  name="maintenance_type_dropdown"
-                  value={selectedDropdownMaintenanceType}
-                  onChange={handleDropdownChange} // Specific handler for this dropdown
-                  className={`${inputClass} pl-10 pr-8 appearance-none`}
-                >
-                  <option value="">Select Type...</option>
-                  {PREDEFINED_MAINTENANCE_TYPES.map(type => (
-                    <option key={type} value={type}>{type}</option>
-                  ))}
-                  <option value={CUSTOM_MAINTENANCE_TYPE_KEY}>Other (Specify)</option>
-                </select>
-                <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                <div className="pl-10">
+                  <AutocompleteField
+                    name="maintenance_type_dropdown"
+                    value={selectedDropdownMaintenanceType}
+                    onChange={handleDropdownChange as React.ChangeEventHandler<HTMLInputElement>}
+                    options={[
+                      ...PREDEFINED_MAINTENANCE_TYPES.map(t => ({ label: t, value: t })),
+                      { label: 'Other (Specify)', value: CUSTOM_MAINTENANCE_TYPE_KEY },
+                    ]}
+                    placeholder="Select Type..."
+                  />
+                  <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                     <ChevronDown className="h-4 w-4 text-gray-400" />
+                  </div>
                 </div>
               </div>
               {formErrors.maintenance_type && selectedDropdownMaintenanceType !== CUSTOM_MAINTENANCE_TYPE_KEY && <p className="text-xs text-red-500 mt-1">{formErrors.maintenance_type}</p>}

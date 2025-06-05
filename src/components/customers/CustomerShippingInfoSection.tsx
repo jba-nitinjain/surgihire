@@ -1,6 +1,7 @@
 import React from 'react';
 import { CustomerFormData } from '../../types';
 import { Loader2 } from 'lucide-react';
+import AutocompleteField, { AutocompleteOption } from '../ui/AutocompleteField';
 
 interface AreaOption {
   value: string;
@@ -29,7 +30,13 @@ const CustomerShippingInfoSection: React.FC<Props> = ({
   isAreaSelect,
   inputClass,
   labelClass,
-}) => (
+}) => {
+  const areaSelectOptions: AutocompleteOption[] = areaOptions.map(opt => ({
+    label: opt.label,
+    value: opt.value,
+  }));
+
+  return (
   <fieldset className="grid grid-cols-1 gap-6 md:grid-cols-2">
     <legend className="text-lg font-medium text-dark-text col-span-full">Shipping Information</legend>
     <div className="md:col-span-2">
@@ -62,10 +69,13 @@ const CustomerShippingInfoSection: React.FC<Props> = ({
     <div>
       <label htmlFor="shipping_area" className={labelClass}>Area</label>
       {isAreaSelect ? (
-        <select name="shipping_area" id="shipping_area" value={formData.shipping_area || ''} onChange={handleChange} className={inputClass}>
-          <option value="">Select Area</option>
-          {areaOptions.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
-        </select>
+        <AutocompleteField
+          name="shipping_area"
+          value={formData.shipping_area || ''}
+          onChange={handleChange}
+          options={areaSelectOptions}
+          placeholder="Select Area"
+        />
       ) : (
         <input type="text" name="shipping_area" id="shipping_area" value={formData.shipping_area || ''} onChange={handleChange} className={inputClass} readOnly={areaOptions.length > 0 && !isAreaSelect} />
       )}
@@ -81,6 +91,7 @@ const CustomerShippingInfoSection: React.FC<Props> = ({
       <input type="text" name="shipping_state" id="shipping_state" value={formData.shipping_state || ''} onChange={handleChange} className={inputClass} readOnly />
     </div>
   </fieldset>
-);
+  );
+};
 
 export default CustomerShippingInfoSection;
