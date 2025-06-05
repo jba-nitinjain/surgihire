@@ -61,7 +61,7 @@ const AutocompleteField: React.FC<AutocompleteFieldProps> = ({
 
   const inputValue = freeSolo
     ? (typeof value === 'string' ? value : selectedOption?.label || '')
-    : selectedOption?.label || '';
+    : undefined;
 
   return (
     <Autocomplete
@@ -69,9 +69,8 @@ const AutocompleteField: React.FC<AutocompleteFieldProps> = ({
       options={options}
       getOptionLabel={(option) => option.label}
       value={selectedOption}
-      inputValue={inputValue}
+      {...(freeSolo ? { inputValue, onInputChange: handleInputChange } : {})}
       onChange={handleChange}
-      onInputChange={handleInputChange}
       loading={loading}
       disabled={disabled}
       renderInput={(params) => (

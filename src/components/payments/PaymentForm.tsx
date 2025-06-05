@@ -273,25 +273,24 @@ const PaymentForm: React.FC<PaymentFormProps> = ({ payment, onSave, onCancel }) 
           />
         </div>
         <div className="flex justify-end space-x-2">
-          <button
+          <Button
             type="button"
             onClick={onCancel}
-            className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-dark-text hover:bg-gray-50 focus:outline-none"
+            variant="outlined"
+            startIcon={<X className="h-4 w-4" />}
+            sx={{ textTransform: 'none' }}
           >
-            <X className="inline h-4 w-4 mr-1" />Cancel
-          </button>
-          <button
+            Cancel
+          </Button>
+          <Button
             type="submit"
+            variant="contained"
             disabled={crudLoading}
-            className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-brand-blue hover:bg-brand-blue/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-blue disabled:opacity-50 flex items-center"
+            startIcon={crudLoading ? <Loader2 className="animate-spin h-4 w-4" /> : <Save className="h-4 w-4" />}
+            sx={{ textTransform: 'none' }}
           >
-            {crudLoading ? (
-              <Loader2 className="animate-spin h-4 w-4 mr-2" />
-            ) : (
-              <Save className="inline h-4 w-4 mr-1" />
-            )}
             {payment ? 'Save Changes' : 'Record Payment'}
-          </button>
+          </Button>
         </div>
       </form>
     </div>

@@ -128,6 +128,18 @@ const RentalsTab: React.FC = () => {
         </div>
       </div>
 
+      <div className="flex justify-end mb-6">
+        <Button
+          variant="outlined"
+          onClick={() =>
+            setFilters({ status: null, customer_id: null, rental_date: null, return_date: null })
+          }
+          sx={{ textTransform: 'none' }}
+        >
+          Reset Filters
+        </Button>
+      </div>
+
       <div className="mb-6 flex justify-end">
         <Button variant="contained" color="primary" onClick={handleOpenRentalFormForCreate} startIcon={<PlusCircle className="h-5 w-5" />} sx={{ textTransform: 'none' }}>
           New Rental Transaction

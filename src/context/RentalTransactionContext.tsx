@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
+import dayjs from 'dayjs';
 import { RentalTransaction, PaginationParams, ApiResponse, Customer } from '../types';
 import { fetchRentals } from '../services/api/rentals';
 import { fetchCustomers } from '../services/api/customers';
@@ -123,10 +124,10 @@ export const RentalTransactionProvider: React.FC<RentalTransactionProviderProps>
         activeFiltersForApi.customer_id = currentFilters.customer_id;
       }
       if (currentFilters.rental_date && String(currentFilters.rental_date).trim() !== '') {
-        activeFiltersForApi.rental_date = currentFilters.rental_date;
+        activeFiltersForApi.rental_date = dayjs(currentFilters.rental_date, 'DD/MM/YYYY').format('YYYY-MM-DD');
       }
       if (currentFilters.return_date && String(currentFilters.return_date).trim() !== '') {
-        activeFiltersForApi.expected_return_date = currentFilters.return_date;
+        activeFiltersForApi.expected_return_date = dayjs(currentFilters.return_date, 'DD/MM/YYYY').format('YYYY-MM-DD');
       }
 
       const paginationParams: PaginationParams = {
