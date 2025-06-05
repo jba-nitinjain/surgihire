@@ -1,5 +1,5 @@
 import { ApiResponse, PaginationParams } from '../../types';
-import { createRecordGeneric, updateRecordGeneric, deleteRecord, getRecord, listRecords } from './core';
+import { createRecordGeneric, updateRecordGeneric, deleteRecord, listRecords, getRecord } from './core';
 
 const RENTAL_TRANSACTIONS_TABLE = 'rental_transactions';
 const RENTAL_DETAILS_TABLE = 'rental_details';
@@ -8,7 +8,13 @@ export const fetchRentals = (params: PaginationParams): Promise<ApiResponse> => 
 export const createRental = (data: Record<string, any>): Promise<ApiResponse> => createRecordGeneric(RENTAL_TRANSACTIONS_TABLE, data, false);
 export const updateRental = (id: number, data: Record<string, any>): Promise<ApiResponse> => updateRecordGeneric(RENTAL_TRANSACTIONS_TABLE, id, data, false);
 export const deleteRental = (id: number): Promise<ApiResponse> => deleteRecord(RENTAL_TRANSACTIONS_TABLE, id);
-export const getRental = (id: number): Promise<ApiResponse> => getRecord(RENTAL_TRANSACTIONS_TABLE, id);
+export const getRental = (id: number): Promise<ApiResponse> => {
+  return listRecords(RENTAL_TRANSACTIONS_TABLE, {
+    records: 1,
+    skip: 0,
+    filters: { rental_id: id },
+  });
+};
 
 export const fetchRentalDetailsByRentalId = (rentalId: number, paginationParams?: PaginationParams): Promise<ApiResponse> => {
   const params = {
