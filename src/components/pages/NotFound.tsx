@@ -1,12 +1,19 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link as RouterLink } from 'react-router-dom';
+import { Box, Typography, Button } from '@mui/material';
 
 const NotFound: React.FC = () => (
-  <div className="p-8 text-center">
-    <h2 className="text-2xl font-semibold mb-4">Page Not Found</h2>
-    <p className="mb-4">The page you are looking for does not exist.</p>
-    <Link to="/" className="text-brand-blue hover:underline">Go to Dashboard</Link>
-  </div>
+  <Box p={8} textAlign="center">
+    <Typography variant="h4" gutterBottom>
+      Page Not Found
+    </Typography>
+    <Typography variant="body1" gutterBottom>
+      The page you are looking for does not exist.
+    </Typography>
+    <Button variant="contained" color="primary" component={RouterLink} to="/">
+      Go to Dashboard
+    </Button>
+  </Box>
 );
 
 export default NotFound;

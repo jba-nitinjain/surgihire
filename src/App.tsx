@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { ThemeProvider, createTheme } from '@mui/material/styles';
+import CssBaseline from '@mui/material/CssBaseline';
 import { CustomerProvider } from './context/CustomerContext';
 import { CrudProvider } from './context/CrudContext';
 import { EquipmentProvider } from './context/EquipmentContext';
@@ -23,9 +25,12 @@ import NotFound from './components/pages/NotFound';
 
 function App() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const theme = createTheme();
 
   return (
-    <CrudProvider>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <CrudProvider>
       <CustomerProvider>
         <EquipmentProvider>
           <EquipmentCategoryProvider>
@@ -77,6 +82,7 @@ function App() {
         </EquipmentProvider>
       </CustomerProvider>
     </CrudProvider>
+    </ThemeProvider>
   );
 }
 

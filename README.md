@@ -1,6 +1,7 @@
 # SurgiHire Customer Manager
 
 This project is a React + TypeScript application powered by [Vite](https://vitejs.dev/). It includes an admin dashboard for managing customers, equipment and rentals.
+The UI leverages [Material UI](https://mui.com/) for consistent Material Design components.
 
 ## Prerequisites
 

@@ -1,5 +1,7 @@
 import React from 'react';
-import { Search } from 'lucide-react';
+import TextField from '@mui/material/TextField';
+import InputAdornment from '@mui/material/InputAdornment';
+import SearchIcon from '@mui/icons-material/Search';
 
 interface SearchBoxProps {
   value: string;
@@ -7,27 +9,26 @@ interface SearchBoxProps {
   placeholder?: string;
 }
 
-const SearchBox: React.FC<SearchBoxProps> = ({ 
-  value, 
-  onChange, 
-  placeholder = 'Search customers...' 
+const SearchBox: React.FC<SearchBoxProps> = ({
+  value,
+  onChange,
+  placeholder = 'Search customers...'
 }) => {
   return (
-    <div className="relative w-full">
-      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-        <Search className="h-5 w-5 text-brand-blue" />
-      </div>
-      <input
-        type="text"
-        className="block w-full pl-10 pr-3 py-2 border border-light-gray-200 rounded-md leading-5 
-                  bg-white placeholder-dark-text/50 text-dark-text
-                  focus:outline-none focus:ring-2 focus:ring-brand-blue 
-                  focus:border-brand-blue transition duration-150 ease-in-out sm:text-sm"
-        placeholder={placeholder}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-      />
-    </div>
+    <TextField
+      fullWidth
+      variant="outlined"
+      placeholder={placeholder}
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      InputProps={{
+        startAdornment: (
+          <InputAdornment position="start">
+            <SearchIcon color="primary" />
+          </InputAdornment>
+        ),
+      }}
+    />
   );
 };
 
