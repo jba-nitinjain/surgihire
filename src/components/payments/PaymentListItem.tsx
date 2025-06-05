@@ -5,6 +5,9 @@ import { useCrud } from '../../context/CrudContext';
 import ConfirmationModal from '../ui/ConfirmationModal';
 import { usePayments } from '../../context/PaymentContext';
 import { formatDate, formatCurrency } from '../../utils/formatting';
+import TableRow from '@mui/material/TableRow';
+import TableCell from '@mui/material/TableCell';
+import IconButton from '@mui/material/IconButton';
 
 interface PaymentListItemProps {
   payment: Payment;
@@ -28,52 +31,40 @@ const PaymentListItem: React.FC<PaymentListItemProps> = ({ payment, onEdit, onVi
 
   return (
     <>
-      <tr className="bg-white hover:bg-light-gray-50 transition-colors">
-        <td className="px-6 py-4 whitespace-nowrap text-sm text-dark-text font-medium">
-          {payment.payment_id}
-        </td>
-        <td className="px-6 py-4 whitespace-nowrap text-sm text-dark-text/80">
-          {payment.rental_id}
-        </td>
-        <td className="px-6 py-4 whitespace-nowrap text-sm text-dark-text/80">
-          {payment.nature || 'rental'}
-        </td>
-        <td className="px-6 py-4 whitespace-nowrap text-sm text-dark-text/80">
-          {formatDate(payment.payment_date)}
-        </td>
-        <td className="px-6 py-4 whitespace-nowrap text-sm text-dark-text/80">
-          {formatCurrency(payment.payment_amount)}
-        </td>
-        <td className="px-6 py-4 whitespace-nowrap text-sm text-dark-text/80">
-          {payment.payment_mode || <span className="italic text-gray-400">N/A</span>}
-        </td>
-        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
-          <button
+      <TableRow hover>
+        <TableCell>{payment.payment_id}</TableCell>
+        <TableCell>{payment.rental_id}</TableCell>
+        <TableCell>{payment.nature || 'rental'}</TableCell>
+        <TableCell>{formatDate(payment.payment_date)}</TableCell>
+        <TableCell>{formatCurrency(payment.payment_amount)}</TableCell>
+        <TableCell>{payment.payment_mode || <span className="italic text-gray-400">N/A</span>}</TableCell>
+        <TableCell align="right">
+          <IconButton
             onClick={() => onView(payment)}
-            className="text-brand-blue hover:text-brand-blue/80 p-1 rounded hover:bg-brand-blue/10"
-            title="View Payment"
+            size="small"
+            color="primary"
           >
             <span className="sr-only">View</span>
             <Edit3 size={18} className="hidden" />
-          </button>
-          <button
+          </IconButton>
+          <IconButton
             onClick={() => onEdit(payment)}
+            size="small"
+            color="primary"
             disabled={crudLoading}
-            className="text-brand-blue hover:text-brand-blue/80 p-1 rounded hover:bg-brand-blue/10"
-            title="Edit Payment"
           >
             <Edit3 size={18} />
-          </button>
-          <button
+          </IconButton>
+          <IconButton
             onClick={() => setIsConfirmModalOpen(true)}
+            size="small"
+            color="error"
             disabled={crudLoading}
-            className="text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-100"
-            title="Delete Payment"
           >
             <Trash2 size={18} />
-          </button>
-        </td>
-      </tr>
+          </IconButton>
+        </TableCell>
+      </TableRow>
       <ConfirmationModal
         isOpen={isConfirmModalOpen}
         title="Delete Payment"

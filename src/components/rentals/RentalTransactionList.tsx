@@ -1,13 +1,20 @@
 import React from 'react';
 import { useRentalTransactions } from '../../context/RentalTransactionContext';
 import { useCustomers } from '../../context/CustomerContext'; // To get customer names
-import RentalTransactionCard from '../../components/rentals/RentalTransactionCard';
+import RentalTransactionListItem from './RentalTransactionListItem';
 import Spinner from '../ui/Spinner';
 import Pagination from '../ui/Pagination';
 import EmptyState from '../ui/EmptyState';
 import ErrorDisplay from '../ui/ErrorDisplay';
 import { RentalTransaction } from '../../types';
 import { CalendarCheck2 } from 'lucide-react';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import Paper from '@mui/material/Paper';
 
 interface RentalTransactionListProps {
   onEditRental: (rental: RentalTransaction) => void;
@@ -62,40 +69,47 @@ const RentalTransactionList: React.FC<RentalTransactionListProps> = ({
   }
 
   return (
-    <div className="space-y-6">
+    <Paper elevation={2} sx={{ overflow: 'hidden' }}>
       {customersLoading && rentalTransactions.length > 0 && (
         <div className="my-2 flex justify-center items-center text-sm text-gray-500">
           <Spinner size="sm" /> <span className="ml-2">Loading customer details...</span>
         </div>
       )}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6"> {/* Adjusted grid for potentially more info */}
-        {rentalTransactions.map(rental => (
-          <RentalTransactionCard
-            key={rental.rental_id}
-            rental={{
-              ...rental,
-              customer_name: getCustomerName(rental.customer_id) || `ID: ${rental.customer_id}`, // Add customer name
-            }}
-            onEdit={onEditRental}
-            // onClick={onViewRentalDetail} // If detail view is implemented
-          />
-        ))}
-      </div>
-
+      <TableContainer>
+        <Table size="small">
+          <TableHead sx={{ backgroundColor: '#f9fafb' }}>
+            <TableRow>
+              <TableCell>ID</TableCell>
+              <TableCell>Customer</TableCell>
+              <TableCell>Rental Date</TableCell>
+              <TableCell>Status</TableCell>
+              <TableCell>Total</TableCell>
+              <TableCell align="right">Actions</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {rentalTransactions.map((rental) => (
+              <RentalTransactionListItem
+                key={rental.rental_id}
+                rental={{
+                  ...rental,
+                  customer_name: getCustomerName(rental.customer_id) || `ID: ${rental.customer_id}`,
+                }}
+                onEdit={onEditRental}
+              />
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
       {loading && rentalTransactions.length > 0 && (
         <div className="my-4 flex justify-center"><Spinner size="md" /></div>
       )}
-
       {totalPages > 1 && (
         <div className="p-4 border-t border-light-gray-200">
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={fetchRentalTransactionsPage}
-          />
+          <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={fetchRentalTransactionsPage} />
         </div>
       )}
-    </div>
+    </Paper>
   );
 };
 

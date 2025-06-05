@@ -1,13 +1,20 @@
 import React, { useEffect } from 'react';
 import { useEquipment } from '../context/EquipmentContext';
 import { useEquipmentCategories } from '../context/EquipmentCategoryContext';
-import EquipmentCard from './EquipmentCard';
+import EquipmentListItem from './EquipmentListItem';
 import Spinner from '../components/ui/Spinner';
 import Pagination from '../components/ui/Pagination';
 import EmptyState from '../components/ui/EmptyState';
 import ErrorDisplay from '../components/ui/ErrorDisplay';
 import { Equipment } from '../types';
 import { Package } from 'lucide-react';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import Paper from '@mui/material/Paper';
 
 interface EquipmentListProps {
   onEditEquipment: (equipment: Equipment) => void;
@@ -74,39 +81,48 @@ const EquipmentList: React.FC<EquipmentListProps> = ({
   }
 
   return (
-    <div className="space-y-6">
+    <Paper elevation={2} sx={{ overflow: 'hidden' }}>
       {categoriesLoading && equipmentList.length > 0 && (
-         <div className="my-2 flex justify-center items-center text-sm text-gray-500">
-            <Spinner size="sm" /> <span className="ml-2">Loading category details...</span>
+        <div className="my-2 flex justify-center items-center text-sm text-gray-500">
+          <Spinner size="sm" /> <span className="ml-2">Loading category details...</span>
         </div>
       )}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {equipmentList.map(item => (
-          <EquipmentCard
-            key={item.equipment_id}
-            equipment={item}
-            onEdit={onEditEquipment}
-            onViewMaintenance={onViewMaintenance}
-            categoryName={getCategoryName(item.category_id)}
-            onViewDetail={onViewDetail} // Pass onViewDetail to EquipmentCard
-          />
-        ))}
-      </div>
-
+      <TableContainer>
+        <Table size="small">
+          <TableHead sx={{ backgroundColor: '#f9fafb' }}>
+            <TableRow>
+              <TableCell>ID</TableCell>
+              <TableCell>Name</TableCell>
+              <TableCell>Category</TableCell>
+              <TableCell>Status</TableCell>
+              <TableCell align="right">Actions</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {equipmentList.map((item) => (
+              <EquipmentListItem
+                key={item.equipment_id}
+                equipment={item}
+                onEdit={onEditEquipment}
+                onViewMaintenance={onViewMaintenance}
+                onViewDetail={onViewDetail}
+                categoryName={getCategoryName(item.category_id)}
+              />
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
       {loading && equipmentList.length > 0 && (
         <div className="my-4 flex justify-center">
           <Spinner size="md" />
         </div>
       )}
-
       {totalPages > 1 && (
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={fetchEquipmentPage}
-        />
+        <div className="p-4 border-t border-light-gray-200">
+          <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={fetchEquipmentPage} />
+        </div>
       )}
-    </div>
+    </Paper>
   );
 };
 

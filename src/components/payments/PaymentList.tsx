@@ -1,4 +1,11 @@
 import React from 'react';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import Paper from '@mui/material/Paper';
 import { usePayments } from '../../context/PaymentContext';
 import PaymentListItem from './PaymentListItem';
 import Spinner from '../ui/Spinner';
@@ -47,22 +54,22 @@ const PaymentList: React.FC<PaymentListProps> = ({ onEditPayment, onViewPayment 
   }
 
   return (
-    <div className="bg-white shadow-md rounded-lg overflow-hidden">
-      <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-light-gray-200">
-          <thead className="bg-light-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-dark-text uppercase tracking-wider">ID</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-dark-text uppercase tracking-wider">Rental ID</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-dark-text uppercase tracking-wider">Nature</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-dark-text uppercase tracking-wider">Date</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-dark-text uppercase tracking-wider">Amount</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-dark-text uppercase tracking-wider">Mode</th>
-              <th className="relative px-6 py-3"><span className="sr-only">Actions</span></th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-light-gray-200">
-            {payments.map(payment => (
+    <Paper elevation={2} sx={{ overflow: 'hidden' }}>
+      <TableContainer>
+        <Table size="small">
+          <TableHead sx={{ backgroundColor: '#f9fafb' }}>
+            <TableRow>
+              <TableCell>ID</TableCell>
+              <TableCell>Rental ID</TableCell>
+              <TableCell>Nature</TableCell>
+              <TableCell>Date</TableCell>
+              <TableCell>Amount</TableCell>
+              <TableCell>Mode</TableCell>
+              <TableCell align="right">Actions</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {payments.map((payment) => (
               <PaymentListItem
                 key={payment.payment_id}
                 payment={payment}
@@ -70,9 +77,9 @@ const PaymentList: React.FC<PaymentListProps> = ({ onEditPayment, onViewPayment 
                 onView={onViewPayment}
               />
             ))}
-          </tbody>
-        </table>
-      </div>
+          </TableBody>
+        </Table>
+      </TableContainer>
       {loading && payments.length > 0 && (
         <div className="my-4 flex justify-center"><Spinner size="md" /></div>
       )}
@@ -81,7 +88,7 @@ const PaymentList: React.FC<PaymentListProps> = ({ onEditPayment, onViewPayment 
           <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={fetchPaymentsPage} />
         </div>
       )}
-    </div>
+    </Paper>
   );
 };
 
