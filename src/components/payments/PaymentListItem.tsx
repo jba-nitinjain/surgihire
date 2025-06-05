@@ -33,7 +33,10 @@ const PaymentListItem: React.FC<PaymentListItemProps> = ({ payment, onEdit, onVi
           {payment.payment_id}
         </td>
         <td className="px-6 py-4 whitespace-nowrap text-sm text-dark-text/80">
-          {payment.rental_id}
+          {payment.customer_name || `Rental #${payment.rental_id}`}
+        </td>
+        <td className="px-6 py-4 whitespace-nowrap text-sm text-dark-text/80">
+          {payment.rented_from ? formatDate(payment.rented_from) : '-'}
         </td>
         <td className="px-6 py-4 whitespace-nowrap text-sm text-dark-text/80">
           {payment.nature || 'rental'}

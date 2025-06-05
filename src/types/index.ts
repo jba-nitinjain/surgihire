@@ -101,6 +101,8 @@ export interface Payment {
   payment_mode: string | null;
   payment_reference: string | null;
   notes: string | null;
+  customer_name?: string;
+  rented_from?: string;
 }
 
 export interface PaymentFormData {

@@ -40,7 +40,7 @@ const PaymentList: React.FC<PaymentListProps> = ({ onEditPayment, onViewPayment 
     return (
       <EmptyState
         title={searchQuery ? 'No payments match your search' : 'No Payments Found'}
-        message={searchQuery ? 'Try a different search term.' : 'Get started by recording a payment.'}
+        message={searchQuery ? 'Try a different search term.' : 'No payments available.'}
         icon={<IndianRupee className="w-16 h-16 text-gray-400" />}
       />
     );
@@ -53,7 +53,8 @@ const PaymentList: React.FC<PaymentListProps> = ({ onEditPayment, onViewPayment 
           <thead className="bg-light-gray-50">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-dark-text uppercase tracking-wider">ID</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-dark-text uppercase tracking-wider">Rental ID</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-dark-text uppercase tracking-wider">Customer</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-dark-text uppercase tracking-wider">Rented From</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-dark-text uppercase tracking-wider">Nature</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-dark-text uppercase tracking-wider">Date</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-dark-text uppercase tracking-wider">Amount</th>
