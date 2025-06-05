@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { RentalTransaction } from '../../types';
-import { CalendarCheck2, User, Edit3, Trash2, Loader2, FileText, IndianRupee, Tag, CalendarClock, CheckCircle, XCircle, Clock, AlertTriangle } from 'lucide-react';
+import { CalendarCheck2, User, Edit3, Trash2, Loader2, FileText, IndianRupee, Tag, CalendarClock, CheckCircle, XCircle, Clock, AlertTriangle, Undo2 } from 'lucide-react';
 import IconButton from '@mui/material/IconButton';
 import Button from '@mui/material/Button';
 import { useCrud } from '../../context/CrudContext';
@@ -9,6 +9,7 @@ import { useRentalTransactions } from '../../context/RentalTransactionContext';
 import { formatDate, formatCurrency } from '../../utils/formatting';
 import { fetchRentalDetailsByRentalId } from '../../services/api/rentals';
 import { useNavigate, useLocation } from 'react-router-dom';
+import ReturnRentalDialog from './ReturnRentalDialog';
 
 interface RentalTransactionCardProps {
   rental: RentalTransaction; // This will now include customer_name and payment_term_name
@@ -20,6 +21,7 @@ const RentalTransactionCard: React.FC<RentalTransactionCardProps> = ({ rental, o
   const { deleteItem, loading: crudLoading } = useCrud();
   const { refreshRentalTransactions } = useRentalTransactions();
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+  const [showReturnDialog, setShowReturnDialog] = useState(false);
   const [items, setItems] = useState(rental.rental_items || []);
   const navigate = useNavigate();
   const location = useLocation();
@@ -51,6 +53,11 @@ const RentalTransactionCard: React.FC<RentalTransactionCardProps> = ({ rental, o
     navigate('/payments/new', {
       state: { payment: { rental_id: rental.rental_id }, from: location.pathname },
     });
+  };
+
+  const handleReturnClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setShowReturnDialog(true);
   };
 
   const confirmDelete = async () => {
@@ -198,9 +205,12 @@ const RentalTransactionCard: React.FC<RentalTransactionCardProps> = ({ rental, o
         </div>
         <div className="p-4 mt-auto border-t border-light-gray-100 flex justify-between items-center">
           {getStatusChip(rental.status)}
-          <Button onClick={handleRecordPayment} size="small" color="primary" className="rental-card-menu-button" sx={{ textTransform: 'none' }}>
-            Record Payment
-          </Button>
+          <div className="space-x-2">
+            <Button onClick={handleReturnClick} size="small" color="secondary" className="rental-card-menu-button" sx={{ textTransform: 'none' }} startIcon={<Undo2 size={16} />}>Return</Button>
+            <Button onClick={handleRecordPayment} size="small" color="primary" className="rental-card-menu-button" sx={{ textTransform: 'none' }}>
+              Record Payment
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -213,6 +223,7 @@ const RentalTransactionCard: React.FC<RentalTransactionCardProps> = ({ rental, o
         isLoading={crudLoading}
         confirmText="Delete"
       />
+      <ReturnRentalDialog open={showReturnDialog} onClose={() => setShowReturnDialog(false)} rental={rental} />
     </>
   );
 };
