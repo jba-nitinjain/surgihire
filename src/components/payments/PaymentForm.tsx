@@ -4,6 +4,7 @@ import { useCrud } from '../../context/CrudContext';
 import { Save, X, Loader2, IndianRupee } from 'lucide-react';
 import Button from '@mui/material/Button';
 import OutlinedTextField from '../ui/OutlinedTextField';
+import NumberField from '../ui/NumberField';
 import AutocompleteField from '../ui/AutocompleteField';
 import InputAdornment from '@mui/material/InputAdornment';
 
@@ -186,20 +187,16 @@ const PaymentForm: React.FC<PaymentFormProps> = ({ payment, onSave, onCancel }) 
             <label htmlFor="payment_amount" className="block text-sm font-medium text-dark-text mb-1">
               Amount
             </label>
-            <OutlinedTextField
-              type="number"
+            <NumberField
               id="payment_amount"
               name="payment_amount"
               value={formData.payment_amount || ''}
               onChange={handleChange}
-              onWheel={e => e.currentTarget.blur()}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <IndianRupee size={16} />
-                  </InputAdornment>
-                ),
-              }}
+              startAdornment={
+                <InputAdornment position="start">
+                  <IndianRupee size={16} />
+                </InputAdornment>
+              }
               className={inputClass}
             />
           </div>

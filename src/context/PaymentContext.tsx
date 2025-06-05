@@ -154,7 +154,7 @@ export const PaymentProvider: React.FC<PaymentProviderProps> = ({
 
   const setFilters = useCallback((update: Partial<PaymentFilters>) => {
     setFiltersState(prev => {
-      let newFilters = { ...prev, ...update };
+      const newFilters = { ...prev, ...update };
       if (newFilters.start_date && newFilters.end_date) {
         const start = dayjs(newFilters.start_date, 'DD/MM/YYYY');
         const end = dayjs(newFilters.end_date, 'DD/MM/YYYY');
