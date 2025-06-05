@@ -42,8 +42,8 @@ const RentalItemsSection: React.FC<Props> = ({
           >
             <Trash2 size={16} />
           </button>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div className="md:col-span-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 items-end">
+            <div>
               <label htmlFor={`item_equipment_${index}`} className={`${labelClass} text-xs`}>Equipment <span className="text-red-500">*</span></label>
               <select
                 id={`item_equipment_${index}`}
@@ -54,14 +54,19 @@ const RentalItemsSection: React.FC<Props> = ({
               >
                 <option value="">{loadingEquipment ? 'Loading...' : 'Select Equipment'}</option>
                 {availableEquipment
-                  .filter(eq => eq.status === 'Available')
+                  .filter(eq =>
+                    eq.status === 'Available' ||
+                    items.some(it => it.equipment_id === String(eq.equipment_id))
+                  )
                   .map(eq => (
                     <option key={eq.equipment_id} value={String(eq.equipment_id)}>
                       {eq.equipment_name} (SN: {eq.serial_number || 'N/A'}) - Rate: {formatCurrency(eq.rental_rate)}
                     </option>
                   ))}
               </select>
-              {formErrors[`rental_items.${index}.equipment_id`] && <p className="text-xs text-red-500 mt-1">{formErrors[`rental_items.${index}.equipment_id`]}</p>}
+              {formErrors[`rental_items.${index}.equipment_id`] && (
+                <p className="text-xs text-red-500 mt-1">{formErrors[`rental_items.${index}.equipment_id`]}</p>
+              )}
             </div>
             <div>
               <label htmlFor={`item_rate_${index}`} className={`${labelClass} text-xs`}>Unit Rate (₹/day) <span className="text-red-500">*</span></label>
@@ -75,7 +80,9 @@ const RentalItemsSection: React.FC<Props> = ({
                 min="0"
                 placeholder={item.default_equipment_rate !== null ? String(item.default_equipment_rate) : '0.00'}
               />
-               {formErrors[`rental_items.${index}.unit_rental_rate`] && <p className="text-xs text-red-500 mt-1">{formErrors[`rental_items.${index}.unit_rental_rate`]}</p>}
+              {formErrors[`rental_items.${index}.unit_rental_rate`] && (
+                <p className="text-xs text-red-500 mt-1">{formErrors[`rental_items.${index}.unit_rental_rate`]}</p>
+              )}
             </div>
           </div>
         </div>

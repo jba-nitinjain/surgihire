@@ -116,6 +116,8 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
 
   const isEditing = !!rental;
 
+  const [showAddressSection, setShowAddressSection] = useState<boolean>(!isEditing);
+
 
 
   useEffect(() => {
@@ -186,6 +188,8 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
         mobile_number: prev.mobile_number || selected.mobile_number_1 || '',
         email: prev.email || selected.email || '',
       }));
+      setOriginalShippingPincode(selected.shipping_pincode || '');
+      setOriginalBillingPincode(selected.shipping_pincode || '');
     }
   }, [formData.customer_id, customers]);
 
@@ -401,7 +405,10 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
       })),
     };
 
-    if (apiData.expected_return_date === '') apiData.expected_return_date = null;
+    apiData.rental_date = dayjs(formData.rental_date, 'DD/MM/YYYY').format('YYYY-MM-DD');
+    apiData.expected_return_date = formData.expected_return_date
+      ? dayjs(formData.expected_return_date, 'DD/MM/YYYY').format('YYYY-MM-DD')
+      : null;
     if (apiData.notes === '') apiData.notes = null;
 
     try {
@@ -523,36 +530,47 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
             statusOptions={RENTAL_STATUSES_FORM}
           />
 
-          <RentalShippingBilling
-            data={{
-              shipping_address: formData.shipping_address,
-              shipping_area: formData.shipping_area,
-              shipping_city: formData.shipping_city,
-              shipping_state: formData.shipping_state,
-              shipping_pincode: formData.shipping_pincode,
-              billing_address: formData.billing_address,
-              billing_area: formData.billing_area,
-              billing_city: formData.billing_city,
-              billing_state: formData.billing_state,
-              billing_pincode: formData.billing_pincode,
-              mobile_number: formData.mobile_number,
-              email: formData.email,
-            }}
-            errors={formErrors as Record<string, string>}
-            handleChange={handleChange}
-            shippingPincodeDetailsLoading={shippingPincodeDetailsLoading}
-            shippingPincodeError={shippingPincodeError}
-            shippingAreaOptions={shippingAreaOptions}
-            shippingIsAreaSelect={shippingIsAreaSelect}
-            billingPincodeDetailsLoading={billingPincodeDetailsLoading}
-            billingPincodeError={billingPincodeError}
-            billingAreaOptions={billingAreaOptions}
-            billingIsAreaSelect={billingIsAreaSelect}
-            copyShippingToBilling={copyShippingToBilling}
-            copyBillingToShipping={copyBillingToShipping}
-            inputClass={inputClass}
-            labelClass={labelClass}
-          />
+          <div>
+            <button
+              type="button"
+              onClick={() => setShowAddressSection(s => !s)}
+              className="text-brand-blue underline mb-2 text-sm"
+            >
+              {showAddressSection ? 'Hide Shipping & Billing' : 'Show Shipping & Billing'}
+            </button>
+            {showAddressSection && (
+              <RentalShippingBilling
+                data={{
+                  shipping_address: formData.shipping_address,
+                  shipping_area: formData.shipping_area,
+                  shipping_city: formData.shipping_city,
+                  shipping_state: formData.shipping_state,
+                  shipping_pincode: formData.shipping_pincode,
+                  billing_address: formData.billing_address,
+                  billing_area: formData.billing_area,
+                  billing_city: formData.billing_city,
+                  billing_state: formData.billing_state,
+                  billing_pincode: formData.billing_pincode,
+                  mobile_number: formData.mobile_number,
+                  email: formData.email,
+                }}
+                errors={formErrors as Record<string, string>}
+                handleChange={handleChange}
+                shippingPincodeDetailsLoading={shippingPincodeDetailsLoading}
+                shippingPincodeError={shippingPincodeError}
+                shippingAreaOptions={shippingAreaOptions}
+                shippingIsAreaSelect={shippingIsAreaSelect}
+                billingPincodeDetailsLoading={billingPincodeDetailsLoading}
+                billingPincodeError={billingPincodeError}
+                billingAreaOptions={billingAreaOptions}
+                billingIsAreaSelect={billingIsAreaSelect}
+                copyShippingToBilling={copyShippingToBilling}
+                copyBillingToShipping={copyBillingToShipping}
+                inputClass={inputClass}
+                labelClass={labelClass}
+              />
+            )}
+          </div>
 
           {!isEditing && (
             <div className="flex items-center">
