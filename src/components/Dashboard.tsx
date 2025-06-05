@@ -131,6 +131,31 @@ const Dashboard: React.FC<DashboardProps> = ({ sidebarOpen, setSidebarOpen }) =>
                       payments: '/payments',
                     };
                     navigate(paths[tab.id] || '/');
+
+                    switch (tab.id) {
+                      case 'customers':
+                        refreshCustomerData();
+                        break;
+                      case 'equipment':
+                        refreshEquipmentData();
+                        break;
+                      case 'rentals':
+                        refreshRentalTransactions();
+                        break;
+                      case 'payments':
+                        refreshPayments();
+                        break;
+                      case 'masters':
+                        refreshEqCategories();
+                        refreshPaymentPlans();
+                        break;
+                      case 'maintenance':
+                        refreshMaintenanceRecords();
+                        break;
+                      default:
+                        break;
+                    }
+
                     if (sidebarOpen && window.innerWidth < 768) setSidebarOpen(false);
                   }}
                   className={`w-full flex items-center px-4 py-2 rounded-md transition-colors ${activeTab === tab.id ? 'bg-brand-blue text-white shadow-sm' : 'text-dark-text hover:bg-light-gray-100'}`}
