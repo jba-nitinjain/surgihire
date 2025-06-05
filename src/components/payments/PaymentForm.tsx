@@ -4,13 +4,14 @@ import { useCrud } from '../../context/CrudContext';
 import { Save, X, Loader2, CalendarCheck2, IndianRupee } from 'lucide-react';
 
 import DatePickerField from "../ui/DatePickerField";
+import dayjs from 'dayjs';
 interface PaymentFormProps {
   payment?: Payment | null;
   onSave: () => void;
   onCancel: () => void;
 }
 
-const todayStr = new Date().toISOString().split('T')[0];
+const todayStr = dayjs().format('DD/MM/YYYY');
 const DEFAULT_MODE_KEY = 'default_payment_mode';
 const getStoredDefaultMode = () =>
   typeof window !== 'undefined' && typeof localStorage !== 'undefined'
@@ -45,7 +46,7 @@ const PaymentForm: React.FC<PaymentFormProps> = ({ payment, onSave, onCancel }) 
       setFormData({
         rental_id: payment.rental_id,
         nature: payment.nature ?? 'rental',
-        payment_date: payment.payment_date,
+        payment_date: payment.payment_date ? dayjs(payment.payment_date).format('DD/MM/YYYY') : todayStr,
         payment_amount: payment.payment_amount ? String(payment.payment_amount) : '',
         payment_mode: payment.payment_mode ?? '',
         payment_reference: payment.payment_reference ?? '',

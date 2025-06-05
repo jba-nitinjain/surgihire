@@ -7,6 +7,7 @@ import EquipmentBasicInfo from './equipment/EquipmentBasicInfo';
 import EquipmentIdentification from './equipment/EquipmentIdentification';
 import EquipmentFinancial from './equipment/EquipmentFinancial';
 import EquipmentDatesLocation from './equipment/EquipmentDatesLocation';
+import dayjs from 'dayjs';
 
 interface EquipmentFormProps {
   equipment?: Equipment | null;
@@ -80,8 +81,12 @@ const EquipmentForm: React.FC<EquipmentFormProps> = ({ equipment, onSave, onCanc
     } else if (formData.rental_rate && parseFloat(formData.rental_rate) < 0) {
       errors.rental_rate = 'Rental rate cannot be negative.';
     }
-    if (formData.purchase_date && formData.purchase_date.trim() !== '' && isNaN(new Date(formData.purchase_date).getTime())) {
-        errors.purchase_date = 'Invalid purchase date.';
+    if (
+      formData.purchase_date &&
+      formData.purchase_date.trim() !== '' &&
+      !dayjs(formData.purchase_date, 'DD/MM/YYYY', true).isValid()
+    ) {
+      errors.purchase_date = 'Invalid purchase date.';
     }
     if (!isEditing && formData.quantity) { 
         const qty = parseInt(formData.quantity, 10);

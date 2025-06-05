@@ -8,6 +8,7 @@ import { useCrud } from '../context/CrudContext'; // To get loading state from C
 import { Save, X, Loader2, Wrench, ChevronDown } from 'lucide-react';
 import MaintenanceRecordInfo from './maintenance/MaintenanceRecordInfo';
 import MaintenanceRecordExtra from './maintenance/MaintenanceRecordExtra';
+import dayjs from 'dayjs';
 
 interface MaintenanceRecordFormProps {
   record?: MaintenanceRecordFormData; // For editing
@@ -104,8 +105,8 @@ const MaintenanceRecordForm: React.FC<MaintenanceRecordFormProps> = ({
     }
     if (!formData.maintenance_date) {
       errors.maintenance_date = 'Maintenance date is required.';
-    } else if (isNaN(new Date(formData.maintenance_date).getTime())) {
-        errors.maintenance_date = 'Invalid maintenance date.';
+    } else if (!dayjs(formData.maintenance_date, 'DD/MM/YYYY', true).isValid()) {
+      errors.maintenance_date = 'Invalid maintenance date.';
     }
     if (formData.cost && (isNaN(parseFloat(formData.cost)) || parseFloat(formData.cost) < 0)) {
       errors.cost = 'Cost must be a valid non-negative number.';

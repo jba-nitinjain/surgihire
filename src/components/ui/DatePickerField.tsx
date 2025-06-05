@@ -14,7 +14,7 @@ interface DatePickerFieldProps {
 const DatePickerField: React.FC<DatePickerFieldProps> = ({ label, name, value, onChange, required }) => {
   const handleChange = (date: Dayjs | null) => {
     const syntheticEvent = {
-      target: { name, value: date ? date.format('YYYY-MM-DD') : '' }
+      target: { name, value: date ? date.format('DD/MM/YYYY') : '' }
     } as unknown as React.ChangeEvent<HTMLInputElement>;
     onChange(syntheticEvent);
   };
@@ -22,7 +22,8 @@ const DatePickerField: React.FC<DatePickerFieldProps> = ({ label, name, value, o
   return (
     <DatePicker
       label={label}
-      value={value ? dayjs(value) : null}
+      format="DD/MM/YYYY"
+      value={value ? dayjs(value, 'DD/MM/YYYY') : null}
       onChange={handleChange}
       slotProps={{ textField: { fullWidth: true, name, id: name, required } }}
     />
