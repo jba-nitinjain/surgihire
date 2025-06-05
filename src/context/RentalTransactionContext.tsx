@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
+import dayjs from 'dayjs';
 import { RentalTransaction, PaginationParams, ApiResponse, Customer } from '../types';
 import { fetchRentals } from '../services/api/rentals';
 import { fetchCustomers } from '../services/api/customers';
@@ -10,7 +11,8 @@ const CONTEXT_NAME = "RentalTransactionContext";
 export interface RentalTransactionFilters {
   status: string | null;
   customer_id: string | null; // Customer ID for filtering by customer
-  // Add other filters like date ranges if needed
+  rental_date: string | null;
+  return_date: string | null; // expected return date
 }
 
 interface RentalTransactionContextType {
@@ -28,6 +30,9 @@ interface RentalTransactionContextType {
   fetchRentalTransactionsPage: (page: number) => void;
   refreshRentalTransactions: () => void;
   fetchCustomersForSelection: () => void; // To explicitly fetch customers
+  statusCounts: Record<string, number>;
+  loadingStatusCounts: boolean;
+  fetchStatusCounts: () => void;
 }
 
 const RentalTransactionContext = createContext<RentalTransactionContextType | undefined>(undefined);
@@ -55,11 +60,18 @@ export const RentalTransactionProvider: React.FC<RentalTransactionProviderProps>
   const [totalRecords, setTotalRecords] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQueryState] = useState('');
-  const [filters, setFiltersState] = useState<RentalTransactionFilters>({ status: null, customer_id: null });
+  const [filters, setFiltersState] = useState<RentalTransactionFilters>({
+    status: null,
+    customer_id: null,
+    rental_date: null,
+    return_date: null,
+  });
   const [initialLoadDone, setInitialLoadDone] = useState(false);
 
   const [customersForFilter, setCustomersForFilter] = useState<Customer[]>([]);
   const [loadingCustomers, setLoadingCustomers] = useState(false);
+  const [statusCounts, setStatusCounts] = useState<Record<string, number>>({});
+  const [loadingStatusCounts, setLoadingStatusCounts] = useState(false);
 
   // Fetch customers for dropdowns (e.g., in forms or filter UI)
   const fetchCustomersForSelection = useCallback(async () => {
@@ -78,6 +90,28 @@ export const RentalTransactionProvider: React.FC<RentalTransactionProviderProps>
       setCustomersForFilter([]);
     } finally {
       setLoadingCustomers(false);
+    }
+  }, []);
+
+  const fetchStatusCounts = useCallback(async () => {
+    setLoadingStatusCounts(true);
+    try {
+      const response = await fetchRentals({ records: 10000, skip: 0 });
+      if (response.success && Array.isArray(response.data)) {
+        const counts: Record<string, number> = {};
+        (response.data as RentalTransaction[]).forEach(rt => {
+          const key = rt.status || 'Unknown';
+          counts[key] = (counts[key] || 0) + 1;
+        });
+        setStatusCounts(counts);
+      } else {
+        setStatusCounts({});
+      }
+    } catch (err) {
+      console.error(`${CONTEXT_NAME}: Error fetching status counts`, err);
+      setStatusCounts({});
+    } finally {
+      setLoadingStatusCounts(false);
     }
   }, []);
 
@@ -104,6 +138,10 @@ export const RentalTransactionProvider: React.FC<RentalTransactionProviderProps>
     }
   }, [recordsPerPage]);
 
+  useEffect(() => {
+    fetchStatusCounts();
+  }, [fetchStatusCounts]);
+
   const fetchRentalTransactionsData = useCallback(async (page: number, query: string, currentFilters: RentalTransactionFilters) => {
     setLoading(true);
     setError(null);
@@ -115,6 +153,12 @@ export const RentalTransactionProvider: React.FC<RentalTransactionProviderProps>
       }
       if (currentFilters.customer_id && String(currentFilters.customer_id).trim() !== '') {
         activeFiltersForApi.customer_id = currentFilters.customer_id;
+      }
+      if (currentFilters.rental_date && String(currentFilters.rental_date).trim() !== '') {
+        activeFiltersForApi.rental_date = dayjs(currentFilters.rental_date, 'DD/MM/YYYY').format('YYYY-MM-DD');
+      }
+      if (currentFilters.return_date && String(currentFilters.return_date).trim() !== '') {
+        activeFiltersForApi.expected_return_date = dayjs(currentFilters.return_date, 'DD/MM/YYYY').format('YYYY-MM-DD');
       }
 
       const paginationParams: PaginationParams = {
@@ -137,7 +181,11 @@ export const RentalTransactionProvider: React.FC<RentalTransactionProviderProps>
       setError(errorMessage);
     } finally {
       setLoading(false);
-      const noActiveFilters = !currentFilters.status && !currentFilters.customer_id;
+      const noActiveFilters =
+        !currentFilters.status &&
+        !currentFilters.customer_id &&
+        !currentFilters.rental_date &&
+        !currentFilters.return_date;
       if (page === 1 && !query.trim() && noActiveFilters) {
         setInitialLoadDone(true);
       }
@@ -155,7 +203,9 @@ export const RentalTransactionProvider: React.FC<RentalTransactionProviderProps>
       const newCombinedFilters = { ...prevFilters, ...filtersUpdate };
       if (
         newCombinedFilters.status !== prevFilters.status ||
-        newCombinedFilters.customer_id !== prevFilters.customer_id
+        newCombinedFilters.customer_id !== prevFilters.customer_id ||
+        newCombinedFilters.rental_date !== prevFilters.rental_date ||
+        newCombinedFilters.return_date !== prevFilters.return_date
       ) {
         setCurrentPage(1);
         setInitialLoadDone(false);
@@ -166,7 +216,11 @@ export const RentalTransactionProvider: React.FC<RentalTransactionProviderProps>
   }, []);
 
   useEffect(() => {
-    const noActiveFilters = !filters.status && !filters.customer_id;
+    const noActiveFilters =
+      !filters.status &&
+      !filters.customer_id &&
+      !filters.rental_date &&
+      !filters.return_date;
     if (!searchQuery.trim() && noActiveFilters && !initialLoadDone && !loading) {
       fetchRentalTransactionsData(1, '', filters);
     }
@@ -174,7 +228,12 @@ export const RentalTransactionProvider: React.FC<RentalTransactionProviderProps>
 
   useEffect(() => {
     const handler = setTimeout(() => {
-      const shouldFetch = searchQuery.trim() || filters.status || filters.customer_id;
+      const shouldFetch =
+        searchQuery.trim() ||
+        filters.status ||
+        filters.customer_id ||
+        filters.rental_date ||
+        filters.return_date;
       if (shouldFetch) {
         fetchRentalTransactionsData(1, searchQuery.trim(), filters);
       }
@@ -183,11 +242,16 @@ export const RentalTransactionProvider: React.FC<RentalTransactionProviderProps>
   }, [searchQuery, filters, fetchRentalTransactionsData]);
 
   const refreshRentalTransactions = () => {
-    const noActiveFilters = !filters.status && !filters.customer_id;
+    const noActiveFilters =
+      !filters.status &&
+      !filters.customer_id &&
+      !filters.rental_date &&
+      !filters.return_date;
     if (currentPage === 1 && !searchQuery.trim() && noActiveFilters) {
       setInitialLoadDone(false);
     }
     fetchRentalTransactionsData(currentPage, searchQuery, filters);
+    fetchStatusCounts();
   };
 
   const value = {
@@ -205,6 +269,9 @@ export const RentalTransactionProvider: React.FC<RentalTransactionProviderProps>
     fetchRentalTransactionsPage: (page: number) => fetchRentalTransactionsData(page, searchQuery, filters),
     refreshRentalTransactions,
     fetchCustomersForSelection,
+    statusCounts,
+    loadingStatusCounts,
+    fetchStatusCounts,
   };
 
   return (

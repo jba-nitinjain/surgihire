@@ -1,7 +1,7 @@
 import React from 'react';
 import { RentalItemFormData, Equipment as EquipmentType } from '../../types';
 import { Trash2, PackagePlus } from 'lucide-react';
-import OutlinedTextField from '../ui/OutlinedTextField';
+import NumberField from '../ui/NumberField';
 import AutocompleteField from '../ui/AutocompleteField';
 import InputAdornment from '@mui/material/InputAdornment';
 import { formatCurrency } from '../../utils/formatting';
@@ -74,19 +74,15 @@ const RentalItemsSection: React.FC<Props> = ({
                   )}
                 </td>
                 <td className="p-2">
-                  <OutlinedTextField
-                    type="number"
+                  <NumberField
                     id={`item_rate_${index}`}
+                    name={`item_rate_${index}`}
                     value={item.rental_rate}
                     onChange={(e) => handleItemChange(index, 'rental_rate', e.target.value)}
+                    min={0}
+                    step={0.01}
+                    startAdornment={<InputAdornment position="start">₹</InputAdornment>}
                     className={`${inputClass} text-xs`}
-                    inputProps={{ step: '0.01', min: '0' }}
-                    placeholder={item.default_equipment_rate !== null ? String(item.default_equipment_rate) : '0.00'}
-                    InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">₹</InputAdornment>
-                      ),
-                    }}
                   />
                   {formErrors[`rental_items.${index}.rental_rate`] && (
                     <p className="text-xs text-red-500 mt-1">{formErrors[`rental_items.${index}.rental_rate`]}</p>
@@ -146,21 +142,15 @@ const RentalItemsSection: React.FC<Props> = ({
               </div>
               <div>
                 <label htmlFor={`item_rate_${index}`} className={`${labelClass} text-xs`}>Unit Rate (₹/day) <span className="text-red-500">*</span></label>
-                <OutlinedTextField
-                  type="number"
+                <NumberField
                   id={`item_rate_${index}`}
+                  name={`item_rate_${index}`}
                   value={item.rental_rate}
                   onChange={(e) => handleItemChange(index, 'rental_rate', e.target.value)}
+                  min={0}
+                  step={0.01}
+                  startAdornment={<InputAdornment position="start">₹</InputAdornment>}
                   className={`${inputClass} text-xs`}
-                  inputProps={{ step: '0.01', min: '0' }}
-                  placeholder={item.default_equipment_rate !== null ? String(item.default_equipment_rate) : '0.00'}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        ₹
-                      </InputAdornment>
-                    ),
-                  }}
                 />
                 {formErrors[`rental_items.${index}.rental_rate`] && (
                   <p className="text-xs text-red-500 mt-1">{formErrors[`rental_items.${index}.rental_rate`]}</p>
