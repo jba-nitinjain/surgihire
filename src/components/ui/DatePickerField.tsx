@@ -9,9 +9,10 @@ interface DatePickerFieldProps {
   value: string;
   onChange: React.ChangeEventHandler<HTMLInputElement>;
   required?: boolean;
+  disabled?: boolean;
 }
 
-const DatePickerField: React.FC<DatePickerFieldProps> = ({ label, name, value, onChange, required }) => {
+const DatePickerField: React.FC<DatePickerFieldProps> = ({ label, name, value, onChange, required, disabled = false }) => {
   const handleChange = (date: Dayjs | null) => {
     const syntheticEvent = {
       target: { name, value: date ? date.format('DD/MM/YYYY') : '' }
@@ -25,7 +26,7 @@ const DatePickerField: React.FC<DatePickerFieldProps> = ({ label, name, value, o
       format="DD/MM/YYYY"
       value={value ? dayjs(value, 'DD/MM/YYYY') : null}
       onChange={handleChange}
-      slotProps={{ textField: { fullWidth: true, name, id: name, required } }}
+      slotProps={{ textField: { fullWidth: true, name, id: name, required, disabled } }}
     />
   );
 };

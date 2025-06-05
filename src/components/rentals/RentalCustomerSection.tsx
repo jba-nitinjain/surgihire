@@ -17,6 +17,7 @@ interface Props {
   labelClass: string;
   iconClass: string;
   onAddCustomer: () => void;
+  disabled?: boolean;
 }
 
 const RentalCustomerSection: React.FC<Props> = ({
@@ -32,6 +33,7 @@ const RentalCustomerSection: React.FC<Props> = ({
   labelClass,
   iconClass,
   onAddCustomer,
+  disabled = false,
 }) => (
   <fieldset className="grid grid-cols-1 gap-y-6 md:grid-cols-2">
     <legend className="text-lg font-medium text-dark-text col-span-full mb-2">
@@ -57,11 +59,11 @@ const RentalCustomerSection: React.FC<Props> = ({
             onChange={handleChange}
             options={customers.map((c) => ({ label: c.full_name, value: String(c.customer_id) }))}
             loading={loadingCustomers}
-            disabled={loadingCustomers}
+            disabled={loadingCustomers || disabled}
             placeholder={loadingCustomers ? 'Loading...' : 'Select Customer'}
           />
         </div>
-        <Button variant="outlined" size="small" onClick={onAddCustomer} startIcon={<PlusCircle className="h-4 w-4" />} sx={{ minWidth: 'fit-content', textTransform: 'none' }}>
+        <Button variant="outlined" size="small" onClick={onAddCustomer} disabled={disabled} startIcon={<PlusCircle className="h-4 w-4" />} sx={{ minWidth: 'fit-content', textTransform: 'none' }}>
           Add
         </Button>
       </div>
@@ -83,6 +85,7 @@ const RentalCustomerSection: React.FC<Props> = ({
             onChange={handleChange}
             options={statusOptions.map((s) => ({ label: s, value: s }))}
             placeholder="Select status"
+            disabled={disabled}
           />
         </div>
       </div>

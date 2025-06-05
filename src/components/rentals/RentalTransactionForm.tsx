@@ -121,6 +121,8 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
   } = usePincodeLookup(formData.billing_pincode, shouldFetchBilling);
 
   const isEditing = !!rental;
+  const isCompleted = isEditing && !!rental?.actual_return_date;
+  const fieldsDisabled = isCompleted;
 
   const [showAddressSection, setShowAddressSection] = useState<boolean>(!isEditing);
 
@@ -516,6 +518,9 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
         <h2 className="text-xl font-semibold text-brand-blue flex items-center">
           <CalendarCheck2 className="h-6 w-6 mr-2 text-brand-blue" />
           {isEditing ? 'Edit Rental Transaction' : 'New Rental Transaction'}
+          {isCompleted && (
+            <span className="ml-3 px-2.5 py-1 text-xs font-semibold rounded-full bg-teal-100 text-teal-700">Completed</span>
+          )}
         </h2>
         <button onClick={onCancel} className="p-2 rounded-full hover:bg-light-gray-100">
           <X className="h-5 w-5 text-dark-text" />
@@ -542,6 +547,7 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
             labelClass={labelClass}
             iconClass={iconClass}
             onAddCustomer={() => navigate('/customers/new', { state: { returnToRental: true } })}
+            disabled={fieldsDisabled}
           />
 
           <RentalStatusDates
@@ -558,6 +564,7 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
             inputClass={inputClass}
             labelClass={labelClass}
             iconClass={iconClass}
+            disabled={fieldsDisabled}
           />
 
           <div>
@@ -566,6 +573,7 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
               size="small"
               onClick={() => setShowAddressSection(s => !s)}
               className="mb-2"
+              disabled={fieldsDisabled}
             >
               {showAddressSection ? 'Hide Shipping & Billing' : 'Show Shipping & Billing'}
             </Button>
@@ -599,6 +607,7 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
                 copyBillingToShipping={copyBillingToShipping}
                 inputClass={inputClass}
                 labelClass={labelClass}
+                disabled={fieldsDisabled}
               />
             )}
           </div>
@@ -611,6 +620,7 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
                 checked={updateCustomerAddress}
                 onChange={(e) => setUpdateCustomerAddress(e.target.checked)}
                 className="h-4 w-4 text-brand-blue border-gray-300 rounded"
+                disabled={fieldsDisabled}
               />
               <label htmlFor="update_customer_address" className="ml-2 text-sm text-dark-text">
                 Update customer with this shipping address
@@ -629,6 +639,7 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
             inputClass={inputClass}
             labelClass={labelClass}
             isEditing={isEditing}
+            disabled={fieldsDisabled}
           />
 
           <fieldset className="grid grid-cols-1 gap-y-6 gap-x-4 md:grid-cols-2">
@@ -647,7 +658,7 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
                     onChange={handleChange}
                     options={paymentPlans.map(pt => ({ label: pt.plan_name, value: pt.plan_name }))}
                     loading={loadingPaymentPlans}
-                    disabled={loadingPaymentPlans}
+                    disabled={loadingPaymentPlans || fieldsDisabled}
                     placeholder={loadingPaymentPlans ? 'Loading...' : 'Select Payment Term'}
                     freeSolo
                   />
@@ -672,6 +683,7 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
                   value={formData.notes || ''}
                   onChange={handleChange}
                   className={`${inputClass} pl-8`}
+                  disabled={fieldsDisabled}
                 />
               </div>
             </div>
@@ -688,7 +700,7 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
             </button>
             <button
               type="submit"
-              disabled={crudLoading || loadingCustomers || loadingPaymentPlans || loadingEquipment}
+              disabled={fieldsDisabled || crudLoading || loadingCustomers || loadingPaymentPlans || loadingEquipment}
               className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-brand-blue hover:bg-brand-blue/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-blue disabled:opacity-50 flex items-center"
             >
               {crudLoading ? (
@@ -698,7 +710,7 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
               )}
               {isEditing ? 'Save Changes' : 'Create Rental'}
             </button>
-            {!isEditing && (
+            {!isEditing && !fieldsDisabled && (
               <button
                 type="button"
                 onClick={() => handleSubmit(true)}

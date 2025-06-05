@@ -11,6 +11,7 @@ interface Props {
   inputClass: string;
   labelClass: string;
   iconClass: string;
+  disabled?: boolean;
 }
 
 const RentalStatusDates: React.FC<Props> = ({
@@ -21,6 +22,7 @@ const RentalStatusDates: React.FC<Props> = ({
   inputClass,
   labelClass,
   iconClass,
+  disabled = false,
 }) => (
   <fieldset className="grid grid-cols-1 gap-y-6 gap-x-4 md:grid-cols-3">
     <legend className="text-lg font-medium text-dark-text col-span-full mb-2">
@@ -35,6 +37,7 @@ const RentalStatusDates: React.FC<Props> = ({
         value={data.rental_date}
         onChange={handleChange}
         required
+        disabled={disabled}
       />
       {errors.rental_date && (
         <p className="text-xs text-red-500 mt-1">{errors.rental_date}</p>
@@ -50,6 +53,7 @@ const RentalStatusDates: React.FC<Props> = ({
         value={data.expected_return_date || ''}
         onChange={handleChange}
         required
+        disabled={disabled}
       />
       {errors.expected_return_date && (
         <p className="text-xs text-red-500 mt-1">{errors.expected_return_date}</p>

@@ -38,6 +38,7 @@ interface Props {
   copyBillingToShipping: () => void;
   inputClass: string;
   labelClass: string;
+  disabled?: boolean;
 }
 
 const RentalShippingBilling: React.FC<Props> = ({
@@ -56,13 +57,14 @@ const RentalShippingBilling: React.FC<Props> = ({
   copyBillingToShipping,
   inputClass,
   labelClass,
+  disabled = false,
 }) => (
   <fieldset className="space-y-6">
     <legend className="text-lg font-medium text-dark-text mb-2">Shipping &amp; Billing</legend>
     <div className="flex gap-4 text-xs">
-      <Button variant="outlined" size="small" onClick={copyShippingToBilling}
+      <Button variant="outlined" size="small" onClick={copyShippingToBilling} disabled={disabled}
         >Copy Shipping to Billing</Button>
-      <Button variant="outlined" size="small" onClick={copyBillingToShipping}
+      <Button variant="outlined" size="small" onClick={copyBillingToShipping} disabled={disabled}
         >Copy Billing to Shipping</Button>
     </div>
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -77,6 +79,7 @@ const RentalShippingBilling: React.FC<Props> = ({
             multiline
             rows={2}
             className={inputClass}
+            disabled={disabled}
           />
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -97,6 +100,7 @@ const RentalShippingBilling: React.FC<Props> = ({
                   </InputAdornment>
                 ) : undefined,
               }}
+              disabled={disabled}
             />
             {errors.shipping_pincode && (
               <p className="text-xs text-red-500 mt-1">{errors.shipping_pincode}</p>
@@ -115,6 +119,7 @@ const RentalShippingBilling: React.FC<Props> = ({
               options={shippingAreaOptions}
               placeholder="Select Area"
               freeSolo
+              disabled={disabled}
             />
             {errors.shipping_area && (
               <p className="text-xs text-red-500 mt-1">{errors.shipping_area}</p>
@@ -124,27 +129,29 @@ const RentalShippingBilling: React.FC<Props> = ({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <div>
             <label htmlFor="shipping_city" className={labelClass}>Shipping City</label>
-            <OutlinedTextField
-              type="text"
-              id="shipping_city"
-              name="shipping_city"
-              value={data.shipping_city || ''}
-              onChange={handleChange}
-              className={inputClass}
-              InputProps={{ readOnly: true }}
-            />
+          <OutlinedTextField
+            type="text"
+            id="shipping_city"
+            name="shipping_city"
+            value={data.shipping_city || ''}
+            onChange={handleChange}
+            className={inputClass}
+            InputProps={{ readOnly: true }}
+            disabled={disabled}
+          />
           </div>
           <div>
             <label htmlFor="shipping_state" className={labelClass}>Shipping State</label>
-            <OutlinedTextField
-              type="text"
-              id="shipping_state"
-              name="shipping_state"
-              value={data.shipping_state || ''}
-              onChange={handleChange}
-              className={inputClass}
-              InputProps={{ readOnly: true }}
-            />
+          <OutlinedTextField
+            type="text"
+            id="shipping_state"
+            name="shipping_state"
+            value={data.shipping_state || ''}
+            onChange={handleChange}
+            className={inputClass}
+            InputProps={{ readOnly: true }}
+            disabled={disabled}
+          />
           </div>
         </div>
       </div>
@@ -159,27 +166,29 @@ const RentalShippingBilling: React.FC<Props> = ({
             multiline
             rows={2}
             className={inputClass}
+            disabled={disabled}
           />
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <div>
             <label htmlFor="billing_pincode" className={labelClass}>Billing Pincode</label>
-            <OutlinedTextField
-              type="text"
-              id="billing_pincode"
-              name="billing_pincode"
-              value={data.billing_pincode || ''}
-              onChange={handleChange}
-              className={inputClass}
-              inputProps={{ maxLength: 6 }}
-              InputProps={{
-                endAdornment: billingPincodeDetailsLoading ? (
-                  <InputAdornment position="end">
-                    <Loader2 className="h-5 w-5 text-gray-400 animate-spin" />
-                  </InputAdornment>
-                ) : undefined,
-              }}
-            />
+          <OutlinedTextField
+            type="text"
+            id="billing_pincode"
+            name="billing_pincode"
+            value={data.billing_pincode || ''}
+            onChange={handleChange}
+            className={inputClass}
+            inputProps={{ maxLength: 6 }}
+            InputProps={{
+              endAdornment: billingPincodeDetailsLoading ? (
+                <InputAdornment position="end">
+                  <Loader2 className="h-5 w-5 text-gray-400 animate-spin" />
+                </InputAdornment>
+              ) : undefined,
+            }}
+            disabled={disabled}
+          />
             {errors.billing_pincode && (
               <p className="text-xs text-red-500 mt-1">{errors.billing_pincode}</p>
             )}
@@ -197,6 +206,7 @@ const RentalShippingBilling: React.FC<Props> = ({
               options={billingAreaOptions}
               placeholder="Select Area"
               freeSolo
+              disabled={disabled}
             />
             {errors.billing_area && (
               <p className="text-xs text-red-500 mt-1">{errors.billing_area}</p>
@@ -206,27 +216,29 @@ const RentalShippingBilling: React.FC<Props> = ({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <div>
             <label htmlFor="billing_city" className={labelClass}>Billing City</label>
-            <OutlinedTextField
-              type="text"
-              id="billing_city"
-              name="billing_city"
-              value={data.billing_city || ''}
-              onChange={handleChange}
-              className={inputClass}
-              InputProps={{ readOnly: true }}
-            />
+          <OutlinedTextField
+            type="text"
+            id="billing_city"
+            name="billing_city"
+            value={data.billing_city || ''}
+            onChange={handleChange}
+            className={inputClass}
+            InputProps={{ readOnly: true }}
+            disabled={disabled}
+          />
           </div>
           <div>
             <label htmlFor="billing_state" className={labelClass}>Billing State</label>
-            <OutlinedTextField
-              type="text"
-              id="billing_state"
-              name="billing_state"
-              value={data.billing_state || ''}
-              onChange={handleChange}
-              className={inputClass}
-              InputProps={{ readOnly: true }}
-            />
+          <OutlinedTextField
+            type="text"
+            id="billing_state"
+            name="billing_state"
+            value={data.billing_state || ''}
+            onChange={handleChange}
+            className={inputClass}
+            InputProps={{ readOnly: true }}
+            disabled={disabled}
+          />
           </div>
         </div>
       </div>
@@ -243,6 +255,7 @@ const RentalShippingBilling: React.FC<Props> = ({
           value={data.mobile_number || ''}
           onChange={handleChange}
           className={inputClass}
+          disabled={disabled}
         />
       </div>
       <div>
@@ -256,6 +269,7 @@ const RentalShippingBilling: React.FC<Props> = ({
           value={data.email || ''}
           onChange={handleChange}
           className={inputClass}
+          disabled={disabled}
         />
       </div>
     </div>

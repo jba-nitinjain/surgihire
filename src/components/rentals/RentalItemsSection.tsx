@@ -17,6 +17,7 @@ interface Props {
   inputClass: string;
   labelClass: string;
   isEditing?: boolean;
+  disabled?: boolean;
 }
 
 const RentalItemsSection: React.FC<Props> = ({
@@ -30,6 +31,7 @@ const RentalItemsSection: React.FC<Props> = ({
   inputClass,
   labelClass,
   isEditing = false,
+  disabled = false,
 }) => (
   <fieldset>
     <legend className="text-lg font-medium text-dark-text col-span-full mb-2">Rental Items</legend>
@@ -65,7 +67,7 @@ const RentalItemsSection: React.FC<Props> = ({
                         label: `${eq.equipment_name} (SN: ${eq.serial_number || 'N/A'}) - Rate: ${formatCurrency(eq.rental_rate)}`,
                       }))}
                     loading={loadingEquipment}
-                    disabled={loadingEquipment}
+                    disabled={loadingEquipment || disabled}
                     placeholder={loadingEquipment ? 'Loading...' : 'Select Equipment'}
                     className="w-full"
                   />
@@ -83,6 +85,7 @@ const RentalItemsSection: React.FC<Props> = ({
                     step={0.01}
                     startAdornment={<InputAdornment position="start">₹</InputAdornment>}
                     className={`${inputClass} text-xs`}
+                    readOnly={disabled}
                   />
                   {formErrors[`rental_items.${index}.rental_rate`] && (
                     <p className="text-xs text-red-500 mt-1">{formErrors[`rental_items.${index}.rental_rate`]}</p>
@@ -94,6 +97,7 @@ const RentalItemsSection: React.FC<Props> = ({
                     onClick={() => removeItem(index)}
                     className="p-1 text-red-500 hover:text-red-700 rounded-full hover:bg-red-100"
                     title="Remove Item"
+                    disabled={disabled}
                   >
                     <Trash2 size={16} />
                   </button>
@@ -133,7 +137,7 @@ const RentalItemsSection: React.FC<Props> = ({
                       label: `${eq.equipment_name} (SN: ${eq.serial_number || 'N/A'}) - Rate: ${formatCurrency(eq.rental_rate)}`,
                     }))}
                   loading={loadingEquipment}
-                  disabled={loadingEquipment}
+                  disabled={loadingEquipment || disabled}
                   placeholder={loadingEquipment ? 'Loading...' : 'Select Equipment'}
                 />
                 {formErrors[`rental_items.${index}.equipment_id`] && (
@@ -151,6 +155,7 @@ const RentalItemsSection: React.FC<Props> = ({
                   step={0.01}
                   startAdornment={<InputAdornment position="start">₹</InputAdornment>}
                   className={`${inputClass} text-xs`}
+                  readOnly={disabled}
                 />
                 {formErrors[`rental_items.${index}.rental_rate`] && (
                   <p className="text-xs text-red-500 mt-1">{formErrors[`rental_items.${index}.rental_rate`]}</p>
@@ -164,6 +169,7 @@ const RentalItemsSection: React.FC<Props> = ({
     <button
       type="button"
       onClick={addItem}
+      disabled={disabled}
       className="mt-3 inline-flex items-center px-3 py-1.5 border border-dashed border-brand-blue text-brand-blue text-xs font-medium rounded-md hover:bg-brand-blue/10 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-brand-blue"
     >
       <PackagePlus size={16} className="mr-2" /> Add Rental Item
