@@ -4,6 +4,7 @@ import RentalTransactionList from '../rentals/RentalTransactionList';
 // import RentalTransactionDetail from '../rentals/RentalTransactionDetail'; // Keep commented if not yet implemented
 import SearchBox from '../ui/SearchBox';
 import { PlusCircle, ArrowLeft } from 'lucide-react'; // Unused icons like Filter, CalendarIcon removed
+import Button from '@mui/material/Button';
 import { RentalTransaction } from '../../types';
 import { useNavigate, useLocation } from 'react-router-dom';
 
@@ -127,12 +128,9 @@ const RentalsTab: React.FC = () => {
       </div>
 
       <div className="mb-6 flex justify-end">
-        <button
-          onClick={handleOpenRentalFormForCreate}
-          className="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-brand-blue hover:bg-brand-blue/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-blue transition-colors"
-        >
-          <PlusCircle className="h-5 w-5 mr-2" />New Rental Transaction
-        </button>
+        <Button variant="contained" color="primary" onClick={handleOpenRentalFormForCreate} startIcon={<PlusCircle className="h-5 w-5" />} sx={{ textTransform: 'none' }}>
+          New Rental Transaction
+        </Button>
       </div>
 
       {/* This is the crucial part: RentalTransactionList should only receive props it expects. */}

@@ -4,14 +4,16 @@ import CustomerForm from '../CustomerForm';
 import { Customer } from '../../types';
 import { getCustomer } from '../../services/api/customers';
 import { useCustomers } from '../../context/CustomerContext';
+import { useRentalTransactions } from '../../context/RentalTransactionContext';
 
 const CustomerFormPage: React.FC = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id?: string }>();
-  const location = useLocation() as { state?: { customer?: Customer } };
+  const location = useLocation() as { state?: { customer?: Customer; returnToRental?: boolean } };
   const [customer, setCustomer] = useState<Customer | null>(location.state?.customer || null);
   const [loading, setLoading] = useState<boolean>(!!id && !customer);
   const { refreshData: refreshCustomerData } = useCustomers();
+  const { fetchCustomersForSelection } = useRentalTransactions();
 
   useEffect(() => {
     if (id && !customer) {
@@ -32,7 +34,15 @@ const CustomerFormPage: React.FC = () => {
     <div className="p-4">
       <CustomerForm
         customer={customer}
-        onSave={() => { refreshCustomerData(); navigate('/customers'); }}
+        onSave={(newId) => {
+          refreshCustomerData();
+          fetchCustomersForSelection();
+          if (location.state?.returnToRental && newId) {
+            navigate('/rentals/new', { state: { selectedCustomerId: String(newId) } });
+          } else {
+            navigate('/customers');
+          }
+        }}
         onCancel={() => navigate(-1)}
       />
     </div>

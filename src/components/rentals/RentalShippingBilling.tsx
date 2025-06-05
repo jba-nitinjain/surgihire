@@ -79,45 +79,47 @@ const RentalShippingBilling: React.FC<Props> = ({
             className={inputClass}
           />
         </div>
-        <div>
-          <label htmlFor="shipping_pincode" className={labelClass}>Shipping Pincode</label>
-          <OutlinedTextField
-            type="text"
-            id="shipping_pincode"
-            name="shipping_pincode"
-            value={data.shipping_pincode || ''}
-            onChange={handleChange}
-            className={inputClass}
-            inputProps={{ maxLength: 6 }}
-            InputProps={{
-              endAdornment: shippingPincodeDetailsLoading ? (
-                <InputAdornment position="end">
-                  <Loader2 className="h-5 w-5 text-gray-400 animate-spin" />
-                </InputAdornment>
-              ) : undefined,
-            }}
-          />
-          {errors.shipping_pincode && (
-            <p className="text-xs text-red-500 mt-1">{errors.shipping_pincode}</p>
-          )}
-          {shippingPincodeError && (
-            <p className="text-xs text-red-500 mt-1">{shippingPincodeError}</p>
-          )}
-        </div>
-        <div>
-          <label htmlFor="shipping_area" className={labelClass}>Shipping Area</label>
-          <AutocompleteField
-            id="shipping_area"
-            name="shipping_area"
-            value={data.shipping_area || ''}
-            onChange={handleChange}
-            options={shippingAreaOptions}
-            placeholder="Select Area"
-            freeSolo
-          />
-          {errors.shipping_area && (
-            <p className="text-xs text-red-500 mt-1">{errors.shipping_area}</p>
-          )}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div>
+            <label htmlFor="shipping_pincode" className={labelClass}>Shipping Pincode</label>
+            <OutlinedTextField
+              type="text"
+              id="shipping_pincode"
+              name="shipping_pincode"
+              value={data.shipping_pincode || ''}
+              onChange={handleChange}
+              className={inputClass}
+              inputProps={{ maxLength: 6 }}
+              InputProps={{
+                endAdornment: shippingPincodeDetailsLoading ? (
+                  <InputAdornment position="end">
+                    <Loader2 className="h-5 w-5 text-gray-400 animate-spin" />
+                  </InputAdornment>
+                ) : undefined,
+              }}
+            />
+            {errors.shipping_pincode && (
+              <p className="text-xs text-red-500 mt-1">{errors.shipping_pincode}</p>
+            )}
+            {shippingPincodeError && (
+              <p className="text-xs text-red-500 mt-1">{shippingPincodeError}</p>
+            )}
+          </div>
+          <div>
+            <label htmlFor="shipping_area" className={labelClass}>Shipping Area</label>
+            <AutocompleteField
+              id="shipping_area"
+              name="shipping_area"
+              value={data.shipping_area || ''}
+              onChange={handleChange}
+              options={shippingAreaOptions}
+              placeholder="Select Area"
+              freeSolo
+            />
+            {errors.shipping_area && (
+              <p className="text-xs text-red-500 mt-1">{errors.shipping_area}</p>
+            )}
+          </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <div>
@@ -159,45 +161,47 @@ const RentalShippingBilling: React.FC<Props> = ({
             className={inputClass}
           />
         </div>
-        <div>
-          <label htmlFor="billing_pincode" className={labelClass}>Billing Pincode</label>
-          <OutlinedTextField
-            type="text"
-            id="billing_pincode"
-            name="billing_pincode"
-            value={data.billing_pincode || ''}
-            onChange={handleChange}
-            className={inputClass}
-            inputProps={{ maxLength: 6 }}
-            InputProps={{
-              endAdornment: billingPincodeDetailsLoading ? (
-                <InputAdornment position="end">
-                  <Loader2 className="h-5 w-5 text-gray-400 animate-spin" />
-                </InputAdornment>
-              ) : undefined,
-            }}
-          />
-          {errors.billing_pincode && (
-            <p className="text-xs text-red-500 mt-1">{errors.billing_pincode}</p>
-          )}
-          {billingPincodeError && (
-            <p className="text-xs text-red-500 mt-1">{billingPincodeError}</p>
-          )}
-        </div>
-        <div>
-          <label htmlFor="billing_area" className={labelClass}>Billing Area</label>
-          <AutocompleteField
-            id="billing_area"
-            name="billing_area"
-            value={data.billing_area || ''}
-            onChange={handleChange}
-            options={billingAreaOptions}
-            placeholder="Select Area"
-            freeSolo
-          />
-          {errors.billing_area && (
-            <p className="text-xs text-red-500 mt-1">{errors.billing_area}</p>
-          )}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div>
+            <label htmlFor="billing_pincode" className={labelClass}>Billing Pincode</label>
+            <OutlinedTextField
+              type="text"
+              id="billing_pincode"
+              name="billing_pincode"
+              value={data.billing_pincode || ''}
+              onChange={handleChange}
+              className={inputClass}
+              inputProps={{ maxLength: 6 }}
+              InputProps={{
+                endAdornment: billingPincodeDetailsLoading ? (
+                  <InputAdornment position="end">
+                    <Loader2 className="h-5 w-5 text-gray-400 animate-spin" />
+                  </InputAdornment>
+                ) : undefined,
+              }}
+            />
+            {errors.billing_pincode && (
+              <p className="text-xs text-red-500 mt-1">{errors.billing_pincode}</p>
+            )}
+            {billingPincodeError && (
+              <p className="text-xs text-red-500 mt-1">{billingPincodeError}</p>
+            )}
+          </div>
+          <div>
+            <label htmlFor="billing_area" className={labelClass}>Billing Area</label>
+            <AutocompleteField
+              id="billing_area"
+              name="billing_area"
+              value={data.billing_area || ''}
+              onChange={handleChange}
+              options={billingAreaOptions}
+              placeholder="Select Area"
+              freeSolo
+            />
+            {errors.billing_area && (
+              <p className="text-xs text-red-500 mt-1">{errors.billing_area}</p>
+            )}
+          </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <div>

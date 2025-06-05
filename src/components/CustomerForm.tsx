@@ -8,7 +8,7 @@ import usePincodeLookup from '../utils/usePincodeLookup';
 
 interface CustomerFormProps {
   customer?: Customer | null; // For editing, null/undefined for creating
-  onSave: () => void;
+  onSave: (newCustomerId?: number | null) => void;
   onCancel: () => void;
 }
 
@@ -130,12 +130,15 @@ const CustomerForm: React.FC<CustomerFormProps> = ({ customer, onSave, onCancel 
         }
       }
 
+      let newId: number | null = null;
       if (customer && customer.customer_id) {
         await updateItem('customers', customer.customer_id, apiData);
+        newId = Number(customer.customer_id);
       } else {
-        await createItem('customers', apiData);
+        const res = await createItem('customers', apiData);
+        newId = res?.data?.customer_id ?? res?.data?.insertId ?? null;
       }
-      onSave();
+      onSave(newId);
     } catch (err) {
       console.error('Failed to save customer:', err);
     }

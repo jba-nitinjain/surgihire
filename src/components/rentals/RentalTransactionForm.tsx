@@ -40,6 +40,7 @@ interface RentalTransactionFormProps {
   rental?: RentalTransaction | null;
   onSave: () => void;
   onCancel: () => void;
+  defaultCustomerId?: string;
 }
 
 const initialFormData: RentalTransactionFormData = {
@@ -68,9 +69,10 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
   rental,
   onSave,
   onCancel,
+  defaultCustomerId,
 }) => {
   const [formData, setFormData] = useState<RentalTransactionFormData>(initialFormData);
-  const [formErrors, setFormErrors] = useState<Partial<Record<keyof RentalTransactionFormData | `rental_items.${number}.equipment_id` | `rental_items.${number}.unit_rental_rate`, string>>>({});
+  const [formErrors, setFormErrors] = useState<Partial<Record<keyof RentalTransactionFormData | `rental_items.${number}.equipment_id` | `rental_items.${number}.rental_rate`, string>>>({});
   const { createItem, updateItem, loading: crudLoading, error: crudError } = useCrud();
 
   const {
@@ -133,6 +135,17 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
   ]);
 
   useEffect(() => {
+    if (!isEditing && defaultCustomerId) {
+      const exists = customers.find(c => String(c.customer_id) === defaultCustomerId);
+      if (exists) {
+        setFormData(prev => ({ ...prev, customer_id: defaultCustomerId }));
+      } else if (!loadingCustomers) {
+        fetchCustomersForSelection();
+      }
+    }
+  }, [defaultCustomerId, isEditing, customers, loadingCustomers, fetchCustomersForSelection]);
+
+  useEffect(() => {
     if (rental) {
       setFormData({
         customer_id: rental.customer_id || '',
@@ -156,8 +169,11 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
         rental_items: rental.rental_items?.map(item => ({
           temp_id: String(item.rental_detail_id || crypto.randomUUID()),
           equipment_id: String(item.equipment_id),
-          equipment_name: item.equipment_name || availableEquipment.find(eq => eq.equipment_id === item.equipment_id)?.equipment_name || 'Loading...',
-          unit_rental_rate: String(item.unit_rental_rate),
+          equipment_name:
+            item.equipment_name ||
+            availableEquipment.find(eq => eq.equipment_id === item.equipment_id)?.equipment_name ||
+            'Loading...',
+          rental_rate: String(item.rental_rate),
           default_equipment_rate: availableEquipment.find(eq => eq.equipment_id === item.equipment_id)?.rental_rate,
         })) || [],
       });
@@ -177,18 +193,18 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
     if (selected) {
       setFormData(prev => ({
         ...prev,
-        shipping_address: prev.shipping_address || selected.shipping_address || '',
-        shipping_area: prev.shipping_area || selected.shipping_area || '',
-        shipping_city: prev.shipping_city || selected.shipping_city || '',
-        shipping_state: prev.shipping_state || selected.shipping_state || '',
-        shipping_pincode: prev.shipping_pincode || selected.shipping_pincode || '',
-        billing_address: prev.billing_address || selected.shipping_address || '',
-        billing_area: prev.billing_area || selected.shipping_area || '',
-        billing_city: prev.billing_city || selected.shipping_city || '',
-        billing_state: prev.billing_state || selected.shipping_state || '',
-        billing_pincode: prev.billing_pincode || selected.shipping_pincode || '',
-        mobile_number: prev.mobile_number || selected.mobile_number_1 || '',
-        email: prev.email || selected.email || '',
+        shipping_address: selected.shipping_address || '',
+        shipping_area: selected.shipping_area || '',
+        shipping_city: selected.shipping_city || '',
+        shipping_state: selected.shipping_state || '',
+        shipping_pincode: selected.shipping_pincode || '',
+        billing_address: selected.shipping_address || '',
+        billing_area: selected.shipping_area || '',
+        billing_city: selected.shipping_city || '',
+        billing_state: selected.shipping_state || '',
+        billing_pincode: selected.shipping_pincode || '',
+        mobile_number: selected.mobile_number_1 || '',
+        email: selected.email || '',
       }));
       setOriginalShippingPincode(selected.shipping_pincode || '');
       setOriginalBillingPincode(selected.shipping_pincode || '');
@@ -210,7 +226,7 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
     setNumberOfDays(days);
 
     const dailyRateFromItems = formData.rental_items.reduce((sum, item) => {
-      const rate = parseFloat(item.unit_rental_rate) || 0;
+      const rate = parseFloat(item.rental_rate) || 0;
       return sum + rate;
     }, 0);
 
@@ -269,7 +285,7 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
 
 
   const validateForm = (): boolean => {
-    const errors: Partial<Record<keyof RentalTransactionFormData | `rental_items.${number}.equipment_id` | `rental_items.${number}.unit_rental_rate`, string>> = {};
+    const errors: Partial<Record<keyof RentalTransactionFormData | `rental_items.${number}.equipment_id` | `rental_items.${number}.rental_rate`, string>> = {};
     if (!formData.customer_id) errors.customer_id = 'Customer is required.';
     if (!formData.rental_date) errors.rental_date = 'Rental date is required.';
     if (!formData.expected_return_date) {
@@ -298,7 +314,7 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
 
     formData.rental_items.forEach((item, index) => {
       if (!item.equipment_id) errors[`rental_items.${index}.equipment_id`] = 'Equipment is required.';
-      if (!item.unit_rental_rate || parseFloat(item.unit_rental_rate) < 0) errors[`rental_items.${index}.unit_rental_rate`] = 'Rate must be non-negative.';
+      if (!item.rental_rate || parseFloat(item.rental_rate) < 0) errors[`rental_items.${index}.rental_rate`] = 'Rate must be non-negative.';
     });
 
     if (formData.rental_items.length === 0) {
@@ -325,8 +341,11 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
       const selectedEquipment = availableEquipment.find(eq => String(eq.equipment_id) === value);
       currentItem.equipment_name = selectedEquipment?.equipment_name || 'Unknown Equipment';
       currentItem.default_equipment_rate = selectedEquipment?.rental_rate;
-      if (!currentItem.unit_rental_rate || currentItem.unit_rental_rate === "0") {
-        currentItem.unit_rental_rate = selectedEquipment?.rental_rate !== null && selectedEquipment?.rental_rate !== undefined ? String(selectedEquipment.rental_rate) : '0';
+      if (!currentItem.rental_rate || currentItem.rental_rate === "0") {
+        currentItem.rental_rate =
+          selectedEquipment?.rental_rate !== null && selectedEquipment?.rental_rate !== undefined
+            ? String(selectedEquipment.rental_rate)
+            : '0';
       }
     }
     updatedItems[index] = currentItem;
@@ -347,7 +366,7 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
           temp_id: crypto.randomUUID(),
           equipment_id: '',
           equipment_name: '',
-          unit_rental_rate: '0',
+          rental_rate: '0',
           default_equipment_rate: null,
         },
       ],
@@ -361,7 +380,7 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
     }));
     const newFormErrors = { ...formErrors };
     delete newFormErrors[`rental_items.${index}.equipment_id`];
-    delete newFormErrors[`rental_items.${index}.unit_rental_rate`];
+    delete newFormErrors[`rental_items.${index}.rental_rate`];
     setFormErrors(newFormErrors);
   };
 
@@ -400,6 +419,7 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
       total_amount: calculatedTotalAmount, // Add calculated total amount
       rental_items: formData.rental_items.map(item => ({
         equipment_id: parseInt(item.equipment_id, 10),
+        rental_rate: parseFloat(item.rental_rate) || 0,
         ...(isEditing &&
           rental?.rental_items?.find(ri => String(ri.equipment_id) === item.equipment_id)?.rental_detail_id
             ? { rental_detail_id: rental.rental_items.find(ri => String(ri.equipment_id) === item.equipment_id)!.rental_detail_id }
@@ -424,10 +444,12 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
               ? updateRentalDetail(item.rental_detail_id, {
                   rental_id: rental.rental_id,
                   equipment_id: item.equipment_id,
+                  rental_rate: item.rental_rate,
                 })
               : createRentalDetail({
                   rental_id: rental.rental_id,
                   equipment_id: item.equipment_id,
+                  rental_rate: item.rental_rate,
                 })
           )
         );
@@ -440,6 +462,7 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
               createRentalDetail({
                 rental_id: Number(newId),
                 equipment_id: item.equipment_id,
+                rental_rate: item.rental_rate,
               })
             )
           );
@@ -506,30 +529,31 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
             customerId={formData.customer_id}
             customers={customers}
             loadingCustomers={loadingCustomers}
+            status={formData.status}
+            statusOptions={RENTAL_STATUSES_FORM}
             handleChange={handleChange}
             error={formErrors.customer_id}
+            statusError={formErrors.status}
             inputClass={inputClass}
             labelClass={labelClass}
             iconClass={iconClass}
+            onAddCustomer={() => navigate('/customers/new', { state: { returnToRental: true } })}
           />
 
           <RentalStatusDates
             data={{
               rental_date: formData.rental_date,
               expected_return_date: formData.expected_return_date,
-              status: formData.status,
             }}
             numberOfDays={numberOfDays}
             errors={{
               rental_date: formErrors.rental_date,
               expected_return_date: formErrors.expected_return_date,
-              status: formErrors.status,
             }}
             handleChange={handleChange}
             inputClass={inputClass}
             labelClass={labelClass}
             iconClass={iconClass}
-            statusOptions={RENTAL_STATUSES_FORM}
           />
 
           <div>

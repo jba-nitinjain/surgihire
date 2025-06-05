@@ -8,14 +8,17 @@ import { useRentalTransactions } from '../../context/RentalTransactionContext';
 const RentalFormPage: React.FC = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id?: string }>();
-  const location = useLocation() as { state?: { rental?: RentalTransaction } };
+  const location = useLocation() as { state?: { rental?: RentalTransaction; selectedCustomerId?: string } };
 
   const [rental, setRental] = useState<RentalTransaction | null>(location.state?.rental || null);
-  const [loading, setLoading] = useState<boolean>(!!id && !rental);
+  const [loading, setLoading] = useState<boolean>(!!id && !location.state?.rental);
   const { refreshRentalTransactions } = useRentalTransactions();
 
   useEffect(() => {
-    if (id && !rental) {
+    if (!id) return;
+
+    if (!rental || !Array.isArray(rental.rental_items) || rental.rental_items.length === 0) {
+      setLoading(true);
       Promise.all([
         getRental(Number(id)),
         fetchRentalDetailsByRentalId(Number(id), { records: 100, skip: 0 }),
@@ -42,6 +45,7 @@ const RentalFormPage: React.FC = () => {
     <div className="p-4">
       <RentalTransactionForm
         rental={rental}
+        defaultCustomerId={location.state?.selectedCustomerId}
         onSave={() => { refreshRentalTransactions(); navigate('/rentals'); }}
         onCancel={() => navigate(-1)}
       />

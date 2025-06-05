@@ -1,10 +1,11 @@
 import { ApiResponse, PaginationParams } from '../../types';
-import { createRecordGeneric, updateRecordGeneric, deleteRecord, getRecord, listRecords, searchRecords } from './core';
+import { createRecordGeneric, updateRecordGeneric, deleteRecord, listRecords, searchRecords, getRecord } from './core';
+import { getRental } from './rentals';
 
 const TABLE = 'payments';
 const RENTALS_TABLE = 'rental_transactions';
 
-const fetchRental = (id: number) => getRecord(RENTALS_TABLE, id);
+const fetchRental = (id: number) => getRental(id);
 const updateRentalRecord = (id: number, data: Record<string, any>) => updateRecordGeneric(RENTALS_TABLE, id, data);
 
 export const fetchPayments = (params: PaginationParams): Promise<ApiResponse> => listRecords(TABLE, params);
