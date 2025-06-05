@@ -3,6 +3,7 @@ import { Payment, PaymentFormData } from '../../types';
 import { useCrud } from '../../context/CrudContext';
 import { Save, X, Loader2, CalendarCheck2, IndianRupee } from 'lucide-react';
 
+import DatePickerField from "../ui/DatePickerField";
 interface PaymentFormProps {
   payment?: Payment | null;
   onSave: () => void;
@@ -165,13 +166,10 @@ const PaymentForm: React.FC<PaymentFormProps> = ({ payment, onSave, onCancel }) 
           <label htmlFor="payment_date" className="block text-sm font-medium text-dark-text mb-1">
             Date
           </label>
-          <input
-            type="date"
-            id="payment_date"
+          <DatePickerField
             name="payment_date"
             value={formData.payment_date}
             onChange={handleChange}
-            className={inputClass}
           />
           {formErrors.payment_date && <p className="text-red-600 text-sm mt-1">{formErrors.payment_date}</p>}
         </div>

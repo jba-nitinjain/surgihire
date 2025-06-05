@@ -2,6 +2,8 @@ import React from 'react';
 import { MaintenanceRecordFormData, Equipment } from '../../types';
 import { Loader2, Package, CalendarDays } from 'lucide-react';
 
+import DatePickerField from "../ui/DatePickerField";
+
 interface Props {
   formData: MaintenanceRecordFormData;
   formErrors: Partial<Record<keyof MaintenanceRecordFormData, string>>;
@@ -61,18 +63,12 @@ const MaintenanceRecordInfo: React.FC<Props> = ({
         <label htmlFor="maintenance_date" className={labelClass}>
           Maintenance Date <span className="text-red-500">*</span>
         </label>
-        <div className="mt-1 relative rounded-md shadow-sm">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <CalendarDays className={iconClass} />
-          </div>
-          <input
-            type="date"
-            id="maintenance_date"
+        <div className="mt-1">
+          <DatePickerField
             name="maintenance_date"
             value={formData.maintenance_date}
             onChange={handleChange}
             required
-            className={`${inputClass} pl-10`}
           />
         </div>
         {formErrors.maintenance_date && <p className="text-xs text-red-500 mt-1">{formErrors.maintenance_date}</p>}

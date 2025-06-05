@@ -2,6 +2,7 @@ import React from 'react';
 import { CalendarDays, ChevronDown } from 'lucide-react';
 import { RentalTransactionFormData } from '../../types';
 
+import DatePickerField from "../ui/DatePickerField";
 interface Props {
   data: Pick<RentalTransactionFormData, 'rental_date' | 'expected_return_date' | 'status'>;
   numberOfDays: number;
@@ -31,13 +32,10 @@ const RentalStatusDates: React.FC<Props> = ({
       <label htmlFor="rental_date" className={labelClass}>
         Rental Date <span className="text-red-500">*</span>
       </label>
-      <input
-        type="date"
+      <DatePickerField
         name="rental_date"
-        id="rental_date"
         value={data.rental_date}
         onChange={handleChange}
-        className={inputClass}
         required
       />
       {errors.rental_date && (
@@ -49,13 +47,10 @@ const RentalStatusDates: React.FC<Props> = ({
       <label htmlFor="expected_return_date" className={labelClass}>
         Expected Return Date <span className="text-red-500">*</span>
       </label>
-      <input
-        type="date"
+      <DatePickerField
         name="expected_return_date"
-        id="expected_return_date"
         value={data.expected_return_date || ''}
         onChange={handleChange}
-        className={inputClass}
         required
       />
       {errors.expected_return_date && (
