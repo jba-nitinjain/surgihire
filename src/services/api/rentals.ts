@@ -1,6 +1,7 @@
 import { ApiResponse, PaginationParams } from '../../types';
 import { createRecordGeneric, updateRecordGeneric, deleteRecord, listRecords, getRecord, fetchFromApi } from './core';
-import { fetchEquipmentByIds } from './equipment';
+import { fetchEquipmentByIds, bulkUpdateEquipmentStatus } from './equipment';
+import dayjs from 'dayjs';
 
 const RENTAL_TRANSACTIONS_TABLE = 'rental_transactions';
 const RENTAL_DETAILS_TABLE = 'rental_details';
@@ -81,3 +82,28 @@ export const createPaymentSchedule = (data: Record<string, any>): Promise<ApiRes
 export const updatePaymentSchedule = (id: number, data: Record<string, any>): Promise<ApiResponse> => updateRecordGeneric('payment_schedules', id, data);
 export const deletePaymentSchedule = (id: number): Promise<ApiResponse> => deleteRecord('payment_schedules', id);
 export const getPaymentSchedule = (id: number): Promise<ApiResponse> => getRecord('payment_schedules', id);
+
+export const updateRentalStatus = (
+  id: number,
+  status: string,
+  actualReturnDate?: string
+): Promise<ApiResponse> => {
+  const data: Record<string, any> = { status };
+  if (actualReturnDate) data.actual_return_date = actualReturnDate;
+  return updateRental(id, data);
+};
+
+export const returnRental = async (
+  rentalId: number,
+  itemEquipmentIds?: number[]
+): Promise<ApiResponse> => {
+  const res = await updateRentalStatus(
+    rentalId,
+    'Returned/Completed',
+    dayjs().format('YYYY-MM-DD')
+  );
+  if (res.success && itemEquipmentIds && itemEquipmentIds.length > 0) {
+    await bulkUpdateEquipmentStatus(itemEquipmentIds, 'Available');
+  }
+  return res;
+};
