@@ -85,6 +85,31 @@ const RentalShippingBilling: React.FC<Props> = ({
           />
         </div>
         <div>
+          <label htmlFor="shipping_pincode" className={labelClass}>Shipping Pincode</label>
+          <div className="relative">
+            <input
+              type="text"
+              id="shipping_pincode"
+              name="shipping_pincode"
+              value={data.shipping_pincode || ''}
+              onChange={handleChange}
+              className={inputClass}
+              maxLength={6}
+            />
+            {shippingPincodeDetailsLoading && (
+              <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                <Loader2 className="h-5 w-5 text-gray-400 animate-spin" />
+              </div>
+            )}
+          </div>
+          {errors.shipping_pincode && (
+            <p className="text-xs text-red-500 mt-1">{errors.shipping_pincode}</p>
+          )}
+          {shippingPincodeError && (
+            <p className="text-xs text-red-500 mt-1">{shippingPincodeError}</p>
+          )}
+        </div>
+        <div>
           <label htmlFor="shipping_area" className={labelClass}>Shipping Area</label>
           {shippingIsAreaSelect ? (
             <select
@@ -140,31 +165,6 @@ const RentalShippingBilling: React.FC<Props> = ({
             readOnly
           />
         </div>
-        <div>
-          <label htmlFor="shipping_pincode" className={labelClass}>Shipping Pincode</label>
-          <div className="relative">
-            <input
-              type="text"
-              id="shipping_pincode"
-              name="shipping_pincode"
-              value={data.shipping_pincode || ''}
-              onChange={handleChange}
-              className={inputClass}
-              maxLength={6}
-            />
-            {shippingPincodeDetailsLoading && (
-              <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                <Loader2 className="h-5 w-5 text-gray-400 animate-spin" />
-              </div>
-            )}
-          </div>
-          {errors.shipping_pincode && (
-            <p className="text-xs text-red-500 mt-1">{errors.shipping_pincode}</p>
-          )}
-          {shippingPincodeError && (
-            <p className="text-xs text-red-500 mt-1">{shippingPincodeError}</p>
-          )}
-        </div>
       </div>
       <div className="space-y-4">
         <div>
@@ -177,6 +177,31 @@ const RentalShippingBilling: React.FC<Props> = ({
             rows={2}
             className={inputClass}
           />
+        </div>
+        <div>
+          <label htmlFor="billing_pincode" className={labelClass}>Billing Pincode</label>
+          <div className="relative">
+            <input
+              type="text"
+              id="billing_pincode"
+              name="billing_pincode"
+              value={data.billing_pincode || ''}
+              onChange={handleChange}
+              className={inputClass}
+              maxLength={6}
+            />
+            {billingPincodeDetailsLoading && (
+              <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                <Loader2 className="h-5 w-5 text-gray-400 animate-spin" />
+              </div>
+            )}
+          </div>
+          {errors.billing_pincode && (
+            <p className="text-xs text-red-500 mt-1">{errors.billing_pincode}</p>
+          )}
+          {billingPincodeError && (
+            <p className="text-xs text-red-500 mt-1">{billingPincodeError}</p>
+          )}
         </div>
         <div>
           <label htmlFor="billing_area" className={labelClass}>Billing Area</label>
@@ -233,31 +258,6 @@ const RentalShippingBilling: React.FC<Props> = ({
             className={inputClass}
             readOnly
           />
-        </div>
-        <div>
-          <label htmlFor="billing_pincode" className={labelClass}>Billing Pincode</label>
-          <div className="relative">
-            <input
-              type="text"
-              id="billing_pincode"
-              name="billing_pincode"
-              value={data.billing_pincode || ''}
-              onChange={handleChange}
-              className={inputClass}
-              maxLength={6}
-            />
-            {billingPincodeDetailsLoading && (
-              <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                <Loader2 className="h-5 w-5 text-gray-400 animate-spin" />
-              </div>
-            )}
-          </div>
-          {errors.billing_pincode && (
-            <p className="text-xs text-red-500 mt-1">{errors.billing_pincode}</p>
-          )}
-          {billingPincodeError && (
-            <p className="text-xs text-red-500 mt-1">{billingPincodeError}</p>
-          )}
         </div>
       </div>
     </div>
