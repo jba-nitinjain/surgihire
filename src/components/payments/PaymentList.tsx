@@ -7,6 +7,7 @@ import EmptyState from '../ui/EmptyState';
 import ErrorDisplay from '../ui/ErrorDisplay';
 import { Payment } from '../../types';
 import { IndianRupee } from 'lucide-react';
+import { formatCurrency } from '../../utils/formatting';
 
 interface PaymentListProps {
   onEditPayment: (payment: Payment) => void;
@@ -14,7 +15,7 @@ interface PaymentListProps {
 }
 
 const PaymentList: React.FC<PaymentListProps> = ({ onEditPayment, onViewPayment }) => {
-  const {
+  const { 
     payments,
     loading,
     error,
@@ -23,6 +24,7 @@ const PaymentList: React.FC<PaymentListProps> = ({ onEditPayment, onViewPayment 
     fetchPaymentsPage,
     refreshPayments,
     searchQuery,
+    totalAmount,
   } = usePayments();
 
   const recordsPerPage = 10; // Should match context
@@ -72,6 +74,13 @@ const PaymentList: React.FC<PaymentListProps> = ({ onEditPayment, onViewPayment 
               />
             ))}
           </tbody>
+          <tfoot>
+            <tr className="bg-light-gray-50 font-medium">
+              <td colSpan={5} className="px-6 py-3 text-right">Total</td>
+              <td className="px-6 py-3">{formatCurrency(totalAmount)}</td>
+              <td colSpan={2}></td>
+            </tr>
+          </tfoot>
         </table>
       </div>
       {loading && payments.length > 0 && (

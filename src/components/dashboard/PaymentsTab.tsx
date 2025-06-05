@@ -1,12 +1,13 @@
 import React from 'react';
 import { usePayments } from '../../context/PaymentContext';
 import PaymentList from '../payments/PaymentList';
-import SearchBox from '../ui/SearchBox';
+import PaymentFilterBar from './PaymentFilterBar';
 import { Payment } from '../../types';
 import { useNavigate } from 'react-router-dom';
+import { formatCurrency } from '../../utils/formatting';
 
 const PaymentsTab: React.FC = () => {
-  const { searchQuery, setSearchQuery } = usePayments();
+  const { searchQuery, setSearchQuery, filters, setFilters, depositTotal, rentalTotal } = usePayments();
   const navigate = useNavigate();
 
 
@@ -20,11 +21,21 @@ const PaymentsTab: React.FC = () => {
 
   return (
     <>
-      <div className="mb-6 md:flex md:items-center md:justify-between">
-        <div className="w-full md:max-w-xs mb-4 md:mb-0">
-          <SearchBox value={searchQuery} onChange={setSearchQuery} placeholder="Search payments..." />
+      <PaymentFilterBar
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        filters={filters}
+        onFiltersChange={setFilters}
+      />
+      <div className="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="p-4 bg-white rounded shadow">
+          <div className="text-sm text-dark-text">Deposits This Month</div>
+          <div className="text-lg font-semibold">{formatCurrency(depositTotal)}</div>
         </div>
-        {/* Record Payment button removed as payments are created from rental page */}
+        <div className="p-4 bg-white rounded shadow">
+          <div className="text-sm text-dark-text">Rentals This Month</div>
+          <div className="text-lg font-semibold">{formatCurrency(rentalTotal)}</div>
+        </div>
       </div>
       <PaymentList onEditPayment={handleOpenPaymentFormForEdit} onViewPayment={handleViewPayment} />
     </>
