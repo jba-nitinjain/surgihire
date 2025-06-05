@@ -27,16 +27,7 @@ import NotFound from './components/pages/NotFound';
 
 function App() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const theme = createTheme({
-    components: {
-      MuiTextField: {
-        defaultProps: {
-          variant: 'outlined',
-          InputLabelProps: { shrink: true },
-        },
-      },
-    },
-  });
+  const theme = createTheme();
 
   return (
     <ThemeProvider theme={theme}>
