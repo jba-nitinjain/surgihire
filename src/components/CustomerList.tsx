@@ -57,7 +57,7 @@ const CustomerList: React.FC<CustomerListProps> = ({
     <Paper elevation={2} sx={{ overflow: 'hidden', p: 2 }}>
       <Grid container spacing={2}>
         {customers.map((customer) => (
-          <Grid item xs={12} sm={6} md={4} lg={3} key={customer.customer_id}>
+          <Grid item xs={12} sm={6} md={4} lg={4} key={customer.customer_id}>
             <CustomerListItem
               customer={customer}
               onSelect={onSelectCustomer}

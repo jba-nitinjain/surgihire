@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import SearchBox from '../ui/SearchBox';
 import { PlusCircle } from 'lucide-react';
 import Button from '@mui/material/Button';
+import Typography from '@mui/material/Typography';
 import { Customer } from '../../types';
 
 interface CustomerTabProps {
@@ -37,14 +38,19 @@ const CustomerTab: React.FC<CustomerTabProps> = ({ onViewRentalsForCustomer }) =
         <div className="w-full md:max-w-xs mb-4 md:mb-0">
           <SearchBox value={searchQuery} onChange={setSearchQuery} placeholder="Search customers..."/>
         </div>
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={handleOpenCustomerFormForCreate}
-          startIcon={<PlusCircle className="h-5 w-5" />}
-        >
-          Add New Customer
-        </Button>
+        <div className="flex flex-col items-start md:items-end">
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleOpenCustomerFormForCreate}
+            startIcon={<PlusCircle className="h-5 w-5" />}
+          >
+            Add New Customer
+          </Button>
+          <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5 }}>
+            Create a new customer record
+          </Typography>
+        </div>
       </div>
       <CustomerList
         onSelectCustomer={handleSelectCustomerForDetail}

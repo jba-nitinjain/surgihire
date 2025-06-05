@@ -84,7 +84,7 @@ const EquipmentList: React.FC<EquipmentListProps> = ({
       )}
       <Grid container spacing={2}>
         {equipmentList.map((item) => (
-          <Grid item xs={12} sm={6} md={4} lg={3} key={item.equipment_id}>
+          <Grid item xs={12} sm={6} md={4} lg={4} key={item.equipment_id}>
             <EquipmentListItem
               equipment={item}
               onEdit={onEditEquipment}

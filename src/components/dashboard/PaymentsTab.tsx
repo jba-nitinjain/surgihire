@@ -4,6 +4,7 @@ import PaymentList from '../payments/PaymentList';
 import SearchBox from '../ui/SearchBox';
 import { PlusCircle } from 'lucide-react';
 import Button from '@mui/material/Button';
+import Typography from '@mui/material/Typography';
 import { Payment } from '../../types';
 import { useNavigate } from 'react-router-dom';
 
@@ -29,14 +30,19 @@ const PaymentsTab: React.FC = () => {
         <div className="w-full md:max-w-xs mb-4 md:mb-0">
           <SearchBox value={searchQuery} onChange={setSearchQuery} placeholder="Search payments..." />
         </div>
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={handleOpenPaymentFormForCreate}
-          startIcon={<PlusCircle className="h-5 w-5" />}
-        >
-          Record Payment
-        </Button>
+        <div className="flex flex-col items-start md:items-end">
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleOpenPaymentFormForCreate}
+            startIcon={<PlusCircle className="h-5 w-5" />}
+          >
+            Record Payment
+          </Button>
+          <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5 }}>
+            Log a payment for a rental
+          </Typography>
+        </div>
       </div>
       <PaymentList onEditPayment={handleOpenPaymentFormForEdit} onViewPayment={handleViewPayment} />
     </>

@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import EquipmentFilterPanel from './EquipmentFilterPanel';
 import { PlusCircle } from 'lucide-react';
 import Button from '@mui/material/Button';
+import Typography from '@mui/material/Typography';
 import { Equipment } from '../../types';
 
 interface EquipmentTabProps {
@@ -68,14 +69,19 @@ const EquipmentTab: React.FC<EquipmentTabProps> = ({
         />
 
       <div className="mb-6 flex justify-end">
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={handleOpenEquipmentFormForCreate}
-          startIcon={<PlusCircle className="h-5 w-5" />}
-        >
-          Add New Equipment
-        </Button>
+        <div className="flex flex-col items-end">
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleOpenEquipmentFormForCreate}
+            startIcon={<PlusCircle className="h-5 w-5" />}
+          >
+            Add New Equipment
+          </Button>
+          <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5 }}>
+            Register new equipment details
+          </Typography>
+        </div>
       </div>
       <EquipmentList
         onEditEquipment={handleOpenEquipmentFormForEdit}
