@@ -17,6 +17,7 @@ interface AutocompleteFieldProps {
   loading?: boolean;
   disabled?: boolean;
   placeholder?: string;
+  freeSolo?: boolean;
 }
 
 const AutocompleteField: React.FC<AutocompleteFieldProps> = ({
@@ -28,6 +29,7 @@ const AutocompleteField: React.FC<AutocompleteFieldProps> = ({
   loading = false,
   disabled = false,
   placeholder,
+  freeSolo = false,
 }) => {
   const selectedOption =
     options.find((opt) => String(opt.value) === String(value)) || null;
@@ -44,6 +46,7 @@ const AutocompleteField: React.FC<AutocompleteFieldProps> = ({
 
   return (
     <Autocomplete
+      freeSolo={freeSolo}
       options={options}
       getOptionLabel={(option) => option.label}
       value={selectedOption}
