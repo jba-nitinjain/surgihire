@@ -107,7 +107,7 @@ const Dashboard: React.FC<DashboardProps> = ({ sidebarOpen, setSidebarOpen }) =>
   }, [location.pathname]);
 
   return (
-    <div className="min-h-screen bg-light-gray-50 flex">
+    <div className="min-h-screen bg-white-50 flex">
       {sidebarOpen && <div className="sidebar-overlay md:hidden" onClick={toggleSidebar}></div>}
       <div className={`sidebar ${!sidebarOpen ? 'closed' : ''}`}>
         <div className="flex items-center justify-between p-4 border-b">
