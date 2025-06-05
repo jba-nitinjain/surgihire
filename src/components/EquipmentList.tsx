@@ -8,12 +8,7 @@ import EmptyState from '../components/ui/EmptyState';
 import ErrorDisplay from '../components/ui/ErrorDisplay';
 import { Equipment } from '../types';
 import { Package } from 'lucide-react';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
+import Grid from '@mui/material/Grid';
 import Paper from '@mui/material/Paper';
 
 interface EquipmentListProps {
@@ -81,37 +76,25 @@ const EquipmentList: React.FC<EquipmentListProps> = ({
   }
 
   return (
-    <Paper elevation={2} sx={{ overflow: 'hidden' }}>
+    <Paper elevation={2} sx={{ overflow: 'hidden', p: 2 }}>
       {categoriesLoading && equipmentList.length > 0 && (
         <div className="my-2 flex justify-center items-center text-sm text-gray-500">
           <Spinner size="sm" /> <span className="ml-2">Loading category details...</span>
         </div>
       )}
-      <TableContainer>
-        <Table size="small">
-          <TableHead sx={{ backgroundColor: '#f9fafb' }}>
-            <TableRow>
-              <TableCell>ID</TableCell>
-              <TableCell>Name</TableCell>
-              <TableCell>Category</TableCell>
-              <TableCell>Status</TableCell>
-              <TableCell align="right">Actions</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {equipmentList.map((item) => (
-              <EquipmentListItem
-                key={item.equipment_id}
-                equipment={item}
-                onEdit={onEditEquipment}
-                onViewMaintenance={onViewMaintenance}
-                onViewDetail={onViewDetail}
-                categoryName={getCategoryName(item.category_id)}
-              />
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+      <Grid container spacing={2}>
+        {equipmentList.map((item) => (
+          <Grid item xs={12} sm={6} md={4} lg={3} key={item.equipment_id}>
+            <EquipmentListItem
+              equipment={item}
+              onEdit={onEditEquipment}
+              onViewMaintenance={onViewMaintenance}
+              onViewDetail={onViewDetail}
+              categoryName={getCategoryName(item.category_id)}
+            />
+          </Grid>
+        ))}
+      </Grid>
       {loading && equipmentList.length > 0 && (
         <div className="my-4 flex justify-center">
           <Spinner size="md" />

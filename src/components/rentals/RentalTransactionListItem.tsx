@@ -6,8 +6,10 @@ import ConfirmationModal from '../ui/ConfirmationModal';
 import { useRentalTransactions } from '../../context/RentalTransactionContext';
 import { formatDate, formatCurrency } from '../../utils/formatting';
 import { useNavigate } from 'react-router-dom';
-import TableRow from '@mui/material/TableRow';
-import TableCell from '@mui/material/TableCell';
+import Card from '@mui/material/Card';
+import CardContent from '@mui/material/CardContent';
+import CardActions from '@mui/material/CardActions';
+import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 
 interface RentalTransactionListItemProps {
@@ -37,13 +39,25 @@ const RentalTransactionListItem: React.FC<RentalTransactionListItemProps> = ({ r
 
   return (
     <>
-      <TableRow hover>
-        <TableCell>{rental.rental_id}</TableCell>
-        <TableCell>{rental.customer_name || rental.customer_id}</TableCell>
-        <TableCell>{formatDate(rental.rental_date)}</TableCell>
-        <TableCell>{rental.status || '-'}</TableCell>
-        <TableCell>{rental.total_amount !== null ? formatCurrency(rental.total_amount) : '-'}</TableCell>
-        <TableCell align="right">
+      <Card variant="outlined">
+        <CardContent>
+          <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+            ID: {rental.rental_id}
+          </Typography>
+          <Typography variant="body1" component="div">
+            {rental.customer_name || rental.customer_id}
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Rental Date: {formatDate(rental.rental_date)}
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Status: {rental.status || '-'}
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            {rental.total_amount !== null ? formatCurrency(rental.total_amount) : '-'}
+          </Typography>
+        </CardContent>
+        <CardActions sx={{ justifyContent: 'flex-end' }}>
           <IconButton size="small" color="primary" onClick={() => onEdit(rental)} disabled={crudLoading}>
             <Edit3 size={18} />
           </IconButton>
@@ -53,8 +67,8 @@ const RentalTransactionListItem: React.FC<RentalTransactionListItemProps> = ({ r
           <IconButton size="small" color="error" onClick={() => setConfirmOpen(true)} disabled={crudLoading}>
             <Trash2 size={18} />
           </IconButton>
-        </TableCell>
-      </TableRow>
+        </CardActions>
+      </Card>
       <ConfirmationModal
         isOpen={confirmOpen}
         title="Delete Rental Transaction"

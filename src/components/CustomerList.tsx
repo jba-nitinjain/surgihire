@@ -1,12 +1,7 @@
 import React from 'react';
 import { useCustomers } from '../context/CustomerContext';
 import CustomerListItem from './CustomerListItem';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
+import Grid from '@mui/material/Grid';
 import Paper from '@mui/material/Paper';
 import Spinner from './ui/Spinner';
 import Pagination from './ui/Pagination';
@@ -59,32 +54,19 @@ const CustomerList: React.FC<CustomerListProps> = ({
   }
 
   return (
-    <Paper elevation={2} sx={{ overflow: 'hidden' }}>
-      <TableContainer>
-        <Table size="small">
-          <TableHead sx={{ backgroundColor: '#f9fafb' }}>
-            <TableRow>
-              <TableCell>ID</TableCell>
-              <TableCell>Name</TableCell>
-              <TableCell>Phone</TableCell>
-              <TableCell>Email</TableCell>
-              <TableCell>Registered</TableCell>
-              <TableCell align="right">Actions</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {customers.map((customer) => (
-              <CustomerListItem
-                key={customer.customer_id}
-                customer={customer}
-                onSelect={onSelectCustomer}
-                onEdit={onEditCustomer}
-                onViewRentals={onViewRentals}
-              />
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+    <Paper elevation={2} sx={{ overflow: 'hidden', p: 2 }}>
+      <Grid container spacing={2}>
+        {customers.map((customer) => (
+          <Grid item xs={12} sm={6} md={4} lg={3} key={customer.customer_id}>
+            <CustomerListItem
+              customer={customer}
+              onSelect={onSelectCustomer}
+              onEdit={onEditCustomer}
+              onViewRentals={onViewRentals}
+            />
+          </Grid>
+        ))}
+      </Grid>
       {loading && customers.length > 0 && (
         <div className="my-4 flex justify-center">
           <Spinner size="md" />

@@ -5,8 +5,10 @@ import { useCrud } from '../context/CrudContext';
 import ConfirmationModal from './ui/ConfirmationModal';
 import { useCustomers } from '../context/CustomerContext';
 import { formatDate } from '../utils/formatting';
-import TableRow from '@mui/material/TableRow';
-import TableCell from '@mui/material/TableCell';
+import Card from '@mui/material/Card';
+import CardContent from '@mui/material/CardContent';
+import CardActions from '@mui/material/CardActions';
+import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 
 interface CustomerListItemProps {
@@ -32,24 +34,59 @@ const CustomerListItem: React.FC<CustomerListItemProps> = ({ customer, onEdit, o
 
   return (
     <>
-      <TableRow hover sx={{ cursor: 'pointer' }} onClick={() => onSelect(customer)}>
-        <TableCell>{customer.customer_id}</TableCell>
-        <TableCell>{customer.full_name || 'Unnamed'}</TableCell>
-        <TableCell>{customer.mobile_number_1 || '-'}</TableCell>
-        <TableCell>{customer.email || '-'}</TableCell>
-        <TableCell>{formatDate(customer.registration_date)}</TableCell>
-        <TableCell align="right">
-          <IconButton size="small" color="primary" onClick={e => { e.stopPropagation(); onViewRentals(String(customer.customer_id)); }}>
+      <Card variant="outlined" sx={{ cursor: 'pointer' }} onClick={() => onSelect(customer)}>
+        <CardContent>
+          <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+            ID: {customer.customer_id}
+          </Typography>
+          <Typography variant="h6" component="div">
+            {customer.full_name || 'Unnamed'}
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            {customer.mobile_number_1 || '-'}
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            {customer.email || '-'}
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Registered: {formatDate(customer.registration_date)}
+          </Typography>
+        </CardContent>
+        <CardActions sx={{ justifyContent: 'flex-end' }}>
+          <IconButton
+            size="small"
+            color="primary"
+            onClick={e => {
+              e.stopPropagation();
+              onViewRentals(String(customer.customer_id));
+            }}
+          >
             <ListChecks size={18} />
           </IconButton>
-          <IconButton size="small" color="primary" onClick={e => { e.stopPropagation(); onEdit(customer); }} disabled={crudLoading}>
+          <IconButton
+            size="small"
+            color="primary"
+            onClick={e => {
+              e.stopPropagation();
+              onEdit(customer);
+            }}
+            disabled={crudLoading}
+          >
             <Edit3 size={18} />
           </IconButton>
-          <IconButton size="small" color="error" onClick={e => { e.stopPropagation(); setConfirmOpen(true); }} disabled={crudLoading}>
+          <IconButton
+            size="small"
+            color="error"
+            onClick={e => {
+              e.stopPropagation();
+              setConfirmOpen(true);
+            }}
+            disabled={crudLoading}
+          >
             <Trash2 size={18} />
           </IconButton>
-        </TableCell>
-      </TableRow>
+        </CardActions>
+      </Card>
       <ConfirmationModal
         isOpen={confirmOpen}
         title="Delete Customer"

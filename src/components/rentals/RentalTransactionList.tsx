@@ -8,12 +8,7 @@ import EmptyState from '../ui/EmptyState';
 import ErrorDisplay from '../ui/ErrorDisplay';
 import { RentalTransaction } from '../../types';
 import { CalendarCheck2 } from 'lucide-react';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
+import Grid from '@mui/material/Grid';
 import Paper from '@mui/material/Paper';
 
 interface RentalTransactionListProps {
@@ -69,38 +64,25 @@ const RentalTransactionList: React.FC<RentalTransactionListProps> = ({
   }
 
   return (
-    <Paper elevation={2} sx={{ overflow: 'hidden' }}>
+    <Paper elevation={2} sx={{ overflow: 'hidden', p: 2 }}>
       {customersLoading && rentalTransactions.length > 0 && (
         <div className="my-2 flex justify-center items-center text-sm text-gray-500">
           <Spinner size="sm" /> <span className="ml-2">Loading customer details...</span>
         </div>
       )}
-      <TableContainer>
-        <Table size="small">
-          <TableHead sx={{ backgroundColor: '#f9fafb' }}>
-            <TableRow>
-              <TableCell>ID</TableCell>
-              <TableCell>Customer</TableCell>
-              <TableCell>Rental Date</TableCell>
-              <TableCell>Status</TableCell>
-              <TableCell>Total</TableCell>
-              <TableCell align="right">Actions</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {rentalTransactions.map((rental) => (
-              <RentalTransactionListItem
-                key={rental.rental_id}
-                rental={{
-                  ...rental,
-                  customer_name: getCustomerName(rental.customer_id) || `ID: ${rental.customer_id}`,
-                }}
-                onEdit={onEditRental}
-              />
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+      <Grid container spacing={2}>
+        {rentalTransactions.map((rental) => (
+          <Grid item xs={12} sm={6} md={4} lg={3} key={rental.rental_id}>
+            <RentalTransactionListItem
+              rental={{
+                ...rental,
+                customer_name: getCustomerName(rental.customer_id) || `ID: ${rental.customer_id}`,
+              }}
+              onEdit={onEditRental}
+            />
+          </Grid>
+        ))}
+      </Grid>
       {loading && rentalTransactions.length > 0 && (
         <div className="my-4 flex justify-center"><Spinner size="md" /></div>
       )}
