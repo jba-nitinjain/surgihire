@@ -30,6 +30,9 @@ interface RentalTransactionContextType {
   fetchRentalTransactionsPage: (page: number) => void;
   refreshRentalTransactions: () => void;
   fetchCustomersForSelection: () => void; // To explicitly fetch customers
+  statusCounts: Record<string, number>;
+  loadingStatusCounts: boolean;
+  fetchStatusCounts: () => void;
 }
 
 const RentalTransactionContext = createContext<RentalTransactionContextType | undefined>(undefined);
@@ -67,6 +70,8 @@ export const RentalTransactionProvider: React.FC<RentalTransactionProviderProps>
 
   const [customersForFilter, setCustomersForFilter] = useState<Customer[]>([]);
   const [loadingCustomers, setLoadingCustomers] = useState(false);
+  const [statusCounts, setStatusCounts] = useState<Record<string, number>>({});
+  const [loadingStatusCounts, setLoadingStatusCounts] = useState(false);
 
   // Fetch customers for dropdowns (e.g., in forms or filter UI)
   const fetchCustomersForSelection = useCallback(async () => {
@@ -85,6 +90,28 @@ export const RentalTransactionProvider: React.FC<RentalTransactionProviderProps>
       setCustomersForFilter([]);
     } finally {
       setLoadingCustomers(false);
+    }
+  }, []);
+
+  const fetchStatusCounts = useCallback(async () => {
+    setLoadingStatusCounts(true);
+    try {
+      const response = await fetchRentals({ records: 10000, skip: 0 });
+      if (response.success && Array.isArray(response.data)) {
+        const counts: Record<string, number> = {};
+        (response.data as RentalTransaction[]).forEach(rt => {
+          const key = rt.status || 'Unknown';
+          counts[key] = (counts[key] || 0) + 1;
+        });
+        setStatusCounts(counts);
+      } else {
+        setStatusCounts({});
+      }
+    } catch (err) {
+      console.error(`${CONTEXT_NAME}: Error fetching status counts`, err);
+      setStatusCounts({});
+    } finally {
+      setLoadingStatusCounts(false);
     }
   }, []);
 
@@ -110,6 +137,10 @@ export const RentalTransactionProvider: React.FC<RentalTransactionProviderProps>
       setError(response.message || 'Unable to fetch rental transactions.');
     }
   }, [recordsPerPage]);
+
+  useEffect(() => {
+    fetchStatusCounts();
+  }, [fetchStatusCounts]);
 
   const fetchRentalTransactionsData = useCallback(async (page: number, query: string, currentFilters: RentalTransactionFilters) => {
     setLoading(true);
@@ -220,6 +251,7 @@ export const RentalTransactionProvider: React.FC<RentalTransactionProviderProps>
       setInitialLoadDone(false);
     }
     fetchRentalTransactionsData(currentPage, searchQuery, filters);
+    fetchStatusCounts();
   };
 
   const value = {
@@ -237,6 +269,9 @@ export const RentalTransactionProvider: React.FC<RentalTransactionProviderProps>
     fetchRentalTransactionsPage: (page: number) => fetchRentalTransactionsData(page, searchQuery, filters),
     refreshRentalTransactions,
     fetchCustomersForSelection,
+    statusCounts,
+    loadingStatusCounts,
+    fetchStatusCounts,
   };
 
   return (

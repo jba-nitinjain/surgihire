@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useRentalTransactions } from '../../context/RentalTransactionContext';
 import RentalTransactionList from '../rentals/RentalTransactionList';
 // import RentalTransactionDetail from '../rentals/RentalTransactionDetail'; // Keep commented if not yet implemented
-import { PlusCircle, ArrowLeft } from 'lucide-react'; // Unused icons like Filter, CalendarIcon removed
+import { PlusCircle, ArrowLeft, Loader2 } from 'lucide-react';
 import Button from '@mui/material/Button';
 import AutocompleteField from '../ui/AutocompleteField';
 import DatePickerField from '../ui/DatePickerField';
@@ -22,6 +22,8 @@ const RentalsTab: React.FC = () => {
     customersForFilter,
     loadingCustomers,
     fetchCustomersForSelection,
+    statusCounts,
+    loadingStatusCounts,
   } = useRentalTransactions();
 
   const navigate = useNavigate();
@@ -76,19 +78,7 @@ const RentalsTab: React.FC = () => {
       )}
       {/* Filter UI */}
       <div className="mb-6 p-4 bg-white rounded-lg shadow">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-          <div>
-            <label htmlFor="rentalStatusFilter" className="block text-sm font-medium text-dark-text mb-1">
-              Status
-            </label>
-            <AutocompleteField
-              id="rentalStatusFilter"
-              name="status"
-              value={filters.status || 'all'}
-              onChange={(e) => setFilters({ ...filters, status: e.target.value === 'all' ? null : e.target.value })}
-              options={[{ label: 'All Statuses', value: 'all' }, ...RENTAL_STATUSES.map(s => ({ label: s, value: s }))]}
-            />
-          </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
           <div>
             <label htmlFor="rentalCustomerFilter" className="block text-sm font-medium text-dark-text mb-1">
               Customer
@@ -126,6 +116,33 @@ const RentalsTab: React.FC = () => {
             />
           </div>
         </div>
+      </div>
+
+      <div className="mb-6 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+        <div
+          onClick={() => setFilters({ ...filters, status: null })}
+          className={`cursor-pointer rounded-lg border p-4 text-center shadow-sm ${!filters.status ? 'bg-brand-blue text-white' : 'bg-white hover:bg-light-gray-50'}`}
+        >
+          <div className="text-sm font-medium">All</div>
+          <div className="text-2xl font-bold">
+            {RENTAL_STATUSES.reduce((acc, s) => acc + (statusCounts[s] || 0), 0)}
+          </div>
+        </div>
+        {RENTAL_STATUSES.map(status => (
+          <div
+            key={status}
+            onClick={() => setFilters({ ...filters, status })}
+            className={`cursor-pointer rounded-lg border p-4 text-center shadow-sm ${filters.status === status ? 'bg-brand-blue text-white' : 'bg-white hover:bg-light-gray-50'}`}
+          >
+            <div className="text-sm font-medium">{status}</div>
+            <div className="text-2xl font-bold">{statusCounts[status] || 0}</div>
+          </div>
+        ))}
+        {loadingStatusCounts && (
+          <div className="col-span-full flex justify-center">
+            <Loader2 className="h-5 w-5 animate-spin" />
+          </div>
+        )}
       </div>
 
       <div className="flex justify-end mb-6">
