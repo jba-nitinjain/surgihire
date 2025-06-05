@@ -33,6 +33,7 @@ const ReturnRentalDialog: React.FC<Props> = ({ open, onClose, rental }) => {
   const [paymentMode, setPaymentMode] = useState<string>('Cash');
   const [paymentRef, setPaymentRef] = useState('');
 
+
   useEffect(() => {
     if (open) {
       if (!rental.rental_items || rental.rental_items.some(it => !('equipment_name' in it))) {
