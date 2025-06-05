@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Payment, PaymentFormData } from '../../types';
 import { useCrud } from '../../context/CrudContext';
 import { Save, X, Loader2, CalendarCheck2, IndianRupee } from 'lucide-react';
+import OutlinedTextField from '../ui/OutlinedTextField';
+import AutocompleteField from '../ui/AutocompleteField';
+import InputAdornment from '@mui/material/InputAdornment';
 
 import DatePickerField from "../ui/DatePickerField";
 import dayjs from 'dayjs';
@@ -117,7 +120,7 @@ const PaymentForm: React.FC<PaymentFormProps> = ({ payment, onSave, onCancel }) 
     onSave();
   };
 
-  const inputClass = 'mt-1 block w-full border-light-gray-300 rounded-md shadow-sm focus:ring-brand-blue focus:border-brand-blue sm:text-sm';
+  const inputClass = 'mt-1 block w-full';
 
   return (
     <div className="bg-white p-6 rounded-md shadow">
@@ -126,7 +129,7 @@ const PaymentForm: React.FC<PaymentFormProps> = ({ payment, onSave, onCancel }) 
           <label htmlFor="rental_id" className="block text-sm font-medium text-dark-text mb-1">
             Rental ID
           </label>
-          <input
+          <OutlinedTextField
             type="text"
             id="rental_id"
             name="rental_id"
@@ -178,39 +181,40 @@ const PaymentForm: React.FC<PaymentFormProps> = ({ payment, onSave, onCancel }) 
           <label htmlFor="payment_amount" className="block text-sm font-medium text-dark-text mb-1">
             Amount
           </label>
-          <div className="relative">
-            <span className="absolute left-3 top-2.5 text-gray-500">
-              <IndianRupee size={16} />
-            </span>
-            <input
-              type="number"
-              id="payment_amount"
-              name="payment_amount"
-              value={formData.payment_amount || ''}
-              onChange={handleChange}
-              className={`${inputClass} pl-8`}
-            />
-          </div>
+          <OutlinedTextField
+            type="number"
+            id="payment_amount"
+            name="payment_amount"
+            value={formData.payment_amount || ''}
+            onChange={handleChange}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <IndianRupee size={16} />
+                </InputAdornment>
+              ),
+            }}
+            className={inputClass}
+          />
         </div>
         <div>
           <label htmlFor="payment_mode_select" className="block text-sm font-medium text-dark-text mb-1">
             Mode
           </label>
           <div className="flex items-center space-x-2">
-            <select
-              id="payment_mode_select"
-              value={modeSelect}
-              onChange={handleModeSelectChange}
-              className={inputClass}
-            >
-              <option value="">Select</option>
-              {KNOWN_MODES.map(m => (
-                <option key={m} value={m}>
-                  {m}
-                </option>
-              ))}
-              <option value="Others">Others</option>
-            </select>
+            <div className="flex-1">
+              <AutocompleteField
+                id="payment_mode_select"
+                name="payment_mode_select"
+                value={modeSelect}
+                onChange={handleModeSelectChange as React.ChangeEventHandler<HTMLInputElement>}
+                options={[
+                  { label: 'Select', value: '' },
+                  ...KNOWN_MODES.map(m => ({ label: m, value: m })),
+                  { label: 'Others', value: 'Others' },
+                ]}
+              />
+            </div>
             <button
               type="button"
               onClick={() => {
@@ -230,7 +234,7 @@ const PaymentForm: React.FC<PaymentFormProps> = ({ payment, onSave, onCancel }) 
             <label htmlFor="payment_mode_other" className="block text-sm font-medium text-dark-text mb-1">
               Specify Mode
             </label>
-            <input
+            <OutlinedTextField
               type="text"
               id="payment_mode_other"
               value={otherMode}
@@ -243,7 +247,7 @@ const PaymentForm: React.FC<PaymentFormProps> = ({ payment, onSave, onCancel }) 
           <label htmlFor="payment_reference" className="block text-sm font-medium text-dark-text mb-1">
             Reference
           </label>
-          <input
+          <OutlinedTextField
             type="text"
             id="payment_reference"
             name="payment_reference"
@@ -256,12 +260,13 @@ const PaymentForm: React.FC<PaymentFormProps> = ({ payment, onSave, onCancel }) 
           <label htmlFor="notes" className="block text-sm font-medium text-dark-text mb-1">
             Notes
           </label>
-          <textarea
+          <OutlinedTextField
             id="notes"
             name="notes"
             value={formData.notes || ''}
             onChange={handleChange}
             className={inputClass}
+            multiline
             rows={3}
           />
         </div>

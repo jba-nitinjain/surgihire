@@ -2,6 +2,8 @@ import React from 'react';
 import { CustomerFormData } from '../../types';
 import { Loader2 } from 'lucide-react';
 import AutocompleteField, { AutocompleteOption } from '../ui/AutocompleteField';
+import OutlinedTextField from '../ui/OutlinedTextField';
+import InputAdornment from '@mui/material/InputAdornment';
 
 interface AreaOption {
   value: string;
@@ -40,34 +42,38 @@ const CustomerShippingInfoSection: React.FC<Props> = ({
   <fieldset className="grid grid-cols-1 gap-6 md:grid-cols-2">
     <legend className="text-lg font-medium text-dark-text col-span-full">Shipping Information</legend>
     <div className="md:col-span-2">
-      <label htmlFor="shipping_address" className={labelClass}>Address Line</label>
-      <textarea name="shipping_address" id="shipping_address" value={formData.shipping_address || ''} onChange={handleChange} rows={2} className={inputClass}></textarea>
+      <OutlinedTextField
+        label="Address Line"
+        name="shipping_address"
+        id="shipping_address"
+        value={formData.shipping_address || ''}
+        onChange={handleChange}
+        multiline
+        rows={2}
+      />
     </div>
 
     <div>
-      <label htmlFor="shipping_pincode" className={labelClass}>Pincode</label>
-      <div className="relative">
-        <input
-          type="text"
-          name="shipping_pincode"
-          id="shipping_pincode"
-          value={formData.shipping_pincode || ''}
-          onChange={handleChange}
-          className={inputClass}
-          maxLength={6}
-        />
-        {pincodeDetailsLoading && (
-          <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-            <Loader2 className="h-5 w-5 text-gray-400 animate-spin" />
-          </div>
-        )}
-      </div>
-      {formErrors.shipping_pincode && <p className="text-xs text-red-500 mt-1">{formErrors.shipping_pincode}</p>}
-      {pincodeError && <p className="text-xs text-red-500 mt-1">{pincodeError}</p>}
+      <OutlinedTextField
+        label="Pincode"
+        name="shipping_pincode"
+        id="shipping_pincode"
+        value={formData.shipping_pincode || ''}
+        onChange={handleChange}
+        inputProps={{ maxLength: 6 }}
+        error={!!formErrors.shipping_pincode || !!pincodeError}
+        helperText={formErrors.shipping_pincode || pincodeError}
+        InputProps={{
+          endAdornment: pincodeDetailsLoading ? (
+            <InputAdornment position="end">
+              <Loader2 className="h-5 w-5 text-gray-400 animate-spin" />
+            </InputAdornment>
+          ) : undefined,
+        }}
+      />
     </div>
 
     <div>
-      <label htmlFor="shipping_area" className={labelClass}>Area</label>
       {isAreaSelect ? (
         <AutocompleteField
           name="shipping_area"
@@ -77,18 +83,37 @@ const CustomerShippingInfoSection: React.FC<Props> = ({
           placeholder="Select Area"
         />
       ) : (
-        <input type="text" name="shipping_area" id="shipping_area" value={formData.shipping_area || ''} onChange={handleChange} className={inputClass} readOnly={areaOptions.length > 0 && !isAreaSelect} />
+        <OutlinedTextField
+          label="Area"
+          name="shipping_area"
+          id="shipping_area"
+          value={formData.shipping_area || ''}
+          onChange={handleChange}
+          InputProps={{ readOnly: areaOptions.length > 0 && !isAreaSelect }}
+        />
       )}
       {formErrors.shipping_area && <p className="text-xs text-red-500 mt-1">{formErrors.shipping_area}</p>}
     </div>
 
     <div>
-      <label htmlFor="shipping_city" className={labelClass}>City</label>
-      <input type="text" name="shipping_city" id="shipping_city" value={formData.shipping_city || ''} onChange={handleChange} className={inputClass} readOnly />
+      <OutlinedTextField
+        label="City"
+        name="shipping_city"
+        id="shipping_city"
+        value={formData.shipping_city || ''}
+        onChange={handleChange}
+        InputProps={{ readOnly: true }}
+      />
     </div>
     <div>
-      <label htmlFor="shipping_state" className={labelClass}>State</label>
-      <input type="text" name="shipping_state" id="shipping_state" value={formData.shipping_state || ''} onChange={handleChange} className={inputClass} readOnly />
+      <OutlinedTextField
+        label="State"
+        name="shipping_state"
+        id="shipping_state"
+        value={formData.shipping_state || ''}
+        onChange={handleChange}
+        InputProps={{ readOnly: true }}
+      />
     </div>
   </fieldset>
   );

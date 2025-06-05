@@ -26,22 +26,48 @@ const CustomerPersonalInfoSection: React.FC<Props> = ({ formData, formErrors, ha
       />
     </div>
     <div>
-      <label htmlFor="email" className={labelClass}>Email</label>
-      <input type="email" name="email" id="email" value={formData.email || ''} onChange={handleChange} className={inputClass} />
-      {formErrors.email && <p className="text-xs text-red-500 mt-1">{formErrors.email}</p>}
+      <OutlinedTextField
+        label="Email"
+        type="email"
+        name="email"
+        id="email"
+        value={formData.email || ''}
+        onChange={handleChange}
+        error={!!formErrors.email}
+        helperText={formErrors.email}
+      />
     </div>
     <div>
-      <label htmlFor="mobile_number_1" className={labelClass}>Mobile Number 1</label>
-      <input type="tel" name="mobile_number_1" id="mobile_number_1" value={formData.mobile_number_1 || ''} onChange={handleChange} className={inputClass} />
-      {formErrors.mobile_number_1 && <p className="text-xs text-red-500 mt-1">{formErrors.mobile_number_1}</p>}
+      <OutlinedTextField
+        label="Mobile Number 1"
+        type="tel"
+        name="mobile_number_1"
+        id="mobile_number_1"
+        value={formData.mobile_number_1 || ''}
+        onChange={handleChange}
+        error={!!formErrors.mobile_number_1}
+        helperText={formErrors.mobile_number_1}
+      />
     </div>
     <div>
-      <label htmlFor="mobile_number_2" className={labelClass}>Mobile Number 2</label>
-      <input type="tel" name="mobile_number_2" id="mobile_number_2" value={formData.mobile_number_2 || ''} onChange={handleChange} className={inputClass} />
+      <OutlinedTextField
+        label="Mobile Number 2"
+        type="tel"
+        name="mobile_number_2"
+        id="mobile_number_2"
+        value={formData.mobile_number_2 || ''}
+        onChange={handleChange}
+      />
     </div>
     <div>
-      <label htmlFor="mobile_number_3" className={labelClass}>Mobile Number 3</label>
-      <input type="tel" name="mobile_number_3" id="mobile_number_3" value={formData.mobile_number_3 || ''} onChange={handleChange} className={inputClass} />
+      <OutlinedTextField
+        label="Mobile Number 3"
+        type="tel"
+        name="mobile_number_3"
+        id="mobile_number_3"
+        value={formData.mobile_number_3 || ''}
+        onChange={handleChange}
+      />
     </div>
   </fieldset>
 );

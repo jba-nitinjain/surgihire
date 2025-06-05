@@ -3,11 +3,12 @@ import { CalendarDays, ChevronDown } from 'lucide-react';
 import { RentalTransactionFormData } from '../../types';
 
 import DatePickerField from "../ui/DatePickerField";
+import AutocompleteField from '../ui/AutocompleteField';
 interface Props {
   data: Pick<RentalTransactionFormData, 'rental_date' | 'expected_return_date' | 'status'>;
   numberOfDays: number;
   errors: Partial<Record<'rental_date' | 'expected_return_date' | 'status', string>>;
-  handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
+  handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   inputClass: string;
   labelClass: string;
   iconClass: string;
@@ -74,20 +75,16 @@ const RentalStatusDates: React.FC<Props> = ({
         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
           <ChevronDown className={iconClass} />
         </div>
-        <select
-          name="status"
-          id="status"
-          value={data.status || ''}
-          onChange={handleChange}
-          className={`${inputClass} pl-10`}
-          required
-        >
-          {statusOptions.map((s) => (
-            <option key={s} value={s}>
-              {s}
-            </option>
-          ))}
-        </select>
+        <div className="pl-10">
+          <AutocompleteField
+            name="status"
+            id="status"
+            value={data.status || ''}
+            onChange={handleChange}
+            options={statusOptions.map((s) => ({ label: s, value: s }))}
+            placeholder="Select status"
+          />
+        </div>
       </div>
       {errors.status && <p className="text-xs text-red-500 mt-1">{errors.status}</p>}
     </div>

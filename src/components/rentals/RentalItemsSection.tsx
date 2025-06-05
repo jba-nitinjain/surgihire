@@ -1,6 +1,9 @@
 import React from 'react';
 import { RentalItemFormData, Equipment as EquipmentType } from '../../types';
 import { Trash2, PackagePlus } from 'lucide-react';
+import OutlinedTextField from '../ui/OutlinedTextField';
+import AutocompleteField from '../ui/AutocompleteField';
+import InputAdornment from '@mui/material/InputAdornment';
 import { formatCurrency } from '../../utils/formatting';
 
 interface Props {
@@ -45,40 +48,45 @@ const RentalItemsSection: React.FC<Props> = ({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 items-end">
             <div>
               <label htmlFor={`item_equipment_${index}`} className={`${labelClass} text-xs`}>Equipment <span className="text-red-500">*</span></label>
-              <select
+              <AutocompleteField
                 id={`item_equipment_${index}`}
+                name={`item_equipment_${index}`}
                 value={item.equipment_id}
                 onChange={(e) => handleItemChange(index, 'equipment_id', e.target.value)}
-                className={`${inputClass} text-xs py-1.5`}
-                disabled={loadingEquipment}
-              >
-                <option value="">{loadingEquipment ? 'Loading...' : 'Select Equipment'}</option>
-                {availableEquipment
+                options={availableEquipment
                   .filter(eq =>
                     eq.status === 'Available' ||
                     items.some(it => it.equipment_id === String(eq.equipment_id))
                   )
-                  .map(eq => (
-                    <option key={eq.equipment_id} value={String(eq.equipment_id)}>
-                      {eq.equipment_name} (SN: {eq.serial_number || 'N/A'}) - Rate: {formatCurrency(eq.rental_rate)}
-                    </option>
-                  ))}
-              </select>
+                  .map(eq => ({
+                    value: String(eq.equipment_id),
+                    label: `${eq.equipment_name} (SN: ${eq.serial_number || 'N/A'}) - Rate: ${formatCurrency(eq.rental_rate)}`,
+                  }))}
+                loading={loadingEquipment}
+                disabled={loadingEquipment}
+                placeholder={loadingEquipment ? 'Loading...' : 'Select Equipment'}
+              />
               {formErrors[`rental_items.${index}.equipment_id`] && (
                 <p className="text-xs text-red-500 mt-1">{formErrors[`rental_items.${index}.equipment_id`]}</p>
               )}
             </div>
             <div>
               <label htmlFor={`item_rate_${index}`} className={`${labelClass} text-xs`}>Unit Rate (₹/day) <span className="text-red-500">*</span></label>
-              <input
+              <OutlinedTextField
                 type="number"
                 id={`item_rate_${index}`}
                 value={item.unit_rental_rate}
                 onChange={(e) => handleItemChange(index, 'unit_rental_rate', e.target.value)}
-                className={`${inputClass} text-xs py-1.5`}
-                step="0.01"
-                min="0"
+                className={`${inputClass} text-xs`}
+                inputProps={{ step: '0.01', min: '0' }}
                 placeholder={item.default_equipment_rate !== null ? String(item.default_equipment_rate) : '0.00'}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      ₹
+                    </InputAdornment>
+                  ),
+                }}
               />
               {formErrors[`rental_items.${index}.unit_rental_rate`] && (
                 <p className="text-xs text-red-500 mt-1">{formErrors[`rental_items.${index}.unit_rental_rate`]}</p>
