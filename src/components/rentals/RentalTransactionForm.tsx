@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import Button from '@mui/material/Button';
 import AutocompleteField from '../ui/AutocompleteField';
+import OutlinedTextField from '../ui/OutlinedTextField';
 import RentalItemsSection from './RentalItemsSection';
 import RentalCustomerSection from './RentalCustomerSection';
 import RentalStatusDates from './RentalStatusDates';
@@ -664,8 +665,14 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
             <div className="md:col-span-2">
               <label htmlFor="notes" className={labelClass}>Notes</label>
               <div className="mt-1 relative rounded-md shadow-sm">
-                <div className="absolute inset-y-0 left-0 top-2 pl-3 flex items-start pointer-events-none"><Info className={iconClass} /></div>
-                <textarea name="notes" id="notes" value={formData.notes || ''} onChange={handleChange} rows={3} className={`${inputClass} pl-10`}></textarea>
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><Info className={iconClass} /></div>
+                <OutlinedTextField
+                  id="notes"
+                  name="notes"
+                  value={formData.notes || ''}
+                  onChange={handleChange}
+                  className={`${inputClass} pl-8`}
+                />
               </div>
             </div>
           </fieldset>
