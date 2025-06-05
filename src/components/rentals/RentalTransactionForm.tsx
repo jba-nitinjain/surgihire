@@ -135,13 +135,15 @@ const RentalTransactionForm: React.FC<RentalTransactionFormProps> = ({
   ]);
 
   useEffect(() => {
-    if (!isEditing && defaultCustomerId && customers.length > 0) {
+    if (!isEditing && defaultCustomerId) {
       const exists = customers.find(c => String(c.customer_id) === defaultCustomerId);
       if (exists) {
         setFormData(prev => ({ ...prev, customer_id: defaultCustomerId }));
+      } else if (!loadingCustomers) {
+        fetchCustomersForSelection();
       }
     }
-  }, [defaultCustomerId, isEditing, customers]);
+  }, [defaultCustomerId, isEditing, customers, loadingCustomers, fetchCustomersForSelection]);
 
   useEffect(() => {
     if (rental) {
