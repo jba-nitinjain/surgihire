@@ -169,8 +169,8 @@ const RentalTransactionCard: React.FC<RentalTransactionCardProps> = ({ rental, o
                     {items.map(it => (
                       <li key={it.rental_detail_id} className="text-xs">
                         {it.equipment_name || `ID: ${it.equipment_id}`}
-                        {it.unit_rental_rate !== undefined && it.unit_rental_rate !== null && (
-                          <> - {formatCurrency(it.unit_rental_rate)}/day</>
+                        {it.rental_rate !== undefined && it.rental_rate !== null && (
+                          <> - {formatCurrency(it.rental_rate)}/day</>
                         )}
                       </li>
                     ))}

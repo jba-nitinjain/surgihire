@@ -77,8 +77,8 @@ const RentalItemsSection: React.FC<Props> = ({
                   <OutlinedTextField
                     type="number"
                     id={`item_rate_${index}`}
-                    value={item.unit_rental_rate}
-                    onChange={(e) => handleItemChange(index, 'unit_rental_rate', e.target.value)}
+                    value={item.rental_rate}
+                    onChange={(e) => handleItemChange(index, 'rental_rate', e.target.value)}
                     className={`${inputClass} text-xs`}
                     inputProps={{ step: '0.01', min: '0' }}
                     placeholder={item.default_equipment_rate !== null ? String(item.default_equipment_rate) : '0.00'}
@@ -88,8 +88,8 @@ const RentalItemsSection: React.FC<Props> = ({
                       ),
                     }}
                   />
-                  {formErrors[`rental_items.${index}.unit_rental_rate`] && (
-                    <p className="text-xs text-red-500 mt-1">{formErrors[`rental_items.${index}.unit_rental_rate`]}</p>
+                  {formErrors[`rental_items.${index}.rental_rate`] && (
+                    <p className="text-xs text-red-500 mt-1">{formErrors[`rental_items.${index}.rental_rate`]}</p>
                   )}
                 </td>
                 <td className="p-2 text-right">
@@ -149,8 +149,8 @@ const RentalItemsSection: React.FC<Props> = ({
                 <OutlinedTextField
                   type="number"
                   id={`item_rate_${index}`}
-                  value={item.unit_rental_rate}
-                  onChange={(e) => handleItemChange(index, 'unit_rental_rate', e.target.value)}
+                  value={item.rental_rate}
+                  onChange={(e) => handleItemChange(index, 'rental_rate', e.target.value)}
                   className={`${inputClass} text-xs`}
                   inputProps={{ step: '0.01', min: '0' }}
                   placeholder={item.default_equipment_rate !== null ? String(item.default_equipment_rate) : '0.00'}
@@ -162,8 +162,8 @@ const RentalItemsSection: React.FC<Props> = ({
                     ),
                   }}
                 />
-                {formErrors[`rental_items.${index}.unit_rental_rate`] && (
-                  <p className="text-xs text-red-500 mt-1">{formErrors[`rental_items.${index}.unit_rental_rate`]}</p>
+                {formErrors[`rental_items.${index}.rental_rate`] && (
+                  <p className="text-xs text-red-500 mt-1">{formErrors[`rental_items.${index}.rental_rate`]}</p>
                 )}
               </div>
             </div>
