@@ -106,7 +106,7 @@ const PaymentForm: React.FC<PaymentFormProps> = ({ payment, onSave, onCancel }) 
     const payload = {
       rental_id: formData.rental_id,
       nature: formData.nature || null,
-      payment_date: formData.payment_date,
+      payment_date: dayjs(formData.payment_date, 'DD/MM/YYYY').format('YYYY-MM-DD'),
       payment_amount: formData.payment_amount ? Number(formData.payment_amount) : 0,
       payment_mode: formData.payment_mode || null,
       payment_reference: formData.payment_reference || null,
