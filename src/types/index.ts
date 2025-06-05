@@ -224,6 +224,7 @@ export interface PaginationParams {
   records: number;
   skip: number;
   filters?: Record<string, string | number | boolean | null>;
+  q?: string;
 }
 
 export interface TabData {

@@ -102,14 +102,20 @@ export const PaymentProvider: React.FC<PaymentProviderProps> = ({
         if (currentFilters.rental_id) activeFilters.rental_id = currentFilters.rental_id;
         if (currentFilters.payment_mode) activeFilters.payment_mode = currentFilters.payment_mode;
         if (currentFilters.nature) activeFilters.nature = currentFilters.nature;
-        if (currentFilters.start_date) activeFilters.start_date = currentFilters.start_date;
-        if (currentFilters.end_date) activeFilters.end_date = currentFilters.end_date;
 
         const paginationParams: PaginationParams = {
           records: recordsPerPage,
           skip,
           filters: Object.keys(activeFilters).length > 0 ? activeFilters : undefined,
         };
+
+        if (currentFilters.start_date && currentFilters.end_date) {
+          paginationParams.q = `(payment_date~between~${currentFilters.start_date}~date2~${currentFilters.end_date})`;
+        } else if (currentFilters.start_date) {
+          paginationParams.q = `(payment_date~equals~${currentFilters.start_date})`;
+        } else if (currentFilters.end_date) {
+          paginationParams.q = `(payment_date~equals~${currentFilters.end_date})`;
+        }
 
         if (query.trim()) {
           response = await searchPayments(query.trim(), paginationParams);
@@ -148,7 +154,18 @@ export const PaymentProvider: React.FC<PaymentProviderProps> = ({
 
   const setFilters = useCallback((update: Partial<PaymentFilters>) => {
     setFiltersState(prev => {
-      const newFilters = { ...prev, ...update };
+      let newFilters = { ...prev, ...update };
+      if (newFilters.start_date && newFilters.end_date) {
+        const start = dayjs(newFilters.start_date, 'DD/MM/YYYY');
+        const end = dayjs(newFilters.end_date, 'DD/MM/YYYY');
+        if (start.isAfter(end)) {
+          if (update.start_date) {
+            newFilters.end_date = newFilters.start_date;
+          } else if (update.end_date) {
+            newFilters.start_date = newFilters.end_date;
+          }
+        }
+      }
       if (
         newFilters.rental_id !== prev.rental_id ||
         newFilters.payment_mode !== prev.payment_mode ||

@@ -139,7 +139,9 @@ export const listRecords = async (table: string, paginationParams: PaginationPar
     skip: String(paginationParams.skip),
   };
 
-  if (paginationParams.filters && Object.keys(paginationParams.filters).length > 0) {
+  if (paginationParams.q) {
+    apiParams.q = paginationParams.q;
+  } else if (paginationParams.filters && Object.keys(paginationParams.filters).length > 0) {
     let qString = '';
     for (const key in paginationParams.filters) {
       const filterValue = paginationParams.filters[key];
@@ -168,7 +170,9 @@ export const searchRecords = async (
   if (paginationParams) {
     params.records = String(paginationParams.records);
     params.skip = String(paginationParams.skip);
-    if (paginationParams.filters && Object.keys(paginationParams.filters).length > 0) {
+    if (paginationParams.q) {
+      params.q = paginationParams.q;
+    } else if (paginationParams.filters && Object.keys(paginationParams.filters).length > 0) {
       let qString = '';
       for (const key in paginationParams.filters) {
         const filterValue = paginationParams.filters[key];
