@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { EquipmentCategory, EquipmentCategoryFormData } from '../../types';
 import { useCrud } from '../../context/CrudContext';
 import { Save, X, Loader2, Tag, Info } from 'lucide-react';
+import OutlinedTextField from '../ui/OutlinedTextField';
+import InputAdornment from '@mui/material/InputAdornment';
 
 interface EquipmentCategoryFormProps {
   category?: EquipmentCategory | null;
@@ -98,8 +100,16 @@ const EquipmentCategoryForm: React.FC<EquipmentCategoryFormProps> = ({ category,
           <div>
             <label htmlFor="category_name" className={labelClass}>Category Name <span className="text-red-500">*</span></label>
             <div className="mt-1 relative rounded-md shadow-sm">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><Tag className={iconClass} /></div>
-                <input type="text" name="category_name" id="category_name" value={formData.category_name} onChange={handleChange} className={`${inputClass} pl-10`} required />
+                <OutlinedTextField
+                  type="text"
+                  name="category_name"
+                  id="category_name"
+                  value={formData.category_name}
+                  onChange={handleChange}
+                  className={inputClass}
+                  InputProps={{ startAdornment: <InputAdornment position="start"><Tag className={iconClass} /></InputAdornment> }}
+                  required
+                />
             </div>
             {formErrors.category_name && <p className="text-xs text-red-500 mt-1">{formErrors.category_name}</p>}
           </div>
@@ -107,8 +117,16 @@ const EquipmentCategoryForm: React.FC<EquipmentCategoryFormProps> = ({ category,
           <div>
             <label htmlFor="description" className={labelClass}>Description</label>
             <div className="mt-1 relative rounded-md shadow-sm">
-                <div className="absolute inset-y-0 left-0 top-2 pl-3 flex items-start pointer-events-none"><Info className={iconClass} /></div>
-                <textarea name="description" id="description" value={formData.description || ''} onChange={handleChange} rows={4} className={`${inputClass} pl-10`}></textarea>
+                <OutlinedTextField
+                  name="description"
+                  id="description"
+                  value={formData.description || ''}
+                  onChange={handleChange}
+                  multiline
+                  rows={4}
+                  className={inputClass}
+                  InputProps={{ startAdornment: <InputAdornment position="start"><Info className={iconClass} /></InputAdornment> }}
+                />
             </div>
           </div>
 

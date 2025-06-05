@@ -1,12 +1,13 @@
 import React from 'react';
 import { Customer as CustomerType } from '../../types';
 import { Loader2, User } from 'lucide-react';
+import AutocompleteField from '../ui/AutocompleteField';
 
 interface Props {
   customerId: string;
   customers: CustomerType[];
   loadingCustomers: boolean;
-  handleChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+  handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   error?: string;
   inputClass: string;
   labelClass: string;
@@ -39,24 +40,18 @@ const RentalCustomerSection: React.FC<Props> = ({
             <User className={iconClass} />
           )}
         </div>
-        <select
-          name="customer_id"
-          id="customer_id"
-          value={customerId}
-          onChange={handleChange}
-          className={`${inputClass} pl-10`}
-          required
-          disabled={loadingCustomers}
-        >
-          <option value="">
-            {loadingCustomers ? 'Loading...' : 'Select Customer'}
-          </option>
-          {customers.map((c) => (
-            <option key={c.customer_id} value={c.customer_id}>
-              {c.full_name}
-            </option>
-          ))}
-        </select>
+        <div className="pl-10">
+          <AutocompleteField
+            name="customer_id"
+            id="customer_id"
+            value={customerId}
+            onChange={handleChange}
+            options={customers.map((c) => ({ label: c.full_name, value: String(c.customer_id) }))}
+            loading={loadingCustomers}
+            disabled={loadingCustomers}
+            placeholder={loadingCustomers ? 'Loading...' : 'Select Customer'}
+          />
+        </div>
       </div>
       {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
     </div>

@@ -3,6 +3,8 @@ import { EquipmentFormData } from '../../types';
 import { CalendarDays, MapPin, Wrench } from 'lucide-react';
 
 import DatePickerField from "../ui/DatePickerField";
+import OutlinedTextField from '../ui/OutlinedTextField';
+import InputAdornment from '@mui/material/InputAdornment';
 interface Props {
   formData: EquipmentFormData;
   formErrors: Partial<Record<keyof EquipmentFormData, string>>;
@@ -32,11 +34,20 @@ const EquipmentDatesLocation: React.FC<Props> = ({
       {formErrors.purchase_date && <p className="text-xs text-red-500 mt-1">{formErrors.purchase_date}</p>}
     </div>
     <div>
-      <label htmlFor="location" className={labelClass}>Current Location</label>
-      <div className="mt-1 relative rounded-md shadow-sm">
-        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><MapPin className={iconClass} /></div>
-        <input type="text" name="location" id="location" value={formData.location || ''} onChange={handleChange} className={`${inputClass} pl-10`} />
-      </div>
+      <OutlinedTextField
+        label="Current Location"
+        name="location"
+        id="location"
+        value={formData.location || ''}
+        onChange={handleChange}
+        InputProps={{
+          startAdornment: (
+            <InputAdornment position="start">
+              <MapPin className={iconClass} />
+            </InputAdornment>
+          ),
+        }}
+      />
     </div>
     <div>
       <label htmlFor="last_maintenance_date" className={labelClass}>Last Maintenance Date</label>

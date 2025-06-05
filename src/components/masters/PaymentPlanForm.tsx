@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { PaymentPlan, PaymentPlanFormData } from '../../types';
 import { useCrud } from '../../context/CrudContext';
 import { Save, X, Loader2, ListChecks, Info, CalendarClock } from 'lucide-react';
+import OutlinedTextField from '../ui/OutlinedTextField';
+import InputAdornment from '@mui/material/InputAdornment';
 
 interface PaymentPlanFormProps {
   plan?: PaymentPlan | null;
@@ -110,8 +112,16 @@ const PaymentPlanForm: React.FC<PaymentPlanFormProps> = ({ plan, onSave, onCance
           <div>
             <label htmlFor="plan_name" className={labelClass}>Plan Name <span className="text-red-500">*</span></label>
              <div className="mt-1 relative rounded-md shadow-sm">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><ListChecks className={iconClass} /></div>
-                <input type="text" name="plan_name" id="plan_name" value={formData.plan_name} onChange={handleChange} className={`${inputClass} pl-10`} required />
+                <OutlinedTextField
+                  type="text"
+                  name="plan_name"
+                  id="plan_name"
+                  value={formData.plan_name}
+                  onChange={handleChange}
+                  className={inputClass}
+                  InputProps={{ startAdornment: <InputAdornment position="start"><ListChecks className={iconClass} /></InputAdornment> }}
+                  required
+                />
             </div>
             {formErrors.plan_name && <p className="text-xs text-red-500 mt-1">{formErrors.plan_name}</p>}
           </div>
@@ -119,8 +129,16 @@ const PaymentPlanForm: React.FC<PaymentPlanFormProps> = ({ plan, onSave, onCance
           <div>
             <label htmlFor="frequency_in_days" className={labelClass}>Frequency (in days)</label>
             <div className="mt-1 relative rounded-md shadow-sm">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><CalendarClock className={iconClass} /></div>
-                <input type="number" name="frequency_in_days" id="frequency_in_days" value={formData.frequency_in_days || ''} onChange={handleChange} className={`${inputClass} pl-10`} min="1" />
+                <OutlinedTextField
+                  type="number"
+                  name="frequency_in_days"
+                  id="frequency_in_days"
+                  value={formData.frequency_in_days || ''}
+                  onChange={handleChange}
+                  className={inputClass}
+                  inputProps={{ min: '1' }}
+                  InputProps={{ startAdornment: <InputAdornment position="start"><CalendarClock className={iconClass} /></InputAdornment> }}
+                />
             </div>
             {formErrors.frequency_in_days && <p className="text-xs text-red-500 mt-1">{formErrors.frequency_in_days}</p>}
           </div>
@@ -128,8 +146,16 @@ const PaymentPlanForm: React.FC<PaymentPlanFormProps> = ({ plan, onSave, onCance
           <div>
             <label htmlFor="description" className={labelClass}>Description</label>
             <div className="mt-1 relative rounded-md shadow-sm">
-                <div className="absolute inset-y-0 left-0 top-2 pl-3 flex items-start pointer-events-none"><Info className={iconClass} /></div>
-                <textarea name="description" id="description" value={formData.description || ''} onChange={handleChange} rows={4} className={`${inputClass} pl-10`}></textarea>
+                <OutlinedTextField
+                  name="description"
+                  id="description"
+                  value={formData.description || ''}
+                  onChange={handleChange}
+                  multiline
+                  rows={4}
+                  className={inputClass}
+                  InputProps={{ startAdornment: <InputAdornment position="start"><Info className={iconClass} /></InputAdornment> }}
+                />
             </div>
           </div>
 
