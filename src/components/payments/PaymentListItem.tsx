@@ -5,6 +5,7 @@ import { useCrud } from '../../context/CrudContext';
 import ConfirmationModal from '../ui/ConfirmationModal';
 import { usePayments } from '../../context/PaymentContext';
 import { formatDate, formatCurrency } from '../../utils/formatting';
+import { useNavigate } from 'react-router-dom';
 
 interface PaymentListItemProps {
   payment: Payment;
@@ -16,6 +17,7 @@ const PaymentListItem: React.FC<PaymentListItemProps> = ({ payment, onEdit, onVi
   const { deleteItem, loading: crudLoading } = useCrud();
   const { refreshPayments } = usePayments();
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+  const navigate = useNavigate();
 
   const handleDelete = async () => {
     try {
@@ -32,11 +34,17 @@ const PaymentListItem: React.FC<PaymentListItemProps> = ({ payment, onEdit, onVi
         <td className="px-6 py-4 whitespace-nowrap text-sm text-dark-text font-medium">
           {payment.payment_id}
         </td>
-        <td className="px-6 py-4 whitespace-nowrap text-sm text-dark-text/80">
-          {payment.customer_name || `Rental #${payment.rental_id}`}
-        </td>
-        <td className="px-6 py-4 whitespace-nowrap text-sm text-dark-text/80">
-          {payment.rented_from ? formatDate(payment.rented_from) : '-'}
+        <td className="px-6 py-4 whitespace-nowrap text-sm">
+          <button
+            onClick={() =>
+              navigate('/rentals', {
+                state: { customerId: payment.customer_id, from: '/payments' },
+              })
+            }
+            className="text-brand-blue hover:underline"
+          >
+            {payment.customer_name || `Rental #${payment.rental_id}`}
+          </button>
         </td>
         <td className="px-6 py-4 whitespace-nowrap text-sm text-dark-text/80">
           {payment.nature || 'rental'}

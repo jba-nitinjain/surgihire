@@ -2,6 +2,7 @@ import React from 'react';
 import SearchBox from '../ui/SearchBox';
 import OutlinedTextField from '../ui/OutlinedTextField';
 import AutocompleteField from '../ui/AutocompleteField';
+import DatePickerField from '../ui/DatePickerField';
 import { PaymentFilters } from '../../context/PaymentContext';
 
 interface PaymentFilterBarProps {
@@ -27,7 +28,7 @@ const PaymentFilterBar: React.FC<PaymentFilterBarProps> = ({
   onFiltersChange,
 }) => (
   <div className="mb-6 p-4 bg-white rounded-lg shadow">
-    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+    <div className="grid grid-cols-1 md:grid-cols-6 gap-4 items-end">
       <div className="md:col-span-1">
         <label htmlFor="paymentSearch" className="block text-sm font-medium text-dark-text mb-1">
           Search Payments
@@ -71,6 +72,26 @@ const PaymentFilterBar: React.FC<PaymentFilterBarProps> = ({
             { label: 'Rental', value: 'rental' },
             { label: 'Deposit', value: 'deposit' },
           ]}
+        />
+      </div>
+      <div>
+        <label htmlFor="paymentStartDate" className="block text-sm font-medium text-dark-text mb-1">
+          From
+        </label>
+        <DatePickerField
+          name="start_date"
+          value={filters.start_date || ''}
+          onChange={(e) => onFiltersChange({ start_date: e.target.value || null })}
+        />
+      </div>
+      <div>
+        <label htmlFor="paymentEndDate" className="block text-sm font-medium text-dark-text mb-1">
+          To
+        </label>
+        <DatePickerField
+          name="end_date"
+          value={filters.end_date || ''}
+          onChange={(e) => onFiltersChange({ end_date: e.target.value || null })}
         />
       </div>
     </div>

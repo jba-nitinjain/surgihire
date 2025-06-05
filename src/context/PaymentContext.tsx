@@ -7,6 +7,8 @@ export interface PaymentFilters {
   rental_id: string | null;
   payment_mode: string | null;
   nature: string | null;
+  start_date: string | null;
+  end_date: string | null;
 }
 
 interface PaymentContextType {
@@ -52,7 +54,13 @@ export const PaymentProvider: React.FC<PaymentProviderProps> = ({
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQueryState] = useState('');
   const [initialLoadDone, setInitialLoadDone] = useState(false);
-  const [filters, setFiltersState] = useState<PaymentFilters>({ rental_id: null, payment_mode: null, nature: null });
+  const [filters, setFiltersState] = useState<PaymentFilters>({
+    rental_id: null,
+    payment_mode: null,
+    nature: null,
+    start_date: null,
+    end_date: null,
+  });
 
   const processApiResponse = useCallback(
     (response: ApiResponse, page: number, currentSkip: number) => {
@@ -94,6 +102,8 @@ export const PaymentProvider: React.FC<PaymentProviderProps> = ({
         if (currentFilters.rental_id) activeFilters.rental_id = currentFilters.rental_id;
         if (currentFilters.payment_mode) activeFilters.payment_mode = currentFilters.payment_mode;
         if (currentFilters.nature) activeFilters.nature = currentFilters.nature;
+        if (currentFilters.start_date) activeFilters.start_date = currentFilters.start_date;
+        if (currentFilters.end_date) activeFilters.end_date = currentFilters.end_date;
 
         const paginationParams: PaginationParams = {
           records: recordsPerPage,
@@ -116,7 +126,12 @@ export const PaymentProvider: React.FC<PaymentProviderProps> = ({
         }
       } finally {
         setLoading(false);
-        const noFilters = !currentFilters.rental_id && !currentFilters.payment_mode && !currentFilters.nature;
+        const noFilters =
+          !currentFilters.rental_id &&
+          !currentFilters.payment_mode &&
+          !currentFilters.nature &&
+          !currentFilters.start_date &&
+          !currentFilters.end_date;
         if (page === 1 && !query.trim() && noFilters) {
           setInitialLoadDone(true);
         }
@@ -137,7 +152,9 @@ export const PaymentProvider: React.FC<PaymentProviderProps> = ({
       if (
         newFilters.rental_id !== prev.rental_id ||
         newFilters.payment_mode !== prev.payment_mode ||
-        newFilters.nature !== prev.nature
+        newFilters.nature !== prev.nature ||
+        newFilters.start_date !== prev.start_date ||
+        newFilters.end_date !== prev.end_date
       ) {
         setCurrentPage(1);
         setInitialLoadDone(false);
@@ -148,7 +165,12 @@ export const PaymentProvider: React.FC<PaymentProviderProps> = ({
   }, []);
 
   useEffect(() => {
-    const noFilters = !filters.rental_id && !filters.payment_mode && !filters.nature;
+    const noFilters =
+      !filters.rental_id &&
+      !filters.payment_mode &&
+      !filters.nature &&
+      !filters.start_date &&
+      !filters.end_date;
     if (!searchQuery.trim() && noFilters && !initialLoadDone && !loading) {
       fetchPaymentsData(1, '', filters);
     }
@@ -156,7 +178,13 @@ export const PaymentProvider: React.FC<PaymentProviderProps> = ({
 
   useEffect(() => {
     const handler = setTimeout(() => {
-      const shouldFetch = searchQuery.trim() || filters.rental_id || filters.payment_mode || filters.nature;
+      const shouldFetch =
+        searchQuery.trim() ||
+        filters.rental_id ||
+        filters.payment_mode ||
+        filters.nature ||
+        filters.start_date ||
+        filters.end_date;
       if (shouldFetch) {
         fetchPaymentsData(1, searchQuery.trim(), filters);
       }
@@ -165,7 +193,12 @@ export const PaymentProvider: React.FC<PaymentProviderProps> = ({
   }, [searchQuery, filters, fetchPaymentsData]);
 
   const refreshPayments = () => {
-    const noFilters = !filters.rental_id && !filters.payment_mode && !filters.nature;
+    const noFilters =
+      !filters.rental_id &&
+      !filters.payment_mode &&
+      !filters.nature &&
+      !filters.start_date &&
+      !filters.end_date;
     if (currentPage === 1 && !searchQuery.trim() && noFilters) {
       setInitialLoadDone(false);
     }

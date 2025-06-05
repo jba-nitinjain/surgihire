@@ -103,6 +103,7 @@ export interface Payment {
   notes: string | null;
   customer_name?: string;
   rented_from?: string;
+  customer_id?: string;
 }
 
 export interface PaymentFormData {

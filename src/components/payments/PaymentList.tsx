@@ -56,7 +56,6 @@ const PaymentList: React.FC<PaymentListProps> = ({ onEditPayment, onViewPayment 
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-dark-text uppercase tracking-wider">ID</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-dark-text uppercase tracking-wider">Customer</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-dark-text uppercase tracking-wider">Rented From</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-dark-text uppercase tracking-wider">Nature</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-dark-text uppercase tracking-wider">Date</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-dark-text uppercase tracking-wider">Amount</th>
@@ -76,7 +75,7 @@ const PaymentList: React.FC<PaymentListProps> = ({ onEditPayment, onViewPayment 
           </tbody>
           <tfoot>
             <tr className="bg-light-gray-50 font-medium">
-              <td colSpan={5} className="px-6 py-3 text-right">Total</td>
+              <td colSpan={4} className="px-6 py-3 text-right">Total</td>
               <td className="px-6 py-3">{formatCurrency(totalAmount)}</td>
               <td colSpan={2}></td>
             </tr>
