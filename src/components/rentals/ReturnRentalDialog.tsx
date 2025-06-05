@@ -7,6 +7,8 @@ import Button from '@mui/material/Button';
 import Checkbox from '@mui/material/Checkbox';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import TextField from '@mui/material/TextField';
+import AutocompleteField from '../ui/AutocompleteField';
+import DatePickerField from '../ui/DatePickerField';
 import { RentalTransaction, RentalItem } from '../../types';
 import { useCrud } from '../../context/CrudContext';
 import { useRentalTransactions } from '../../context/RentalTransactionContext';
@@ -27,6 +29,10 @@ const ReturnRentalDialog: React.FC<Props> = ({ open, onClose, rental }) => {
   const [items, setItems] = useState<RentalItem[]>(rental.rental_items || []);
   const [selected, setSelected] = useState<number[]>([]);
   const [payment, setPayment] = useState('');
+  const [returnDate, setReturnDate] = useState<string>('');
+  const [paymentMode, setPaymentMode] = useState<string>('Cash');
+  const [paymentRef, setPaymentRef] = useState('');
+
 
   useEffect(() => {
     if (open) {
@@ -42,6 +48,9 @@ const ReturnRentalDialog: React.FC<Props> = ({ open, onClose, rental }) => {
         setSelected(rental.rental_items.map(it => it.equipment_id));
       }
       setPayment('');
+      setReturnDate(dayjs().format('DD/MM/YYYY'));
+      setPaymentMode('Cash');
+      setPaymentRef('');
     }
   }, [open, rental]);
 
@@ -55,15 +64,17 @@ const ReturnRentalDialog: React.FC<Props> = ({ open, onClose, rental }) => {
       if (selected.length === items.length) {
         await updateItem('rental_transactions', rental.rental_id, {
           status: 'Returned/Completed',
-          actual_return_date: dayjs().format('YYYY-MM-DD'),
+          actual_return_date: dayjs(returnDate, 'DD/MM/YYYY').format('YYYY-MM-DD'),
         });
         await updateItem('customers', rental.customer_id, { has_active_rentals: 0 });
       }
       if (payment && Number(payment) > 0) {
         await createItem('payments', {
           rental_id: rental.rental_id,
-          payment_date: dayjs().format('YYYY-MM-DD'),
+          payment_date: dayjs(returnDate, 'DD/MM/YYYY').format('YYYY-MM-DD'),
           payment_amount: Number(payment),
+          payment_mode: paymentMode,
+          payment_reference: paymentMode !== 'Cash' ? paymentRef || null : null,
           nature: 'rental',
         });
       }
@@ -93,15 +104,36 @@ const ReturnRentalDialog: React.FC<Props> = ({ open, onClose, rental }) => {
             />
           ))}
         </div>
-        <TextField
-          label="Payment Amount"
-          type="number"
-          fullWidth
-          margin="normal"
-          value={payment}
-          onChange={e => setPayment(e.target.value)}
-          InputLabelProps={{ shrink: true }}
-        />
+        <div className="mt-4 space-y-4">
+          <DatePickerField label="Return Date" name="return_date" value={returnDate} onChange={(e) => setReturnDate(e.target.value)} />
+          <TextField
+            label="Payment Amount"
+            type="number"
+            fullWidth
+            value={payment}
+            onChange={e => setPayment(e.target.value)}
+            InputLabelProps={{ shrink: true }}
+          />
+          {payment && Number(payment) > 0 && (
+            <>
+              <AutocompleteField
+                name="payment_mode"
+                value={paymentMode}
+                onChange={(e) => setPaymentMode(e.target.value)}
+                options={[{ label: 'Cash', value: 'Cash' }, { label: 'NEFT/RTGS', value: 'NEFT/RTGS' }, { label: 'IMPS', value: 'IMPS' }, { label: 'Credit Card', value: 'Credit Card' }, { label: 'Debit Card', value: 'Debit Card' }, { label: 'UPI', value: 'UPI' }, { label: 'Others', value: 'Others' }]}
+              />
+              {paymentMode !== 'Cash' && (
+                <TextField
+                  label="Reference"
+                  fullWidth
+                  value={paymentRef}
+                  onChange={e => setPaymentRef(e.target.value)}
+                  InputLabelProps={{ shrink: true }}
+                />
+              )}
+            </>
+          )}
+        </div>
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose} disabled={loading}>Cancel</Button>
