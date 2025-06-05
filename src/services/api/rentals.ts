@@ -1,5 +1,5 @@
 import { ApiResponse, PaginationParams } from '../../types';
-import { createRecordGeneric, updateRecordGeneric, deleteRecord, listRecords, getRecord } from './core';
+import { createRecordGeneric, updateRecordGeneric, deleteRecord, listRecords, getRecord, fetchFromApi } from './core';
 
 const RENTAL_TRANSACTIONS_TABLE = 'rental_transactions';
 const RENTAL_DETAILS_TABLE = 'rental_details';
@@ -17,11 +17,27 @@ export const getRental = (id: number): Promise<ApiResponse> => {
 };
 
 export const fetchRentalDetailsByRentalId = (rentalId: number, paginationParams?: PaginationParams): Promise<ApiResponse> => {
-  const params = {
-    ...paginationParams,
-    filters: { ...(paginationParams?.filters || {}), rental_id: rentalId },
-  } as PaginationParams;
-  return listRecords(RENTAL_DETAILS_TABLE, params);
+  const apiParams: Record<string, any> = {
+    action: 'list',
+    table: RENTAL_DETAILS_TABLE,
+    records: String(paginationParams?.records ?? 20),
+    skip: String(paginationParams?.skip ?? 0),
+    include_meta: 1,
+  };
+
+  if (paginationParams?.filters || rentalId) {
+    const filters = { ...(paginationParams?.filters || {}), rental_id: rentalId };
+    let qString = '';
+    for (const key in filters) {
+      const value = filters[key];
+      if (value !== null && value !== undefined && String(value).trim() !== '') {
+        qString += `(${key}~equals~${String(value)})`;
+      }
+    }
+    if (qString) apiParams.q = qString;
+  }
+
+  return fetchFromApi('GET', apiParams);
 };
 export const createRentalDetail = (data: Record<string, any>): Promise<ApiResponse> => createRecordGeneric(RENTAL_DETAILS_TABLE, data);
 export const updateRentalDetail = (id: number, data: Record<string, any>): Promise<ApiResponse> => updateRecordGeneric(RENTAL_DETAILS_TABLE, id, data);

@@ -24,12 +24,14 @@ const RentalTransactionCard: React.FC<RentalTransactionCardProps> = ({ rental, o
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!rental.rental_items) {
+    if (!rental.rental_items || rental.rental_items.some(it => !('equipment_name' in it))) {
       fetchRentalDetailsByRentalId(rental.rental_id, { records: 20, skip: 0 }).then(res => {
         if (res.success && Array.isArray(res.data)) {
           setItems(res.data as any);
         }
       });
+    } else {
+      setItems(rental.rental_items);
     }
   }, [rental]);
 
