@@ -1,6 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import {
-  RefreshCw, Menu, X, Users, Package, Calendar as CalendarIcon, Settings, IndianRupee, Wrench
+  RefreshCw,
+  Menu,
+  X,
+  Users,
+  Package,
+  Calendar as CalendarIcon,
+  Settings,
+  IndianRupee,
+  Wrench,
+  LogOut,
 } from 'lucide-react'; // Renamed Calendar to CalendarIcon to avoid conflict
 
 // Import context hooks
@@ -21,6 +30,7 @@ import RentalsTab from './dashboard/RentalsTab'; // Import new tab component
 import PaymentsTab from './dashboard/PaymentsTab';
 import Footer from './Footer';
 import { Outlet, useNavigate, useLocation, useMatch } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 interface DashboardProps {
   sidebarOpen: boolean;
@@ -30,6 +40,7 @@ interface DashboardProps {
 const Dashboard: React.FC<DashboardProps> = ({ sidebarOpen, setSidebarOpen }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { logout } = useAuth();
   const [activeTab, setActiveTab] = useState('customers');
 
   const { refreshData: refreshCustomerData, loading: customersLoading } = useCustomers();
@@ -64,6 +75,11 @@ const Dashboard: React.FC<DashboardProps> = ({ sidebarOpen, setSidebarOpen }) =>
       case 'maintenance': refreshMaintenanceRecords(); break;
       default: break;
     }
+  };
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login', { replace: true });
   };
 
   const isLoading = () => {
@@ -182,6 +198,12 @@ const Dashboard: React.FC<DashboardProps> = ({ sidebarOpen, setSidebarOpen }) =>
                 {mainTabs.find(tab => tab.id === activeTab)?.label}
               </h1>
             </div>
+            <button
+              onClick={handleLogout}
+              className="inline-flex items-center px-3 py-2 text-sm rounded-md text-dark-text hover:bg-light-gray-100"
+            >
+              <LogOut className="h-4 w-4 mr-2" />Logout
+            </button>
           </div>
         </header>
 

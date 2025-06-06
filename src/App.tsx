@@ -11,6 +11,7 @@ import { PaymentPlanProvider } from './context/PaymentPlanContext';
 import { MaintenanceRecordProvider } from './context/MaintenanceRecordContext';
 import { RentalTransactionProvider } from './context/RentalTransactionContext'; // Import new provider
 import { PaymentProvider } from './context/PaymentContext';
+import { AuthProvider } from './context/AuthContext';
 import Dashboard from './components/Dashboard';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import CustomerFormPage from './components/pages/CustomerFormPage';
@@ -24,6 +25,8 @@ import EquipmentCategoryFormPage from './components/pages/EquipmentCategoryFormP
 import PaymentFormPage from './components/pages/PaymentFormPage';
 import PaymentDetailPage from './components/pages/PaymentDetailPage';
 import NotFound from './components/pages/NotFound';
+import LoginPage from './components/pages/LoginPage';
+import RequireAuth from './components/RequireAuth';
 
 function App() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -42,58 +45,71 @@ function App() {
     <ThemeProvider theme={theme}>
       <LocalizationProvider dateAdapter={AdapterDayjs}>
         <CssBaseline />
-        <CrudProvider>
-      <CustomerProvider>
-        <EquipmentProvider>
-          <EquipmentCategoryProvider>
-            <PaymentPlanProvider>
-              <MaintenanceRecordProvider>
-                <RentalTransactionProvider>
-                  <PaymentProvider>
-                    <Routes>
-                    <Route path="/" element={<Dashboard sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />}>
-                      <Route index element={<Navigate to="customers" replace />} />
+        <AuthProvider>
+          <CrudProvider>
+            <CustomerProvider>
+              <EquipmentProvider>
+                <EquipmentCategoryProvider>
+                  <PaymentPlanProvider>
+                    <MaintenanceRecordProvider>
+                      <RentalTransactionProvider>
+                        <PaymentProvider>
+                          <Routes>
+                            <Route element={<RequireAuth />}>
+                              <Route
+                                path="/"
+                                element={
+                                  <Dashboard
+                                    sidebarOpen={sidebarOpen}
+                                    setSidebarOpen={setSidebarOpen}
+                                  />
+                                }
+                              >
+                                <Route index element={<Navigate to="customers" replace />} />
 
-                      <Route path="customers" element={<></>} />
-                      <Route path="customers/new" element={<CustomerFormPage />} />
-                      <Route path="customers/:id/edit" element={<CustomerFormPage />} />
-                      <Route path="customers/:id" element={<CustomerDetailPage />} />
+                                <Route path="customers" element={<></>} />
+                                <Route path="customers/new" element={<CustomerFormPage />} />
+                                <Route path="customers/:id/edit" element={<CustomerFormPage />} />
+                                <Route path="customers/:id" element={<CustomerDetailPage />} />
 
-                      <Route path="equipment" element={<></>} />
-                      <Route path="equipment/new" element={<EquipmentFormPage />} />
-                      <Route path="equipment/:id/edit" element={<EquipmentFormPage />} />
-                      <Route path="equipment/:id" element={<EquipmentDetailPage />} />
+                                <Route path="equipment" element={<></>} />
+                                <Route path="equipment/new" element={<EquipmentFormPage />} />
+                                <Route path="equipment/:id/edit" element={<EquipmentFormPage />} />
+                                <Route path="equipment/:id" element={<EquipmentDetailPage />} />
 
-                      <Route path="rentals" element={<></>} />
-                      <Route path="rentals/new" element={<RentalFormPage />} />
-                      <Route path="rentals/:id/edit" element={<RentalFormPage />} />
+                                <Route path="rentals" element={<></>} />
+                                <Route path="rentals/new" element={<RentalFormPage />} />
+                                <Route path="rentals/:id/edit" element={<RentalFormPage />} />
 
-                      <Route path="payments" element={<></>} />
-                      <Route path="payments/new" element={<PaymentFormPage />} />
-                      <Route path="payments/:id/edit" element={<PaymentFormPage />} />
-                      <Route path="payments/:id" element={<PaymentDetailPage />} />
+                                <Route path="payments" element={<></>} />
+                                <Route path="payments/new" element={<PaymentFormPage />} />
+                                <Route path="payments/:id/edit" element={<PaymentFormPage />} />
+                                <Route path="payments/:id" element={<PaymentDetailPage />} />
 
-                      <Route path="maintenance" element={<></>} />
-                      <Route path="maintenance/new" element={<MaintenanceFormPage />} />
-                      <Route path="maintenance/:id/edit" element={<MaintenanceFormPage />} />
+                                <Route path="maintenance" element={<></>} />
+                                <Route path="maintenance/new" element={<MaintenanceFormPage />} />
+                                <Route path="maintenance/:id/edit" element={<MaintenanceFormPage />} />
 
-                      <Route path="masters/equipment-categories" element={<></>} />
-                      <Route path="masters/equipment-categories/new" element={<EquipmentCategoryFormPage />} />
-                      <Route path="masters/equipment-categories/:id/edit" element={<EquipmentCategoryFormPage />} />
-                      <Route path="masters/payment-plans" element={<></>} />
-                      <Route path="masters/payment-plans/new" element={<PaymentPlanFormPage />} />
-                      <Route path="masters/payment-plans/:id/edit" element={<PaymentPlanFormPage />} />
-                    </Route>
-                    <Route path="*" element={<NotFound />} />
-                  </Routes>
-                  </PaymentProvider>
-                </RentalTransactionProvider>
-              </MaintenanceRecordProvider>
+                                <Route path="masters/equipment-categories" element={<></>} />
+                                <Route path="masters/equipment-categories/new" element={<EquipmentCategoryFormPage />} />
+                                <Route path="masters/equipment-categories/:id/edit" element={<EquipmentCategoryFormPage />} />
+                                <Route path="masters/payment-plans" element={<></>} />
+                                <Route path="masters/payment-plans/new" element={<PaymentPlanFormPage />} />
+                                <Route path="masters/payment-plans/:id/edit" element={<PaymentPlanFormPage />} />
+                              </Route>
+                            </Route>
+                            <Route path="/login" element={<LoginPage />} />
+                            <Route path="*" element={<NotFound />} />
+                          </Routes>
+                        </PaymentProvider>
+                      </RentalTransactionProvider>
+                    </MaintenanceRecordProvider>
             </PaymentPlanProvider>
           </EquipmentCategoryProvider>
         </EquipmentProvider>
       </CustomerProvider>
     </CrudProvider>
+        </AuthProvider>
       </LocalizationProvider>
     </ThemeProvider>
   );
