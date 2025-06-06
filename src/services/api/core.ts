@@ -76,6 +76,11 @@ export const fetchFromApi = async (
     }
 
     const data = await response.json();
+    if (data && data.success === false && data.error === 'operation not supported') {
+      throw new Error(
+        'You do not have permission to perform this operation. Please contact the admin for more information.'
+      );
+    }
     return data;
   } catch (error) {
     console.error('API Request Error:', error);
