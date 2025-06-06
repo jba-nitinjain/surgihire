@@ -25,6 +25,7 @@ import PaymentPlanFormPage from './components/pages/PaymentPlanFormPage';
 import EquipmentCategoryFormPage from './components/pages/EquipmentCategoryFormPage';
 import PaymentFormPage from './components/pages/PaymentFormPage';
 import PaymentDetailPage from './components/pages/PaymentDetailPage';
+import UserFormPage from './components/pages/UserFormPage';
 import NotFound from './components/pages/NotFound';
 import LoginPage from './components/pages/LoginPage';
 import RequireAuth from './components/RequireAuth';
@@ -89,6 +90,7 @@ function App() {
                                 <Route path="payments/:id" element={<PaymentDetailPage />} />
 
                                 <Route path="users" element={<></>} />
+                                <Route path="users/new" element={<UserFormPage />} />
 
                                 <Route path="maintenance" element={<></>} />
                                 <Route path="maintenance/new" element={<MaintenanceFormPage />} />

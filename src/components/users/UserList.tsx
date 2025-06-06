@@ -48,7 +48,6 @@ const UserList: React.FC = () => {
               <th className="px-6 py-3 text-left text-xs font-medium text-dark-text uppercase tracking-wider">Username</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-dark-text uppercase tracking-wider">Name</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-dark-text uppercase tracking-wider">Email</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-dark-text uppercase tracking-wider">Role</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-dark-text uppercase tracking-wider">Status</th>
             </tr>
           </thead>
@@ -59,7 +58,6 @@ const UserList: React.FC = () => {
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-dark-text/80">{user.username}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-dark-text/80">{user.first_name} {user.last_name}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-dark-text/80">{user.email}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-dark-text/80">{user.role || <span className="italic text-gray-400">N/A</span>}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-dark-text/80">{user.status}</td>
               </tr>
             ))}

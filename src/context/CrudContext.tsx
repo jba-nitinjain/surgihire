@@ -37,6 +37,11 @@ import {
   updatePaymentSchedule,
   deletePaymentSchedule,
 } from '../services/api/rentals';
+import {
+  createUser,
+  updateUser,
+  deleteUser,
+} from '../services/api/users';
 
 interface CrudContextType {
   createItem: (table: string, data: Record<string, any>) => Promise<any>;
@@ -91,6 +96,9 @@ export const CrudProvider: React.FC<CrudProviderProps> = ({ children }) => {
         case 'payment_plans':
           response = await createPaymentPlan(data);
           break;
+        case 'users1':
+          response = await createUser(data);
+          break;
         // --- ADDED CASE FOR MAINTENANCE RECORDS ---
         case 'maintenance_records':
           response = await createMaintenanceRecord(data);
@@ -138,6 +146,9 @@ export const CrudProvider: React.FC<CrudProviderProps> = ({ children }) => {
         case 'payment_plans':
           response = await updatePaymentPlan(Number(id), data);
           break;
+        case 'users1':
+          response = await updateUser(Number(id), data);
+          break;
         // --- ADDED CASE FOR MAINTENANCE RECORDS ---
         case 'maintenance_records':
           response = await updateMaintenanceRecord(Number(id), data);
@@ -184,6 +195,9 @@ export const CrudProvider: React.FC<CrudProviderProps> = ({ children }) => {
           break;
         case 'payment_plans':
           response = await deletePaymentPlan(Number(id));
+          break;
+        case 'users1':
+          response = await deleteUser(Number(id));
           break;
         // --- ADDED CASE FOR MAINTENANCE RECORDS ---
         case 'maintenance_records':

@@ -1,5 +1,11 @@
 import { ApiResponse, PaginationParams } from '../../types';
-import { fetchFromApi } from './core';
+import {
+  fetchFromApi,
+  createRecordGeneric,
+  updateRecordGeneric,
+  deleteRecord,
+  getRecord,
+} from './core';
 
 const TABLE = 'users1';
 
@@ -32,3 +38,17 @@ export const searchUsers = (
   }
   return fetchFromApi('GET', params);
 };
+
+export const createUser = (data: Record<string, any>): Promise<ApiResponse> =>
+  createRecordGeneric(TABLE, data);
+
+export const updateUser = (
+  id: string | number,
+  data: Record<string, any>
+): Promise<ApiResponse> => updateRecordGeneric(TABLE, id, data);
+
+export const deleteUser = (id: string | number): Promise<ApiResponse> =>
+  deleteRecord(TABLE, id);
+
+export const getUser = (id: string | number): Promise<ApiResponse> =>
+  getRecord(TABLE, id);

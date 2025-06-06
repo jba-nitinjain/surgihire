@@ -131,6 +131,13 @@ export interface User {
   apikey: string;
 }
 
+export interface UserFormData {
+  username: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+}
+
 
 // --- Existing Maintenance Record Types ---
 export interface MaintenanceRecord {
