@@ -55,7 +55,11 @@ const UserForm: React.FC<UserFormProps> = ({ user, onSave, onCancel }) => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    let processedValue = value;
+    if (name === 'username') {
+      processedValue = value.replace(/\D/g, '');
+    }
+    setFormData(prev => ({ ...prev, [name]: processedValue }));
     if (formErrors[name as keyof UserFormData]) {
       setFormErrors(prev => ({ ...prev, [name]: undefined }));
     }
@@ -96,7 +100,7 @@ const UserForm: React.FC<UserFormProps> = ({ user, onSave, onCancel }) => {
             name="username"
             value={formData.username}
             onChange={handleChange}
-            inputProps={{ maxLength: 10 }}
+            inputProps={{ maxLength: 10, inputMode: 'numeric', pattern: '\\d*' }}
             className={inputClass}
           />
           {formErrors.username && <p className="text-xs text-red-500 mt-1">{formErrors.username}</p>}
