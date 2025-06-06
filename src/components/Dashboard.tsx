@@ -10,6 +10,7 @@ import {
   IndianRupee,
   Wrench,
   LogOut,
+  User,
 } from 'lucide-react'; // Renamed Calendar to CalendarIcon to avoid conflict
 
 // Import context hooks
@@ -20,6 +21,7 @@ import { usePaymentPlans } from '../context/PaymentPlanContext';
 import { useMaintenanceRecords } from '../context/MaintenanceRecordContext';
 import { useRentalTransactions } from '../context/RentalTransactionContext'; // Import new context hook
 import { usePayments } from '../context/PaymentContext';
+import { useUsers } from '../context/UserContext';
 
 // Import Tab components
 import CustomerTab from './dashboard/CustomerTab';
@@ -28,6 +30,7 @@ import MastersTab from './dashboard/MastersTab';
 import MaintenanceTab from './dashboard/MaintenanceTab';
 import RentalsTab from './dashboard/RentalsTab'; // Import new tab component
 import PaymentsTab from './dashboard/PaymentsTab';
+import UsersTab from './dashboard/UsersTab';
 import Footer from './Footer';
 import { Outlet, useNavigate, useLocation, useMatch } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -50,6 +53,7 @@ const Dashboard: React.FC<DashboardProps> = ({ sidebarOpen, setSidebarOpen }) =>
   const { refreshMaintenanceRecords, loading: maintenanceLoading } = useMaintenanceRecords();
   const { refreshRentalTransactions, loading: rentalsLoading } = useRentalTransactions(); // Add rentals refresh and loading
   const { refreshPayments, loading: paymentsLoading } = usePayments();
+  const { refreshUsers, loading: usersLoading } = useUsers();
 
   const mainTabs = [
     { id: 'customers', label: 'Customers', icon: <Users size={18} /> },
@@ -58,6 +62,7 @@ const Dashboard: React.FC<DashboardProps> = ({ sidebarOpen, setSidebarOpen }) =>
     { id: 'payments', label: 'Payments', icon: <IndianRupee size={18} /> },
     { id: 'maintenance', label: 'Maintenance', icon: <Wrench size={18} /> },
     { id: 'masters', label: 'Masters', icon: <Settings size={18} /> },
+    { id: 'users', label: 'Users', icon: <User size={18} /> },
   ];
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
@@ -71,6 +76,9 @@ const Dashboard: React.FC<DashboardProps> = ({ sidebarOpen, setSidebarOpen }) =>
       case 'masters':
         refreshEqCategories();
         refreshPaymentPlans();
+        break;
+      case 'users':
+        refreshUsers();
         break;
       case 'maintenance': refreshMaintenanceRecords(); break;
       default: break;
@@ -88,6 +96,7 @@ const Dashboard: React.FC<DashboardProps> = ({ sidebarOpen, setSidebarOpen }) =>
     if (activeTab === 'rentals') return rentalsLoading; // Add loading for rentals
     if (activeTab === 'payments') return paymentsLoading;
     if (activeTab === 'masters') return eqCategoriesLoading || ppLoading;
+    if (activeTab === 'users') return usersLoading;
     if (activeTab === 'maintenance') return maintenanceLoading;
     return false;
   };
@@ -100,6 +109,7 @@ const Dashboard: React.FC<DashboardProps> = ({ sidebarOpen, setSidebarOpen }) =>
   const isMastersEqCatBase = useMatch({ path: '/masters/equipment-categories', end: true });
   const isMastersPayPlanBase = useMatch({ path: '/masters/payment-plans', end: true });
   const isPaymentsBase = useMatch({ path: '/payments', end: true });
+  const isUsersBase = useMatch({ path: '/users', end: true });
 
   const handleNavigateToEquipmentDetail = (equipmentId: number) => {
     navigate(`/equipment/${equipmentId}`);
@@ -119,6 +129,7 @@ const Dashboard: React.FC<DashboardProps> = ({ sidebarOpen, setSidebarOpen }) =>
     else if (location.pathname.startsWith('/maintenance')) setActiveTab('maintenance');
     else if (location.pathname.startsWith('/masters')) setActiveTab('masters');
     else if (location.pathname.startsWith('/payments')) setActiveTab('payments');
+    else if (location.pathname.startsWith('/users')) setActiveTab('users');
     else setActiveTab('customers');
   }, [location.pathname]);
 
@@ -145,6 +156,7 @@ const Dashboard: React.FC<DashboardProps> = ({ sidebarOpen, setSidebarOpen }) =>
                       maintenance: '/maintenance',
                       masters: '/masters/equipment-categories',
                       payments: '/payments',
+                      users: '/users',
                     };
                     navigate(paths[tab.id] || '/');
 
@@ -164,6 +176,9 @@ const Dashboard: React.FC<DashboardProps> = ({ sidebarOpen, setSidebarOpen }) =>
                       case 'masters':
                         refreshEqCategories();
                         refreshPaymentPlans();
+                        break;
+                      case 'users':
+                        refreshUsers();
                         break;
                       case 'maintenance':
                         refreshMaintenanceRecords();
@@ -229,6 +244,9 @@ const Dashboard: React.FC<DashboardProps> = ({ sidebarOpen, setSidebarOpen }) =>
               return (
                 <MaintenanceTab navigateToEquipmentDetail={handleNavigateToEquipmentDetail} />
               );
+            }
+            if (activeTab === 'users' && isUsersBase) {
+              return <UsersTab />;
             }
             if (activeTab === 'payments' && isPaymentsBase) {
               return <PaymentsTab />;

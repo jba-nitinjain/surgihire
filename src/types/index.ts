@@ -116,6 +116,22 @@ export interface PaymentFormData {
   notes?: string | null;
 }
 
+// --- User Types ---
+export interface User {
+  user_id: string;
+  username: string;
+  password_hash: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  role: string | null;
+  status: string;
+  created_at: string;
+  last_login: string | null;
+  apikey: string;
+}
+
+
 // --- Existing Maintenance Record Types ---
 export interface MaintenanceRecord {
   maintenance_id: number;

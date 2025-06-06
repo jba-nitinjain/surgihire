@@ -11,6 +11,7 @@ import { PaymentPlanProvider } from './context/PaymentPlanContext';
 import { MaintenanceRecordProvider } from './context/MaintenanceRecordContext';
 import { RentalTransactionProvider } from './context/RentalTransactionContext'; // Import new provider
 import { PaymentProvider } from './context/PaymentContext';
+import { UserProvider } from './context/UserContext';
 import { AuthProvider } from './context/AuthContext';
 import Dashboard from './components/Dashboard';
 import { Routes, Route, Navigate } from 'react-router-dom';
@@ -54,6 +55,7 @@ function App() {
                     <MaintenanceRecordProvider>
                       <RentalTransactionProvider>
                         <PaymentProvider>
+                          <UserProvider>
                           <Routes>
                             <Route element={<RequireAuth />}>
                               <Route
@@ -86,6 +88,8 @@ function App() {
                                 <Route path="payments/:id/edit" element={<PaymentFormPage />} />
                                 <Route path="payments/:id" element={<PaymentDetailPage />} />
 
+                                <Route path="users" element={<></>} />
+
                                 <Route path="maintenance" element={<></>} />
                                 <Route path="maintenance/new" element={<MaintenanceFormPage />} />
                                 <Route path="maintenance/:id/edit" element={<MaintenanceFormPage />} />
@@ -101,6 +105,7 @@ function App() {
                             <Route path="/login" element={<LoginPage />} />
                             <Route path="*" element={<NotFound />} />
                           </Routes>
+                          </UserProvider>
                         </PaymentProvider>
                       </RentalTransactionProvider>
                     </MaintenanceRecordProvider>
